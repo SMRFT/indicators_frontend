@@ -14,7 +14,7 @@ const TrainingFeedbackReport = () => {
   const isViewClicked = true; // or useState(false)
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/TrainingFeedBackReport/")
+    fetch("https://indicators.shinovadatabase.in/TrainingFeedBackReport/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();

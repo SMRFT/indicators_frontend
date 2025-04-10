@@ -24,7 +24,7 @@ const HandHygenieAudit = () => {
     area: "",
     category: "",
     typeOfHandHygiencePractice: "",
-    fiveMoments: "",
+    fiveMoments: [], // Change from "" to []
     ornamentsIfAny: "",
   });
 
@@ -78,13 +78,19 @@ const HandHygenieAudit = () => {
       try {
         const id = localStorage.getItem("userId");
         const auditBy = localStorage.getItem("userName");
+
+        // Format the data properly
         const formDataWithUser = {
           ...formData,
           id,
           auditBy,
+          // No need to include selectedDate separately as it's already in formData
+          // Use formData.fiveMoments instead of fiveMoments
+          fiveMoments: JSON.stringify(formData.fiveMoments),
         };
+
         const response = await fetch(
-          "http://127.0.0.1:8000/HandHygenieAudit/",
+          "https://indicators.shinovadatabase.in/HandHygenieAudit/",
           {
             method: "POST",
             headers: {

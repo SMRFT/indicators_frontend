@@ -133,7 +133,7 @@ const TrainingFeedBack = () => {
           }),
         };
         const response = await fetch(
-          "http://127.0.0.1:8000/TrainingFeedBack/",
+          "https://indicators.shinovadatabase.in/TrainingFeedBack/",
           {
             method: "POST",
             headers: {

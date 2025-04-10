@@ -18,7 +18,7 @@ const HandHygieneReport = () => {
   };
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/HandHygieneReport/")
+    fetch("https://indicators.shinovadatabase.in/HandHygieneReport/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();
