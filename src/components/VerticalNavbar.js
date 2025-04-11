@@ -47,7 +47,7 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
           <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
             <CDBSidebarMenuItem className="sidebar-menu-item">
               <FaHandsWash />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Higiene Audit
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
             </CDBSidebarMenuItem>
           </NavLink>
           <CDBSidebarMenuItem

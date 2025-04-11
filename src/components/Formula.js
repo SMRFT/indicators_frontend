@@ -81,6 +81,29 @@ const EmergencyRoomData = () => {
       let totalUnitsTransfused = 0;
       let totalActualDeath = 0;
       let totalPredictedDeath = 0;
+      let totalreturnsToEmergency = 0;
+      let totalpatientsToEmergency = 0;
+      let totalPressureUlcer = 0;
+      let totalCatheterInMonth = 0;
+      let totalCatheterDaysInMonth = 0;
+      let totalVentilatorPneumonia = 0;
+      let totalVentilatorDaysInMonth = 0;
+      let totalCentrallineBloodStreamInfectionInMonth = 0;
+      let totalCentrallineDaysInMonth = 0;
+      let totalSurgicalsiteInfectionInAMonth = 0;
+      let totalProphylacticAntibiotics = 0;
+      let totalSurgeriesRescheduled = 0;
+      let totalSurgeriesPlanned = 0;
+      let totalBBCCrossMatched = 0;
+      let totalSumOfTimeBBC = 0;
+      let totalBedsOccupied = 0;
+      let totalNursingStaff = 0;
+      let totalOPConsultationTime = 0;
+      let totalOP = 0;
+      let totalDiagnosticsWaitingTime = 0;
+      let totalDiagnosticsPatients = 0;
+      let totalDischargeTime = 0;
+      let totalDischargePatients = 0;
       let recordDetails = [];
 
       allData.forEach((item) => {
@@ -137,6 +160,72 @@ const EmergencyRoomData = () => {
         const unitsTransfused = parseFloat(item.numberOfUnitsTransfused);
         const actualDeath = parseFloat(item.actualDeathsInICU);
         const predictedDeath = parseFloat(item.predictedDeathsInICU);
+        const returnsToEmergency = parseFloat(
+          item.numberOfReturnsToEmergencyWithin72hoursWithSimilarPresentingComplaints
+        );
+        const patientToEmergency = parseFloat(
+          item.numberOfPatientsWhoHaveComeToTheEmergency
+        );
+        const pressureUlcer = parseFloat(
+          item.numberOfPatientsWhoDevelopNewOrWorseningOfPressureUlcer
+        );
+        const catheterInMonth = parseFloat(
+          item.numberOfUrinaryCatheterAssociatedUtisInThatMonth
+        );
+        const catheterDaysInMonth = parseFloat(
+          item.numberOfUrinaryCatheterDaysInThatMonth
+        );
+        const ventilatorPneumonia = parseFloat(
+          item.numberOfVentilatorAssociatedPneumonia
+        );
+        const ventilatorDaysInMonth = parseFloat(item.numberOfVentilatorDays);
+        const CentrallineBloodStreamInfectionInMonth = parseFloat(
+          item.numberCentralLineAssociatedBloodStreamInfectionsInAMonth
+        );
+        const CentrallineDaysInMonth = parseFloat(
+          item.numberOfCentralLineDaysInThatMonth
+        );
+        const SurgicalsiteInfectionInAMonth = parseFloat(
+          item.numberOfSurgicalSiteInfectionsInAGivenMonth
+        );
+        const ProphylacticAntibiotics = parseFloat(
+          item.numberOfPatientsWhoDidReceiveAppropriateProphylacticAntibiotic
+        );
+        const SurgeriesRescheduled = parseFloat(
+          item.numberOfCasesReScheduledOrCanceled
+        );
+        const SurgeriesPlanned = parseFloat(
+          item.numberOfSurgeriesPlannedInTheOt
+        );
+
+        const BBCCrossMatched = parseFloat(item.numberOfBedsOccupied);
+        const SumOfTimeBBC = parseFloat(
+          item.sumOfTimeTakenForBloodAndBloodComponents
+        );
+
+        const BedsOccupied = parseFloat(item.numberOfBedsOccupied);
+        const NursingStaff = parseFloat(item.numberOfNursingStaff);
+
+        const OPConsultationTime = parseFloat(
+          item.sumOfTimeTakenForConsultation
+        );
+        const OP = parseFloat(item.totalNumberOfOutPatients);
+
+        const DiagnosticsWaitingTime = parseFloat(
+          item.waitingTimeForDiagnostics
+        );
+
+        const DiagnosticsPatients = parseFloat(
+          item.numberOfPatientsReportedInDiagnostics
+        );
+
+        const DischargeTime =
+          parseFloat(item.sumOfTimeTakenForDischargeInsurance || 0) +
+          parseFloat(item.sumOfTimeTakenForDischargePay || 0);
+
+        const DischargePatients =
+          parseFloat(item.numberOfPatientsDischargedInsurance || 0) +
+          parseFloat(item.numberOfPatientsDischargedPay || 0);
 
         if (!isNaN(time) && !isNaN(admissions)) {
           if (time === 0 || admissions === 0) {
@@ -166,6 +255,44 @@ const EmergencyRoomData = () => {
         if (!isNaN(unitsTransfused)) totalUnitsTransfused += unitsTransfused;
         if (!isNaN(actualDeath)) totalActualDeath += actualDeath;
         if (!isNaN(predictedDeath)) totalPredictedDeath += predictedDeath;
+        if (!isNaN(returnsToEmergency))
+          totalreturnsToEmergency += returnsToEmergency;
+        if (!isNaN(patientToEmergency))
+          totalpatientsToEmergency += patientToEmergency;
+        if (!isNaN(pressureUlcer)) totalPressureUlcer += pressureUlcer;
+        if (!isNaN(catheterInMonth)) totalCatheterInMonth += catheterInMonth;
+        if (!isNaN(catheterDaysInMonth))
+          totalCatheterDaysInMonth += catheterDaysInMonth;
+        if (!isNaN(ventilatorPneumonia))
+          totalVentilatorPneumonia += ventilatorPneumonia;
+        if (!isNaN(ventilatorDaysInMonth))
+          totalVentilatorDaysInMonth += ventilatorDaysInMonth;
+        if (!isNaN(CentrallineBloodStreamInfectionInMonth))
+          totalCentrallineBloodStreamInfectionInMonth +=
+            CentrallineBloodStreamInfectionInMonth;
+        if (!isNaN(CentrallineDaysInMonth))
+          totalCentrallineDaysInMonth += CentrallineDaysInMonth;
+        if (!isNaN(SurgicalsiteInfectionInAMonth))
+          totalSurgicalsiteInfectionInAMonth += SurgicalsiteInfectionInAMonth;
+        if (!isNaN(ProphylacticAntibiotics))
+          totalProphylacticAntibiotics += ProphylacticAntibiotics;
+        if (!isNaN(SurgeriesRescheduled))
+          totalSurgeriesRescheduled += SurgeriesRescheduled;
+        if (!isNaN(SurgeriesPlanned)) totalSurgeriesPlanned += SurgeriesPlanned;
+        if (!isNaN(BBCCrossMatched)) totalBBCCrossMatched += BBCCrossMatched;
+        if (!isNaN(SumOfTimeBBC)) totalSumOfTimeBBC += SumOfTimeBBC;
+        if (!isNaN(BedsOccupied)) totalBedsOccupied += BedsOccupied;
+        if (!isNaN(NursingStaff)) totalNursingStaff += NursingStaff;
+        if (!isNaN(OPConsultationTime))
+          totalOPConsultationTime += OPConsultationTime;
+        if (!isNaN(OP)) totalOP += OP;
+        if (!isNaN(DiagnosticsWaitingTime))
+          totalDiagnosticsWaitingTime += DiagnosticsWaitingTime;
+        if (!isNaN(DiagnosticsPatients))
+          totalDiagnosticsPatients += DiagnosticsPatients;
+        if (!isNaN(DischargeTime)) totalDischargeTime += DischargeTime;
+        if (!isNaN(DischargePatients))
+          totalDischargePatients += DischargePatients;
 
         recordDetails.push({
           id: item.id,
@@ -225,9 +352,78 @@ const EmergencyRoomData = () => {
         totalUnitsTransfused > 0
           ? ((totalTransusionReaction / totalUnitsTransfused) * 100).toFixed(2)
           : "0.00";
-      const StandMortalityRatio =
+      const StandMortalityRate =
         totalPredictedDeath > 0
           ? ((totalActualDeath / totalPredictedDeath) * 100).toFixed(2)
+          : "0.00";
+      const EmergencyPatientRate =
+        totalpatientsToEmergency > 0
+          ? (
+              (totalreturnsToEmergency / totalpatientsToEmergency) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const PressureUlcerRate =
+        totalInpatients > 0
+          ? ((totalPressureUlcer / totalInpatients) * 100).toFixed(2)
+          : "0.00";
+      const UTIRate =
+        totalCatheterDaysInMonth > 0
+          ? ((totalCatheterInMonth / totalCatheterDaysInMonth) * 100).toFixed(2)
+          : "0.00";
+      const PneumoniaRate =
+        totalVentilatorDaysInMonth > 0
+          ? (
+              (totalVentilatorPneumonia / totalVentilatorDaysInMonth) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const CentrallineInfectionRate =
+        totalCentrallineDaysInMonth > 0
+          ? (
+              (totalCentrallineBloodStreamInfectionInMonth /
+                totalCentrallineDaysInMonth) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const SurgicalsiteInfectionRate =
+        totalUnderwentSurgery > 0
+          ? (
+              (totalSurgicalsiteInfectionInAMonth / totalUnderwentSurgery) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const ProphylacticRate =
+        totalUnderwentSurgery > 0
+          ? (
+              (totalProphylacticAntibiotics / totalUnderwentSurgery) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const SurgeryRescheduledRate =
+        totalSurgeriesPlanned > 0
+          ? ((totalSurgeriesRescheduled / totalSurgeriesPlanned) * 100).toFixed(
+              2
+            )
+          : "0.00";
+      const BBCRate =
+        totalBBCCrossMatched > 0
+          ? (totalSumOfTimeBBC / totalBBCCrossMatched).toFixed(2)
+          : "0.00";
+      const NursePatientRatio =
+        totalBedsOccupied > 0
+          ? (totalNursingStaff / totalBedsOccupied).toFixed(2)
+          : "0.00";
+      const OPWaitingTimeRate =
+        totalOP > 0 ? (totalOPConsultationTime / totalOP).toFixed(2) : "0.00";
+
+      const DiagnosticsWaitingTimeRate =
+        totalDiagnosticsPatients > 0
+          ? (totalDiagnosticsWaitingTime / totalDiagnosticsPatients).toFixed(2)
+          : "0.00";
+      const DischargeTimeRate =
+        totalDischargePatients > 0
+          ? (totalDischargeTime / totalDischargePatients).toFixed(2)
           : "0.00";
 
       console.log("Total Time:", totalSumOfTime);
@@ -262,7 +458,64 @@ const EmergencyRoomData = () => {
       console.log("Transusion reaction Rate (%):", transfusionRate);
       console.log("Total Actual Death:", totalActualDeath);
       console.log("Total Predicted Death:", totalPredictedDeath);
-      console.log("Standard Mortality Ratio(%):", StandMortalityRatio);
+      console.log("Standard Mortality Ratio(%):", StandMortalityRate);
+      console.log("Total returns to emergency:", totalreturnsToEmergency);
+      console.log("Total Patients in emergency:", totalpatientsToEmergency);
+      console.log("Emergency Patient rate(%):", EmergencyPatientRate);
+      console.log("Total pressure Ulcer:", totalPressureUlcer);
+      console.log("Total In - Patiens:", totalInpatients);
+      console.log("Pressure Ulcer rate(%):", PressureUlcerRate);
+      console.log("Total Catheter in month:", totalCatheterInMonth);
+      console.log("Total Catheter Days in month:", totalCatheterDaysInMonth);
+      console.log("UTI Rate(%):", UTIRate);
+      console.log("Total Ventilator Pneumonia:", totalVentilatorPneumonia);
+      console.log(
+        "Total Ventilator Days in Month:",
+        totalVentilatorDaysInMonth
+      );
+      console.log("UTI Rate(%):", PneumoniaRate);
+      console.log(
+        "Total Centralline Blood Stream Infection In Month:",
+        totalCentrallineBloodStreamInfectionInMonth
+      );
+      console.log(
+        "Total Centralline Days In Month:",
+        totalCentrallineDaysInMonth
+      );
+      console.log("Centralline Infection Rate(%):", CentrallineInfectionRate);
+      console.log(
+        "Total Surgicalsite Infection In A Month:",
+        totalSurgicalsiteInfectionInAMonth
+      );
+      console.log("Total Underwent Surgery:", totalUnderwentSurgery);
+      console.log("Surgicalsite Infection Rate(%):", SurgicalsiteInfectionRate);
+      console.log(
+        "Total Prophylactic Antibiotics:",
+        totalProphylacticAntibiotics
+      );
+      console.log("Total Underwent Surgery:", totalUnderwentSurgery);
+      console.log("Prophylactic Rate(%):", ProphylacticRate);
+      console.log("Total Surgeries Rescheduled:", totalSurgeriesRescheduled);
+      console.log("Total Surgeries Planned:", totalSurgeriesPlanned);
+      console.log("Surgery Rescheduled Rate(%):", SurgeryRescheduledRate);
+      console.log("Total BBC Cross Matched:", totalBBCCrossMatched);
+      console.log("Total Sum Of Time BBC:", totalSumOfTimeBBC);
+      console.log("BBC Rate:", BBCRate);
+      console.log("Total Nursing Staff:", totalNursingStaff);
+      console.log("Total Beds Occupied:", totalBedsOccupied);
+      console.log("Nurse Patient Ratio:", NursePatientRatio);
+      console.log("Total OP Consultation Time:", totalOPConsultationTime);
+      console.log("Total OP:", totalOP);
+      console.log("OP Waiting Time Rate:", OPWaitingTimeRate);
+      console.log(
+        "Total Diagnostics Waiting Time:",
+        totalDiagnosticsWaitingTime
+      );
+      console.log("Total Diagnostics Patients:", totalDiagnosticsPatients);
+      console.log("Diagnostics Waiting TimeRate:", DiagnosticsWaitingTimeRate);
+      console.log("Total Discharge Time:", totalDischargeTime);
+      console.log("Total Discharge Patients:", totalDischargePatients);
+      console.log("Discharge Time Rate:", DischargeTimeRate);
 
       setData({
         totalSumOfTime,
@@ -294,7 +547,43 @@ const EmergencyRoomData = () => {
         transfusionRate,
         totalActualDeath,
         totalPredictedDeath,
-        StandMortalityRatio,
+        StandMortalityRate,
+        totalreturnsToEmergency,
+        totalpatientsToEmergency,
+        EmergencyPatientRate,
+        totalPressureUlcer,
+        PressureUlcerRate,
+        totalCatheterInMonth,
+        totalCatheterDaysInMonth,
+        UTIRate,
+        totalVentilatorPneumonia,
+        totalVentilatorDaysInMonth,
+        PneumoniaRate,
+        totalCentrallineBloodStreamInfectionInMonth,
+        totalCentrallineDaysInMonth,
+        CentrallineInfectionRate,
+        totalSurgicalsiteInfectionInAMonth,
+        SurgicalsiteInfectionRate,
+        totalProphylacticAntibiotics,
+        ProphylacticRate,
+        totalSurgeriesRescheduled,
+        totalSurgeriesPlanned,
+        SurgeryRescheduledRate,
+        totalBBCCrossMatched,
+        totalSumOfTimeBBC,
+        BBCRate,
+        totalNursingStaff,
+        totalBedsOccupied,
+        NursePatientRatio,
+        totalOPConsultationTime,
+        totalOP,
+        OPWaitingTimeRate,
+        totalDiagnosticsWaitingTime,
+        totalDiagnosticsPatients,
+        DiagnosticsWaitingTimeRate,
+        totalDischargeTime,
+        totalDischargePatients,
+        DischargeTimeRate,
       });
     } catch (error) {
       console.error("Fetch error:", error);
@@ -541,12 +830,212 @@ const EmergencyRoomData = () => {
                   <td
                     style={{
                       color:
-                        parseFloat(data.StandMortalityRatio) > 1
+                        parseFloat(data.StandMortalityRate) > 1
                           ? "red"
                           : "black",
                     }}
-                  >{`${data.StandMortalityRatio}%`}</td>
+                  >{`${data.StandMortalityRate}%`}</td>
                   <td>&lt; 1%</td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>PSQ3a</td>
+                  <td>
+                    Return to the emergency department within 72 hours with
+                    similar presenting complaints
+                  </td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.EmergencyPatientRate) > 0.8
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.EmergencyPatientRate}%`}</td>
+                  <td>0.80%</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>PSQ3a</td>
+                  <td>
+                    Incidence of hospital associated pressure ulcers after
+                    admission (Bed sore per 1000 patient days)
+                  </td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.PressureUlcerRate) > 0.57
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.PressureUlcerRate}%`}</td>
+                  <td>0.57%</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>PSQ3b</td>
+                  <td>Catheter associated Urinary Tract infection rate</td>
+                  <td
+                    style={{
+                      color: parseFloat(data.UTIRate) > 1.68 ? "red" : "black",
+                    }}
+                  >{`${data.UTIRate}%`}</td>
+                  <td>1.68%</td>
+                </tr>
+                <tr>
+                  <td>14</td>
+                  <td>PSQ3b</td>
+                  <td>Ventilator associated Pneumonia rate</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.PneumoniaRate) > 3 ||
+                        parseFloat(data.PneumoniaRate) < 1
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.PneumoniaRate}%`}</td>
+                  <td>1-3%</td>
+                </tr>
+                <tr>
+                  <td>15</td>
+                  <td>PSQ3b</td>
+                  <td>Central line - associated Blood stream infection rate</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.CentrallineInfectionRate) > 0.8
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.CentrallineInfectionRate}%`}</td>
+                  <td>0.80%</td>
+                </tr>
+                <tr>
+                  <td>16</td>
+                  <td>PSQ3b</td>
+                  <td>Surgical site infection rate</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.SurgicalsiteInfectionRate) > 3
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.SurgicalsiteInfectionRate}%`}</td>
+                  <td>&lt; 3%</td>
+                </tr>
+                <tr>
+                  <td>17</td>
+                  <td>PSQ3b</td>
+                  <td>Hand Hygiene Compliance Rate</td>
+                  <td></td>
+                  <td>93%</td>
+                </tr>
+                <tr>
+                  <td>18</td>
+                  <td>PSQ3b</td>
+                  <td>
+                    Percentage of cases who received appropriate prophylactic
+                    antibiotics within the specified timeframe
+                  </td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.ProphylacticRate) < 100
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.ProphylacticRate}%`}</td>
+                  <td>100%</td>
+                </tr>
+                <tr>
+                  <td>19</td>
+                  <td>PSQ3c</td>
+                  <td>Percentage of re-scheduling of surgeries</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.SurgeryRescheduledRate) > 6
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.SurgeryRescheduledRate}%`}</td>
+                  <td>&lt; 6%</td>
+                </tr>
+                <tr>
+                  <td>20</td>
+                  <td>PSQ3c</td>
+                  <td>
+                    Turnaround time for issue of blood and blood components
+                  </td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.BBCRate) > 35 ||
+                        parseFloat(data.BBCRate) < 11
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.BBCRate} Minutes`}</td>
+                  <td>11-35 Minutes</td>
+                </tr>
+                <tr>
+                  <td>21</td>
+                  <td>PSQ3c</td>
+                  <td>Nurse-Patient ratio for ICUs and wards</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.NursePatientRatio) > 2
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`1:${data.NursePatientRatio}`}</td>
+                  <td>1:2</td>
+                </tr>
+                <tr>
+                  <td>22</td>
+                  <td>PSQ3c</td>
+                  <td>Waiting time for out-patient consultation</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.OPWaitingTimeRate) > 20 ||
+                        parseFloat(data.OPWaitingTimeRate) < 11
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.OPWaitingTimeRate} Minutes`}</td>
+                  <td>11-20 Minutes</td>
+                </tr>
+                <tr>
+                  <td>23</td>
+                  <td>PSQ4c</td>
+                  <td>Waiting time for diagnostics</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.DiagnosticsWaitingTimeRate) > 60
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.DiagnosticsWaitingTimeRate} Minutes`}</td>
+                  <td>60 Minutes</td>
+                </tr>
+                <tr>
+                  <td>24</td>
+                  <td>PSQ4c</td>
+                  <td>Time taken for Discharge</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.DischargeTimeRate) > 150
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.DischargeTimeRate} Minutes`}</td>
+                  <td>150 Minutes</td>
                 </tr>
               </tbody>
             </table>
