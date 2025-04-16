@@ -31,7 +31,7 @@ const EmergencyRoomData = () => {
     try {
       console.log(`Fetching data for ${month}/${year}...`);
 
-      const apiUrl = "http://127.0.0.1:8000/formula-data/";
+      const apiUrl = "https://indicators.shinovadatabase.in/formula-data/";
       const params = { year, month };
       console.log(`API URL: ${apiUrl}`);
       console.log(`Parameters:`, params);
@@ -72,6 +72,8 @@ const EmergencyRoomData = () => {
       let totalStaffAudited = 0;
       let totalMedicationErrors = 0;
       let totalOpportunityMedicationErrors = 0;
+      let totalMedicationChartsWithErrorProneAbbreviation = 0;
+      let totalMedicationChartsReviewed = 0;
       let totalAdverseDrug = 0;
       let totalInpatients = 0;
       let totalUplannedOT = 0;
@@ -104,6 +106,12 @@ const EmergencyRoomData = () => {
       let totalDiagnosticsPatients = 0;
       let totalDischargeTime = 0;
       let totalDischargePatients = 0;
+      let totalPatientFalls = 0;
+      let totalNearMissReported = 0;
+      let totalIncidentsReported = 0;
+      let totalParenteralExposures = 0;
+      let totalHandoverDone = 0;
+      let totalHandoverOpportunity = 0;
       let recordDetails = [];
 
       allData.forEach((item) => {
@@ -140,6 +148,13 @@ const EmergencyRoomData = () => {
         const medication = parseFloat(item.totalNumberOfMedicationErrors);
         const opportunity = parseFloat(
           item.totalNumberOfOpportunitiesOfMedicationErrors
+        );
+
+        const MedicationChartsWithErrorProneAbbreviation = parseFloat(
+          item.numberOfMedicationChartsWithErrorProneAbbreviation
+        );
+        const MedicationChartsReviewed = parseFloat(
+          item.numberOfMedicationChartsReviewed
         );
         const adversedrug = parseFloat(
           item.numberOfPatientsDevelopingAdverseDrugReactions
@@ -227,6 +242,22 @@ const EmergencyRoomData = () => {
           parseFloat(item.numberOfPatientsDischargedInsurance || 0) +
           parseFloat(item.numberOfPatientsDischargedPay || 0);
 
+        const PatientFalls = parseFloat(item.numberOfPatientFalls);
+
+        const NearMissReported = parseFloat(item.numberOfNearMissReported);
+
+        const IncidentsReported = parseFloat(item.numberOfIncidentsReported);
+        const ParenteralExposures = parseFloat(
+          item.numberOfParenteralExposures
+        );
+
+        const HandoverDone = parseFloat(
+          item.totalNumberOfHandoversDoneAppropriately
+        );
+        const Handoveropportunity = parseFloat(
+          item.totalNumberOfHandoverOpportunities
+        );
+
         if (!isNaN(time) && !isNaN(admissions)) {
           if (time === 0 || admissions === 0) {
             zeroRecords++;
@@ -244,6 +275,11 @@ const EmergencyRoomData = () => {
         if (!isNaN(medication)) totalMedicationErrors += medication;
         if (!isNaN(opportunity))
           totalOpportunityMedicationErrors += opportunity;
+        if (!isNaN(MedicationChartsWithErrorProneAbbreviation))
+          totalMedicationChartsWithErrorProneAbbreviation +=
+            MedicationChartsWithErrorProneAbbreviation;
+        if (!isNaN(MedicationChartsReviewed))
+          totalMedicationChartsReviewed += MedicationChartsReviewed;
         if (!isNaN(adversedrug)) totalAdverseDrug += adversedrug;
         if (!isNaN(inPatients)) totalInpatients += inPatients;
         if (!isNaN(unplannedOT)) totalUplannedOT += unplannedOT;
@@ -293,6 +329,16 @@ const EmergencyRoomData = () => {
         if (!isNaN(DischargeTime)) totalDischargeTime += DischargeTime;
         if (!isNaN(DischargePatients))
           totalDischargePatients += DischargePatients;
+        if (!isNaN(PatientFalls)) totalPatientFalls += PatientFalls;
+
+        if (!isNaN(NearMissReported)) totalNearMissReported += NearMissReported;
+        if (!isNaN(IncidentsReported))
+          totalIncidentsReported += IncidentsReported;
+        if (!isNaN(ParenteralExposures))
+          totalParenteralExposures += ParenteralExposures;
+        if (!isNaN(HandoverDone)) totalHandoverDone += HandoverDone;
+        if (!isNaN(Handoveropportunity))
+          totalHandoverOpportunity += Handoveropportunity;
 
         recordDetails.push({
           id: item.id,
@@ -327,6 +373,14 @@ const EmergencyRoomData = () => {
         totalOpportunityMedicationErrors > 0
           ? (
               (totalMedicationErrors / totalOpportunityMedicationErrors) *
+              100
+            ).toFixed(2)
+          : "0.00";
+      const medicationChartError =
+        totalMedicationChartsReviewed > 0
+          ? (
+              (totalMedicationChartsWithErrorProneAbbreviation /
+                totalMedicationChartsReviewed) *
               100
             ).toFixed(2)
           : "0.00";
@@ -426,6 +480,26 @@ const EmergencyRoomData = () => {
           ? (totalDischargeTime / totalDischargePatients).toFixed(2)
           : "0.00";
 
+      const PatientFallRate =
+        totalInpatients > 0
+          ? (totalPatientFalls / totalInpatients).toFixed(2)
+          : "0.00";
+
+      const NearMissesRate =
+        totalIncidentsReported > 0
+          ? ((totalNearMissReported / totalIncidentsReported) * 100).toFixed(2)
+          : "0.00";
+
+      const NeedleStickInjuryRate =
+        totalInpatients > 0
+          ? (totalParenteralExposures / totalInpatients).toFixed(2)
+          : "0.00";
+
+      const HandoverRate =
+        totalHandoverOpportunity > 0
+          ? ((totalHandoverDone / totalHandoverOpportunity) * 100).toFixed(2)
+          : "0.00";
+
       console.log("Total Time:", totalSumOfTime);
       console.log("Total Admissions:", totalAdmissions);
       console.log("Average Time:", averageTime);
@@ -441,6 +515,17 @@ const EmergencyRoomData = () => {
         totalOpportunityMedicationErrors
       );
       console.log("Adherence Rate (%):", medicationError);
+
+      console.log(
+        "Total Medication Charts With Error Prone Abbreviation:",
+        totalMedicationChartsWithErrorProneAbbreviation
+      );
+      console.log(
+        "Total Medication Chart sReviewed:",
+        totalMedicationChartsReviewed
+      );
+      console.log("medication Chart Error (%):", medicationChartError);
+
       console.log("Total Number of Adverse Drug:", totalAdverseDrug);
       console.log("Total Number of In-Patients:", totalInpatients);
       console.log("Adverse Drug Rate (%):", adversedrugrate);
@@ -517,6 +602,22 @@ const EmergencyRoomData = () => {
       console.log("Total Discharge Patients:", totalDischargePatients);
       console.log("Discharge Time Rate:", DischargeTimeRate);
 
+      console.log("Total Patient Falls:", totalPatientFalls);
+      console.log("Total In Patients:", totalInpatients);
+      console.log("Patient Fall Rate:", PatientFallRate);
+
+      console.log("Total Near Miss Reported:", totalNearMissReported);
+      console.log("Total Incidents Reported:", totalIncidentsReported);
+      console.log("Near Misses Rate:", NearMissesRate);
+
+      console.log("Total Parenteral Exposures:", totalParenteralExposures);
+      console.log("Total In patients:", totalInpatients);
+      console.log("Needle Stick Injury Rate:", NeedleStickInjuryRate);
+
+      console.log("Total Handover Done:", totalHandoverDone);
+      console.log("Total Handover Opportunity:", totalHandoverOpportunity);
+      console.log("Handover Rate:", HandoverRate);
+
       setData({
         totalSumOfTime,
         totalAdmissions,
@@ -534,7 +635,9 @@ const EmergencyRoomData = () => {
         totalMedicationErrors,
         totalOpportunityMedicationErrors,
         medicationError,
-        totalMedicationErrors,
+        totalMedicationChartsWithErrorProneAbbreviation,
+        totalMedicationChartsReviewed,
+        medicationChartError,
         totalInpatients,
         adversedrugrate,
         totalUplannedOT,
@@ -584,6 +687,16 @@ const EmergencyRoomData = () => {
         totalDischargeTime,
         totalDischargePatients,
         DischargeTimeRate,
+        totalPatientFalls,
+        PatientFallRate,
+        totalNearMissReported,
+        totalIncidentsReported,
+        NearMissesRate,
+        totalParenteralExposures,
+        NeedleStickInjuryRate,
+        totalHandoverDone,
+        totalHandoverDone,
+        HandoverRate,
       });
     } catch (error) {
       console.error("Fetch error:", error);
@@ -601,27 +714,256 @@ const EmergencyRoomData = () => {
     fetchData();
   };
 
-  const csvData =
-    data && data.totalRecords > 0
-      ? [
-          { Parameter: "Month", Value: formatMonthYear(selectedDate) },
-          { Parameter: "Total Records Processed", Value: data.totalRecords },
-          {
-            Parameter: "Records with Positive Values",
-            Value: data.validRecords,
-          },
-          { Parameter: "Records with Zero Values", Value: data.zeroRecords },
-          {
-            Parameter: "Total Time for Initial Assessment",
-            Value: data.totalSumOfTime.toFixed(2),
-          },
-          {
-            Parameter: "Total Admissions",
-            Value: data.totalAdmissions.toFixed(2),
-          },
-          { Parameter: "Average Time (Minutes)", Value: data.averageTime },
-        ]
-      : [];
+  // Helper function to safely access data properties with default values
+  const safeGet = (
+    obj,
+    prop,
+    defaultValue = "",
+    formatter = (value) => value
+  ) => {
+    if (!obj || obj[prop] === undefined || obj[prop] === null) {
+      return defaultValue;
+    }
+    return formatter(obj[prop]);
+  };
+
+  // Create a comprehensive array of all indicators from the table with requested format
+  const csvData = [
+    // All indicators from the table with Sl.No, Standard, Parameter, Value, Benchmark format
+    {
+      SlNo: 1,
+      Standard: "PSQ3a",
+      Indicator: "Time for Initial assessment of indoor patients",
+      Value: `${safeGet(data, "averageTime", 0)} Minutes`,
+      Benchmark: "30 Minutes",
+    },
+    {
+      SlNo: 2,
+      Standard: "PSQ3a",
+      Indicator: "Number of reporting errors / 1000 investigations",
+      Value: safeGet(data, "errorRate", 0),
+      Benchmark: "2%",
+    },
+    {
+      SlNo: 3,
+      Standard: "PSQ3a",
+      Indicator:
+        "Percentage of adherence to safety precautions by staff working in diagnostics",
+      Value: `${safeGet(data, "adherenceRate", 0)}%`,
+      Benchmark: "95%",
+    },
+    {
+      SlNo: 4,
+      Standard: "PSQ3a",
+      Indicator: "Incidence of medication errors",
+      Value: `${safeGet(data, "medicationError", 0)}%`,
+      Benchmark: "0.2-1.5%",
+    },
+    {
+      SlNo: 5,
+      Standard: "PSQ3a",
+      Parameter:
+        "Percentage of medication charts with error-prone abbreviations",
+      Value: `${safeGet(data, "medicationChartError", 0)}%`,
+      Benchmark: "",
+    },
+    {
+      SlNo: 6,
+      Standard: "PSQ3a",
+      Indicator:
+        "Percentage of in-patients developing adverse drug reaction(s)",
+      Value: `${safeGet(data, "adversedrugrate", 0)}%`,
+      Benchmark: "< 2/1000 (0.002)",
+    },
+    {
+      SlNo: 7,
+      Standard: "PSQ3a",
+      Indicator: "Percentage of unplanned return to OT",
+      Value: `${safeGet(data, "unplannedOTRate", 0)}%`,
+      Benchmark: "1.76%",
+    },
+    {
+      SlNo: 8,
+      Standard: "PSQ3a",
+      Indicator:
+        "Percentage of surgeries where the organisation's procedure to prevent adverse events like wrong site, wrong patient and wrong surgery have been adhered to",
+      Value: `${safeGet(data, "correctsurgery", 0)}%`,
+      Benchmark: "100%",
+    },
+    {
+      SlNo: 9,
+      Standard: "PSQ3a",
+      Indicator: "Percentage of transfusion reactions",
+      Value: `${safeGet(data, "transfusionRate", 0)}%`,
+      Benchmark: "1%",
+    },
+    {
+      SlNo: 10,
+      Standard: "PSQ3a",
+      Indicator: "Standardised Mortality Ratio for ICU",
+      Value: `${safeGet(data, "StandMortalityRate", 0)}%`,
+      Benchmark: "< 1%",
+    },
+    {
+      SlNo: 11,
+      Standard: "PSQ3a",
+      Indicator:
+        "Return to the emergency department within 72 hours with similar presenting complaints",
+      Value: `${safeGet(data, "EmergencyPatientRate", 0)}%`,
+      Benchmark: "0.80%",
+    },
+    {
+      SlNo: 12,
+      Standard: "PSQ3a",
+      Indicator:
+        "Incidence of hospital associated pressure ulcers after admission (Bed sore per 1000 patient days)",
+      Value: `${safeGet(data, "PressureUlcerRate", 0)}%`,
+      Benchmark: "0.57%",
+    },
+    {
+      SlNo: 13,
+      Standard: "PSQ3b",
+      Indicator: "Catheter associated Urinary Tract infection rate",
+      Value: `${safeGet(data, "UTIRate", 0)}%`,
+      Benchmark: "1.68%",
+    },
+    {
+      SlNo: 14,
+      Standard: "PSQ3b",
+      Indicator: "Ventilator associated Pneumonia rate",
+      Value: `${safeGet(data, "PneumoniaRate", 0)}%`,
+      Benchmark: "1-3%",
+    },
+    {
+      SlNo: 15,
+      Standard: "PSQ3b",
+      Indicator: "Central line - associated Blood stream infection rate",
+      Value: `${safeGet(data, "CentrallineInfectionRate", 0)}%`,
+      Benchmark: "0.80%",
+    },
+    {
+      SlNo: 16,
+      Standard: "PSQ3b",
+      Indicator: "Surgical site infection rate",
+      Value: `${safeGet(data, "SurgicalsiteInfectionRate", 0)}%`,
+      Benchmark: "< 3%",
+    },
+    {
+      SlNo: 17,
+      Standard: "PSQ3b",
+      Indicator: "Hand Hygiene Compliance Rate",
+      Value: "",
+      Benchmark: "93%",
+    },
+    {
+      SlNo: 18,
+      Standard: "PSQ3b",
+      Indicator:
+        "Percentage of cases who received appropriate prophylactic antibiotics within the specified timeframe",
+      Value: `${safeGet(data, "ProphylacticRate", 0)}%`,
+      Benchmark: "100%",
+    },
+    {
+      SlNo: 19,
+      Standard: "PSQ3c",
+      Indicator: "Percentage of re-scheduling of surgeries",
+      Value: `${safeGet(data, "SurgeryRescheduledRate", 0)}%`,
+      Benchmark: "< 6%",
+    },
+    {
+      SlNo: 20,
+      Standard: "PSQ3c",
+      Indicator: "Turnaround time for issue of blood and blood components",
+      Value: `${safeGet(data, "BBCRate", 0)} Minutes`,
+      Benchmark: "11-35 Minutes",
+    },
+    {
+      SlNo: 21,
+      Standard: "PSQ3c",
+      Indicator: "Nurse-Patient ratio for ICUs and wards",
+      Value: `1:${safeGet(data, "NursePatientRatio", 0)}`,
+      Benchmark: "1:2",
+    },
+    {
+      SlNo: 22,
+      Standard: "PSQ3c",
+      Indicator: "Waiting time for out-patient consultation",
+      Value: `${safeGet(data, "OPWaitingTimeRate", 0)} Minutes`,
+      Benchmark: "11-20 Minutes",
+    },
+    {
+      SlNo: 23,
+      Standard: "PSQ4c",
+      Indicator: "Waiting time for diagnostics",
+      Value: `${safeGet(data, "DiagnosticsWaitingTimeRate", 0)} Minutes`,
+      Benchmark: "60 Minutes",
+    },
+    {
+      SlNo: 24,
+      Standard: "PSQ4c",
+      Indicator: "Time taken for Discharge",
+      Value: `${safeGet(data, "DischargeTimeRate", 0)} Minutes`,
+      Benchmark: "150 Minutes",
+    },
+    {
+      SlNo: 25,
+      Standard: "PSQ4c",
+      Indicator:
+        "Percentage of medical records having incomplete and/or improper consent",
+      Value: `${safeGet(data, "ImproperConsentRate", 0)}%`,
+      Benchmark: "< 0.3%",
+    },
+    {
+      SlNo: 26,
+      Standard: "PSQ4c",
+      Indicator: "Stock out Rate of Emergency medications",
+      Value: `${safeGet(data, "EMStockOutRate", 0)}%`,
+      Benchmark: "< 0.2%",
+    },
+    {
+      SlNo: 27,
+      Standard: "PSQ4c",
+      Indicator: "Number of variations observed in mock drills",
+      Value: safeGet(data, "MockDrillRate", 0),
+      Benchmark: "< 3/Drill",
+    },
+    {
+      SlNo: 28,
+      Standard: "PSQ4d",
+      Indicator: "Patient fall rate (Falls per 1000 patient days)",
+      Value: `${safeGet(data, "PatientFallRate", 0)}%`,
+      Benchmark: "< 3/1000",
+    },
+    {
+      SlNo: 29,
+      Standard: "PSQ4d",
+      Indicator: "Percentage of near misses",
+      Value: `${safeGet(data, "NearMissesRate", 0)}%`,
+      Benchmark: "3.42%",
+    },
+    {
+      SlNo: 30,
+      Standard: "PSQ3d",
+      Indicator: "Incidence of needle stick injuries",
+      Value: safeGet(data, "NeedleStickInjuryRate", 0),
+      Benchmark: "< 2",
+    },
+    {
+      SlNo: 31,
+      Standard: "PSQ3d",
+      Indicator:
+        "Appropriate handovers during shift change (To be done seperately for doctors and nurses)-(per patient per shift)",
+      Value: `${safeGet(data, "HandoverRate", 0)}%`,
+      Benchmark: "> 98%",
+    },
+    {
+      SlNo: 32,
+      Standard: "PSQ3d",
+      Indicator: "Compliance rate to Medication Prescription in capitals",
+      Value: `${safeGet(data, "MedicationPrescriptionCapitalRate", 0)}%`,
+      Benchmark: "> 98%",
+    },
+  ];
 
   const isExceeded = (actual, threshold) => {
     const actualNum = parseFloat(actual);
@@ -694,7 +1036,7 @@ const EmergencyRoomData = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>1</td>
+                  <td>1.</td>
                   <td>PSQ3a</td>
                   <td>Time for Initial assessment of indoor patients</td>
                   <td
@@ -707,7 +1049,7 @@ const EmergencyRoomData = () => {
                   <td>30 Minutes</td>
                 </tr>
                 <tr>
-                  <td>2</td>
+                  <td>2.</td>
                   <td>PSQ3a</td>
                   <td>Number of reporting errors / 1000 investigations. </td>
                   <td
@@ -720,7 +1062,7 @@ const EmergencyRoomData = () => {
                   <td>2%</td>
                 </tr>
                 <tr>
-                  <td>3</td>
+                  <td>3.</td>
                   <td>PSQ3a</td>
                   <td>
                     Percentage of adherence to safety precautions by staff
@@ -738,7 +1080,7 @@ const EmergencyRoomData = () => {
                   <td>95%</td>
                 </tr>
                 <tr>
-                  <td>4</td>
+                  <td>4.</td>
                   <td>PSQ3a</td>
                   <td>Incidence of medication errors</td>
                   <td
@@ -755,17 +1097,17 @@ const EmergencyRoomData = () => {
                   <td>0.2-1.5%</td>
                 </tr>
                 <tr>
-                  <td>5</td>
+                  <td>5.</td>
                   <td>PSQ3a</td>
                   <td>
                     Percentage of medication charts with error-prone
                     abbreviations
                   </td>
-                  <td></td>
-                  <td></td>
+                  <td>{`${data.medicationChartError}%`}</td>
+                  <td>0</td>
                 </tr>
                 <tr>
-                  <td>6</td>
+                  <td>6.</td>
                   <td>PSQ3a</td>
                   <td>
                     Percentage of in-patients developing adverse drug
@@ -782,7 +1124,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 2/1000 (0.002)</td>
                 </tr>
                 <tr>
-                  <td>7</td>
+                  <td>7.</td>
                   <td>PSQ3a</td>
                   <td>Percentage of unplanned return to OT</td>
                   <td
@@ -796,7 +1138,7 @@ const EmergencyRoomData = () => {
                   <td>1.76%</td>
                 </tr>
                 <tr>
-                  <td>8</td>
+                  <td>8.</td>
                   <td>PSQ3a</td>
                   <td>
                     Percentage of surgeries where the organisation's procedure
@@ -812,7 +1154,7 @@ const EmergencyRoomData = () => {
                   <td>100%</td>
                 </tr>
                 <tr>
-                  <td>9</td>
+                  <td>9.</td>
                   <td>PSQ3a</td>
                   <td>Percentage of transfusion reactions</td>
                   <td
@@ -824,7 +1166,7 @@ const EmergencyRoomData = () => {
                   <td>1%</td>
                 </tr>
                 <tr>
-                  <td>10</td>
+                  <td>10.</td>
                   <td>PSQ3a</td>
                   <td>Standardised Mortality Ratio for ICU</td>
                   <td
@@ -838,7 +1180,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 1%</td>
                 </tr>
                 <tr>
-                  <td>11</td>
+                  <td>11.</td>
                   <td>PSQ3a</td>
                   <td>
                     Return to the emergency department within 72 hours with
@@ -855,7 +1197,7 @@ const EmergencyRoomData = () => {
                   <td>0.80%</td>
                 </tr>
                 <tr>
-                  <td>12</td>
+                  <td>12.</td>
                   <td>PSQ3a</td>
                   <td>
                     Incidence of hospital associated pressure ulcers after
@@ -872,7 +1214,7 @@ const EmergencyRoomData = () => {
                   <td>0.57%</td>
                 </tr>
                 <tr>
-                  <td>13</td>
+                  <td>13.</td>
                   <td>PSQ3b</td>
                   <td>Catheter associated Urinary Tract infection rate</td>
                   <td
@@ -883,7 +1225,7 @@ const EmergencyRoomData = () => {
                   <td>1.68%</td>
                 </tr>
                 <tr>
-                  <td>14</td>
+                  <td>14.</td>
                   <td>PSQ3b</td>
                   <td>Ventilator associated Pneumonia rate</td>
                   <td
@@ -898,7 +1240,7 @@ const EmergencyRoomData = () => {
                   <td>1-3%</td>
                 </tr>
                 <tr>
-                  <td>15</td>
+                  <td>15.</td>
                   <td>PSQ3b</td>
                   <td>Central line - associated Blood stream infection rate</td>
                   <td
@@ -912,7 +1254,7 @@ const EmergencyRoomData = () => {
                   <td>0.80%</td>
                 </tr>
                 <tr>
-                  <td>16</td>
+                  <td>16.</td>
                   <td>PSQ3b</td>
                   <td>Surgical site infection rate</td>
                   <td
@@ -926,14 +1268,14 @@ const EmergencyRoomData = () => {
                   <td>&lt; 3%</td>
                 </tr>
                 <tr>
-                  <td>17</td>
+                  <td>17.</td>
                   <td>PSQ3b</td>
                   <td>Hand Hygiene Compliance Rate</td>
                   <td></td>
                   <td>93%</td>
                 </tr>
                 <tr>
-                  <td>18</td>
+                  <td>18.</td>
                   <td>PSQ3b</td>
                   <td>
                     Percentage of cases who received appropriate prophylactic
@@ -950,7 +1292,7 @@ const EmergencyRoomData = () => {
                   <td>100%</td>
                 </tr>
                 <tr>
-                  <td>19</td>
+                  <td>19.</td>
                   <td>PSQ3c</td>
                   <td>Percentage of re-scheduling of surgeries</td>
                   <td
@@ -964,7 +1306,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 6%</td>
                 </tr>
                 <tr>
-                  <td>20</td>
+                  <td>20.</td>
                   <td>PSQ3c</td>
                   <td>
                     Turnaround time for issue of blood and blood components
@@ -981,7 +1323,7 @@ const EmergencyRoomData = () => {
                   <td>11-35 Minutes</td>
                 </tr>
                 <tr>
-                  <td>21</td>
+                  <td>21.</td>
                   <td>PSQ3c</td>
                   <td>Nurse-Patient ratio for ICUs and wards</td>
                   <td
@@ -995,7 +1337,7 @@ const EmergencyRoomData = () => {
                   <td>1:2</td>
                 </tr>
                 <tr>
-                  <td>22</td>
+                  <td>22.</td>
                   <td>PSQ3c</td>
                   <td>Waiting time for out-patient consultation</td>
                   <td
@@ -1010,7 +1352,7 @@ const EmergencyRoomData = () => {
                   <td>11-20 Minutes</td>
                 </tr>
                 <tr>
-                  <td>23</td>
+                  <td>23.</td>
                   <td>PSQ4c</td>
                   <td>Waiting time for diagnostics</td>
                   <td
@@ -1024,7 +1366,7 @@ const EmergencyRoomData = () => {
                   <td>60 Minutes</td>
                 </tr>
                 <tr>
-                  <td>24</td>
+                  <td>24.</td>
                   <td>PSQ4c</td>
                   <td>Time taken for Discharge</td>
                   <td
@@ -1036,6 +1378,124 @@ const EmergencyRoomData = () => {
                     }}
                   >{`${data.DischargeTimeRate} Minutes`}</td>
                   <td>150 Minutes</td>
+                </tr>
+                <tr>
+                  <td>25.</td>
+                  <td>PSQ4c</td>
+                  <td>
+                    Percentage of medical records having incomplete and/or
+                    improper consent
+                  </td>
+                  <td></td>
+                  {/* <td
+                    style={{
+                      color:
+                        parseFloat(data.ImproperConsentRate) > 0.3
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.ImproperConsentRate} Minutes`}</td> */}
+                  <td>&lt; 0.3%</td>
+                </tr>
+                <tr>
+                  <td>26.</td>
+                  <td>PSQ4c</td>
+                  <td>Stock out Rate of Emergency medications</td>
+                  <td></td>
+                  {/* <td
+                    style={{
+                      color:
+                        parseFloat(data.EMStockOutRate) > 0.2 ? "red" : "black",
+                    }}
+                  >{`${data.EMStockOutRate} Minutes`}</td> */}
+                  <td>&lt; 0.2%</td>
+                </tr>
+                <tr>
+                  <td>27.</td>
+                  <td>PSQ4c</td>
+                  <td>Number of variations observed in mock drills</td>
+                  <td></td>
+                  {/* <td
+                    style={{
+                      color:
+                        parseFloat(data.MockDrillRate) > 3 ? "red" : "black",
+                    }}
+                  >{`${data.MockDrillRate} Minutes`}</td> */}
+                  <td>&lt; 3/Drill</td>
+                </tr>
+                <tr>
+                  <td>28.</td>
+                  <td>PSQ4d</td>
+                  <td>Patient fall rate (Falls per 1000 patient days)</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.PatientFallRate) > 0.00344
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.PatientFallRate} %`}</td>
+                  <td>&lt; 3/1000</td>
+                </tr>
+                <tr>
+                  <td>29.</td>
+                  <td>PSQ4d</td>
+                  <td>Percentage of near misses</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.NearMissesRate) > 3.42
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.NearMissesRate} %`}</td>
+                  <td>3.42%</td>
+                </tr>
+                <tr>
+                  <td>30.</td>
+                  <td>PSQ3d</td>
+                  <td>Incidence of needle stick injuries</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.NeedleStickInjuryRate) > 2
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.NeedleStickInjuryRate}`}</td>
+                  <td>&lt; 2</td>
+                </tr>
+                <tr>
+                  <td>31.</td>
+                  <td>PSQ3d</td>
+                  <td>
+                    Appropriate handovers during shift change (To be done
+                    seperately for doctors and nurses)-(per patient per shift).
+                  </td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.HandoverRate) < 98 ? "red" : "black",
+                    }}
+                  >{`${data.HandoverRate} %`}</td>
+                  <td>&gt; 98%</td>
+                </tr>
+                <tr>
+                  <td>32.</td>
+                  <td>PSQ3d</td>
+                  <td>
+                    Compliance rate to Medication Prescription in capitals
+                  </td>
+                  <td></td>
+                  {/* <td
+                    style={{
+                      color:
+                        parseFloat(data.MedicationPrescriptionCapitalRate) < 98
+                          ? "red"
+                          : "black",
+                    }}
+                  >{`${data.MedicationPrescriptionCapitalRate} %`}</td> */}
+                  <td>&gt; 98%</td>
                 </tr>
               </tbody>
             </table>
