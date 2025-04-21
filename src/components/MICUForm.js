@@ -85,6 +85,14 @@ function MICU() {
     numberOfPatientsOnIVTherapy: "",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
+    NumberofreturnstoICUwithin48hours: "",
+    NumberofreturnstoICUwithin48hoursRemarks: "",
+    NumberofdischargestransfersfromtheICU: "",
+    NumberofdischargestransfersfromtheICURemarks: "",
+    NumberofReintubation: "",
+    NumberofReintubationRemarks: "",
+    NumberofExtubation: "",
+    NumberofExtubationRemarks: "",
   });
 
   useEffect(() => {
@@ -1448,6 +1456,164 @@ function MICU() {
                 as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={formData.incidentsOfDeliningRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+        <br />
+
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="NumberofreturnstoICUwithin48hours">
+              <Form.Label>Number of Returns to ICU within 48 hours</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.NumberofreturnstoICUwithin48hours}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          <Col sm="4">
+            <Form.Group controlId="NumberofreturnstoICUwithin48hoursRemarks">
+              <Form.Label> Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.NumberofreturnstoICUwithin48hoursRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+        <br />
+
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="NumberofdischargestransfersfromtheICU">
+              <Form.Label>
+                Number of discharges transfers from the ICU
+              </Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.NumberofdischargestransfersfromtheICU}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          <Col sm="4">
+            <Form.Group controlId="NumberofdischargestransfersfromtheICURemarks">
+              <Form.Label> Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.NumberofdischargestransfersfromtheICURemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+        <br />
+
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="NumberofReintubation">
+              <Form.Label>Number of Reintubation</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.NumberofReintubation}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          <Col sm="4">
+            <Form.Group controlId="NumberofReintubationRemarks">
+              <Form.Label> Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.NumberofReintubationRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+        <br />
+
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="NumberofExtubation">
+              <Form.Label>Number of Extubation</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.NumberofExtubation}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+
+          <Col sm="4">
+            <Form.Group controlId="NumberofExtubationRemarks">
+              <Form.Label> Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.NumberofExtubationRemarks}
                 onChange={handleChange}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {

@@ -428,89 +428,90 @@ function Report() {
           </div>
         </Col>
       </Row>
-      {localStorage.getItem("userRole") === "Admin" && (
-        <Row>
-          <Col
-            xs={12}
-            md={12}
-            className="text-right"
+      <Row>
+        <Col
+          xs={12}
+          md={12}
+          className="text-right"
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          {/* Admin-only buttons */}
+          {localStorage.getItem("userRole") === "Admin" && (
+            <>
+              <i
+                className={`fa ${isEditing ? "fa-save" : "fa-edit"}`}
+                onClick={isEditing ? handleSaveClick : handleEditClick}
+                style={{
+                  fontSize: "150%",
+                  color: "rgb(149,188,176)",
+                  cursor: "pointer",
+                  marginRight: "15px",
+                }}
+                title={isEditing ? "Save" : "Edit"}
+              ></i>
+              <i
+                style={{
+                  fontSize: "150%",
+                  color: "rgb(149,188,176)",
+                  cursor: "pointer",
+                  marginRight: "20px",
+                }}
+                title="Delete"
+                className="fa fa-trash"
+                onClick={() => setShowDeleteModal(true)}
+              ></i>
+            </>
+          )}
+
+          {/* Download button visible to everyone */}
+          <i
             style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
+              fontSize: "150%",
+              color: "rgb(149,188,176)",
+              cursor: "pointer",
+              marginRight: "30px",
             }}
-          >
-            <i
-              className={`fa ${isEditing ? "fa-save" : "fa-edit"}`}
-              onClick={isEditing ? handleSaveClick : handleEditClick}
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-                marginRight: "15px",
-              }}
-              title={isEditing ? "Save" : "Edit"}
-            ></i>
-            <Modal
-              show={showDeleteModal}
-              onHide={() => setShowDeleteModal(false)}
+            title="Download"
+            className="fa fa-download"
+            onClick={handleDownloadButtonClick}
+          ></i>
+        </Col>
+      </Row>
+
+      {/* Keep the delete modal outside but it will only be triggered by admins */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Date to Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <label>Select a date:</label>
+          <div style={{ position: "relative", zIndex: 9999 }}>
+            <select
+              className="form-control"
+              onChange={(e) => setSelectedDate(e.target.value)}
             >
-              <Modal.Header closeButton>
-                <Modal.Title>Select Date to Delete</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <label>Select a date:</label>
-                <div style={{ position: "relative", zIndex: 9999 }}>
-                  <select
-                    className="form-control"
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                  >
-                    <option value="">Select Date</option>
-                    {exportData.map((item, index) => (
-                      <option key={index} value={item.selectedDate}>
-                        {formatDate(item.selectedDate)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button variant="danger" onClick={handleDelete}>
-                  Delete
-                </Button>
-              </Modal.Footer>
-            </Modal>
-            <i
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-                marginRight: "20px",
-              }}
-              title="Delete"
-              className="fa fa-trash"
-              onClick={() => setShowDeleteModal(true)}
-            ></i>
-            <i
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-                marginRight: "30px",
-              }}
-              title="Download"
-              className="fa fa-download"
-              onClick={handleDownloadButtonClick}
-            ></i>
-          </Col>
-        </Row>
-      )}
+              <option value="">Select Date</option>
+              {exportData.map((item, index) => (
+                <option key={index} value={item.selectedDate}>
+                  {formatDate(item.selectedDate)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {showSuccessAlert && (
         <Alert

@@ -112,6 +112,11 @@ const EmergencyRoomData = () => {
       let totalParenteralExposures = 0;
       let totalHandoverDone = 0;
       let totalHandoverOpportunity = 0;
+      let totalStockOutEmergencyDrugs = 0;
+      let totalNumberOfVariationsObservedInMockDrill = 0;
+      let totalPrescriptionInCapitalLetters = 0;
+      let totalNumberOfPrescriptions = 0;
+
       let recordDetails = [];
 
       allData.forEach((item) => {
@@ -258,6 +263,22 @@ const EmergencyRoomData = () => {
           item.totalNumberOfHandoverOpportunities
         );
 
+        const StockOutEmergencyDrugs = parseFloat(
+          item.numberOfStockOutEmergencyDrugs
+        );
+
+        const NumberOfVariationsObservedInMockDrill = parseFloat(
+          item.totalNumberOfVariationsObservedInMockDrill
+        );
+
+        const PrescriptionInCapitalLetters = parseFloat(
+          item.totalNumberOfPrescriptionInCapitalLetters
+        );
+
+        const NumberOfPrescriptions = parseFloat(
+          item.totalNumberOfPrescriptions
+        );
+
         if (!isNaN(time) && !isNaN(admissions)) {
           if (time === 0 || admissions === 0) {
             zeroRecords++;
@@ -339,6 +360,16 @@ const EmergencyRoomData = () => {
         if (!isNaN(HandoverDone)) totalHandoverDone += HandoverDone;
         if (!isNaN(Handoveropportunity))
           totalHandoverOpportunity += Handoveropportunity;
+        if (!isNaN(StockOutEmergencyDrugs))
+          totalStockOutEmergencyDrugs += StockOutEmergencyDrugs;
+        if (!isNaN(NumberOfVariationsObservedInMockDrill))
+          totalNumberOfVariationsObservedInMockDrill +=
+            NumberOfVariationsObservedInMockDrill;
+
+        if (!isNaN(PrescriptionInCapitalLetters))
+          totalPrescriptionInCapitalLetters += PrescriptionInCapitalLetters;
+        if (!isNaN(NumberOfPrescriptions))
+          totalNumberOfPrescriptions += NumberOfPrescriptions;
 
         recordDetails.push({
           id: item.id,
@@ -497,7 +528,20 @@ const EmergencyRoomData = () => {
 
       const HandoverRate =
         totalHandoverOpportunity > 0
-          ? ((totalHandoverDone / totalHandoverOpportunity) * 100).toFixed(2)
+          ? (totalHandoverOpportunity * 100).toFixed(2)
+          : "0.00";
+
+      // const EMStockOutRate =
+      //   totalStockOutEmergencyDrugs > 0
+      //     ? ((totalHandoverDone / totalStockOutEmergencyDrugs) * 100).toFixed(2)
+      //     : "0.00";
+
+      const MedicationPrescriptionCapitalRate =
+        totalNumberOfPrescriptions > 0
+          ? (
+              (totalPrescriptionInCapitalLetters / totalNumberOfPrescriptions) *
+              100
+            ).toFixed(2)
           : "0.00";
 
       console.log("Total Time:", totalSumOfTime);
@@ -618,6 +662,27 @@ const EmergencyRoomData = () => {
       console.log("Total Handover Opportunity:", totalHandoverOpportunity);
       console.log("Handover Rate:", HandoverRate);
 
+      console.log(
+        "Total Stock Out Emergency Drugs:",
+        totalStockOutEmergencyDrugs
+      );
+      // console.log("Emergency Medicine StockOut Rate:", EMStockOutRate);
+
+      console.log(
+        "Total Number Of Variations Observed In MockDrill:",
+        totalNumberOfVariationsObservedInMockDrill
+      );
+
+      console.log(
+        "Total Prescription In Capital Letters:",
+        totalPrescriptionInCapitalLetters
+      );
+      console.log("Total Number Of Prescriptions:", totalNumberOfPrescriptions);
+      console.log(
+        "Medication Prescription Capital Rate:",
+        MedicationPrescriptionCapitalRate
+      );
+
       setData({
         totalSumOfTime,
         totalAdmissions,
@@ -697,6 +762,12 @@ const EmergencyRoomData = () => {
         totalHandoverDone,
         totalHandoverDone,
         HandoverRate,
+        totalStockOutEmergencyDrugs,
+        // EMStockOutRate,
+        totalNumberOfVariationsObservedInMockDrill,
+        totalPrescriptionInCapitalLetters,
+        totalNumberOfPrescriptions,
+        MedicationPrescriptionCapitalRate,
       });
     } catch (error) {
       console.error("Fetch error:", error);
@@ -1401,26 +1472,30 @@ const EmergencyRoomData = () => {
                   <td>26.</td>
                   <td>PSQ4c</td>
                   <td>Stock out Rate of Emergency medications</td>
-                  <td></td>
-                  {/* <td
+                  <td
                     style={{
                       color:
-                        parseFloat(data.EMStockOutRate) > 0.2 ? "red" : "black",
+                        parseFloat(data.totalStockOutEmergencyDrugs) > 20
+                          ? "red"
+                          : "black",
                     }}
-                  >{`${data.EMStockOutRate} Minutes`}</td> */}
-                  <td>&lt; 0.2%</td>
+                  >{`${data.totalStockOutEmergencyDrugs}`}</td>
+                  <td>&lt; 20</td>
                 </tr>
                 <tr>
                   <td>27.</td>
                   <td>PSQ4c</td>
                   <td>Number of variations observed in mock drills</td>
-                  <td></td>
-                  {/* <td
+                  <td
                     style={{
                       color:
-                        parseFloat(data.MockDrillRate) > 3 ? "red" : "black",
+                        parseFloat(
+                          data.totalNumberOfVariationsObservedInMockDrill
+                        ) > 3
+                          ? "red"
+                          : "black",
                     }}
-                  >{`${data.MockDrillRate} Minutes`}</td> */}
+                  >{`${data.totalNumberOfVariationsObservedInMockDrill}`}</td>
                   <td>&lt; 3/Drill</td>
                 </tr>
                 <tr>
@@ -1486,15 +1561,14 @@ const EmergencyRoomData = () => {
                   <td>
                     Compliance rate to Medication Prescription in capitals
                   </td>
-                  <td></td>
-                  {/* <td
+                  <td
                     style={{
                       color:
                         parseFloat(data.MedicationPrescriptionCapitalRate) < 98
                           ? "red"
                           : "black",
                     }}
-                  >{`${data.MedicationPrescriptionCapitalRate} %`}</td> */}
+                  >{`${data.MedicationPrescriptionCapitalRate} %`}</td>
                   <td>&gt; 98%</td>
                 </tr>
               </tbody>

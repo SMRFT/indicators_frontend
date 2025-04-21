@@ -119,6 +119,73 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
       </>
     );
   }
+  if (userRole === "In-Charge") {
+    content = (
+      <>
+        <div className="sidebar-dropdown">
+          <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
+            <CDBSidebarMenuItem className="sidebar-menu-item">
+              <FaHandsWash />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
+            </CDBSidebarMenuItem>
+          </NavLink>
+          <CDBSidebarMenuItem
+            className="sidebar-menu-item"
+            onClick={toggleReportDropdown}
+          >
+            <FaFileAlt />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reports{" "}
+            {reportDropdownOpen ? (
+              <FaChevronUp size={10} />
+            ) : (
+              <FaChevronDown size={10} />
+            )}
+          </CDBSidebarMenuItem>
+          {reportDropdownOpen && (
+            <div className="sidebar-dropdown-content">
+              <NavLink exact to="/Report" activeClassName="activeClicked">
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/MasterDataReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/HandHygieneReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/TrainingFeedbackReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feedback Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+            </div>
+          )}
+        </div>
+        <NavLink exact to="/Formula" activeClassName="activeClicked">
+          <CDBSidebarMenuItem className="sidebar-menu-item">
+            <FaSquareRootAlt /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Formula
+          </CDBSidebarMenuItem>
+        </NavLink>
+      </>
+    );
+  }
 
   // List of paths where "MasterData" should not be displayed
   const excludedPaths = [

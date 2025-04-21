@@ -102,10 +102,18 @@ const HandHygenieAudit = () => {
 
         if (response.status === 400) {
           const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
+          if (
+            errorText.error ===
+            "Hand hygenie audit with this nameOfTheStaff already exists."
+          ) {
+            setError(
+              "Hand hygenie audit with this nameOfTheStaff already exists."
+            );
           } else {
-            throw new Error(errorText.error || "Failed to submit data");
+            throw new Error(
+              errorText.error ||
+                "Hand hygenie audit with this nameOfTheStaff already exists."
+            );
           }
         } else {
           setFormSubmitted(true); // Display success message
@@ -113,7 +121,10 @@ const HandHygenieAudit = () => {
         }
       } catch (error) {
         console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
+        setError(
+          error.message ||
+            "Hand hygenie audit with this nameOfTheStaff already exists."
+        );
       }
     }
 

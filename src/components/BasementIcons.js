@@ -88,12 +88,12 @@ const BasementIcons = ({ handleIconClick }) => {
       >
         <div
           className="image-container"
-          onClick={() => handleIconClick("OPPharmacy")}
+          onClick={() => handleIconClick("Pharmacy")}
         >
           <img
             style={{ width: "100%", height: "100%" }}
             src="/Pharmacy.png"
-            alt="OPPharmacy"
+            alt="Pharmacy"
           />
           <p
             className="image-text"

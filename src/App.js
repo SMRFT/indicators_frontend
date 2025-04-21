@@ -29,7 +29,6 @@ import Report from "./components/Report";
 import Register from "./components/Register";
 import FirstFloorRawData from "./components/FirstFloorRawData";
 import SecondFloorRawData from "./components/SecondFloorRawData";
-import OPPharmacy from "./components/OPPharmacy";
 import Logo from "../src/images/shanmuga-hospital-logo.jpg";
 import Sidebar from "./components/VerticalNavbar";
 import "./App.css";
@@ -38,7 +37,6 @@ import FirstSuitRawData from "./components/FirstSuitRawData";
 import MasterDataReport from "./components/MasterDataReport";
 import OPD from "./components/OPD";
 import HR from "./components/HR";
-import IPPharmacy from "./components/IPPharmacy";
 import RecoveryWardRawData from "./components/RecoveryWardRawData";
 import SICURawData from "./components/SICURawData";
 import NICURawData from "./components/NICURawData";
@@ -50,6 +48,8 @@ import HandHygieneAudit from "./components/HandHygenieAudit";
 import HandHygieneReport from "./components/HandHygieneReport";
 import TrainingFeedBack from "./components/TrainingFeedBack";
 import TrainingFeedbackReport from "./components/TrainingFeedBackReport";
+import Pharmacy from "./components/Pharmacy";
+import Mockdrills from "./components/Mockdrills";
 
 function App() {
   const location = useLocation();
@@ -133,8 +133,7 @@ function App() {
           <Route path="/HR" element={<HR />} />
           <Route path="/Dialysis" element={<Dialysis />} />
           <Route path="/Physiotherapy" element={<Physiotherapy />} />
-          <Route path="/OPPharmacy" element={<OPPharmacy />} />
-          <Route path="/IPPharmacy" element={<IPPharmacy />} />
+          <Route path="/Pharmacy" element={<Pharmacy />} />
           <Route path="/EmergencyRoom" element={<EmergencyRoom />} />
           <Route path="/MRDForm" element={<MRDForm />} />
           <Route path="/ChemoWard" element={<ChemoWard />} />
@@ -147,6 +146,7 @@ function App() {
           <Route path="/SecondFloorRawData" element={<SecondFloorRawData />} />
           <Route path="/SecondSuitRawData" element={<SecondSuitRawData />} />
           <Route path="/ThirdFloorRawData" element={<ThirdFloorRawData />} />
+          <Route path="/Mockdrills" element={<Mockdrills />} />
           <Route
             path="/RecoveryWardRawData"
             element={<RecoveryWardRawData />}
