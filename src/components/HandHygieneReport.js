@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Row, Col } from "react-bootstrap";
 import { DatePicker } from "antd";
+import dayjs from "dayjs";
 
 const HandHygieneReport = () => {
   const [data, setData] = useState([]);
@@ -16,6 +17,12 @@ const HandHygieneReport = () => {
     console.log("Exporting as:", type);
     // your export logic here
   };
+  useEffect(() => {
+    // Set today's date initially
+    const today = dayjs().format("YYYY-MM-DD");
+    setFromDate(today);
+    setToDate(today);
+  }, []);
 
   useEffect(() => {
     fetch("https://indicators.shinovadatabase.in/HandHygieneReport/")
@@ -89,21 +96,23 @@ const HandHygieneReport = () => {
         <Col xs={12} md={3}>
           <label>From Date</label>
           <DatePicker
-            selected={fromDate}
-            onChange={(date) => setFromDate(date)}
-            dateFormat="yyyy-MM-dd"
+            value={fromDate ? dayjs(fromDate) : null}
+            onChange={(date) =>
+              setFromDate(date ? date.format("YYYY-MM-DD") : "")
+            }
+            format="YYYY-MM-DD"
             className="form-control"
-            placeholderText="From Date"
           />
         </Col>
         <Col xs={12} md={3}>
           <label>To Date</label>
           <DatePicker
-            selected={toDate}
-            onChange={(date) => setToDate(date)}
-            dateFormat="yyyy-MM-dd"
+            value={toDate ? dayjs(toDate) : null}
+            onChange={(date) =>
+              setToDate(date ? date.format("YYYY-MM-DD") : "")
+            }
+            format="YYYY-MM-DD"
             className="form-control"
-            placeholderText="To Date"
           />
         </Col>
 
@@ -156,6 +165,12 @@ const HandHygieneReport = () => {
                 <th className="border px-2 py-1">Type</th>
                 <th className="border px-2 py-1">5 Moments</th>
                 <th className="border px-2 py-1">Ornaments</th>
+                <th className="border px-2 py-1">
+                  Total Number Of Actions Performed
+                </th>
+                <th className="border px-2 py-1">
+                  Total Number Of Hand Hygiene Opportunities
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -176,6 +191,12 @@ const HandHygieneReport = () => {
                       )}
                   </td>
                   <td className="border px-2 py-1">{item.ornamentsIfAny}</td>
+                  <td className="border px-2 py-1">
+                    {item.totalNumberOfActionsPerformed}
+                  </td>
+                  <td className="border px-2 py-1">
+                    {item.totalNumberOfHandHygieneOpportunities}
+                  </td>
                 </tr>
               ))}
             </tbody>

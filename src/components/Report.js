@@ -136,7 +136,10 @@ function Report() {
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setExportData(data);
+          const sortedData = [...data].sort((a, b) => {
+            return new Date(a.selectedDate) - new Date(b.selectedDate);
+          });
+          setExportData(sortedData);
           setEditedValues({}); // Reset edited values when new data is fetched
         } else {
           console.error("Error fetching data:", data);

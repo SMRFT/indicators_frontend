@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Row, Col } from "react-bootstrap";
 import { DatePicker } from "antd";
+import dayjs from "dayjs";
 
 const TrainingFeedbackReport = () => {
   const [data, setData] = useState([]);
@@ -14,20 +15,26 @@ const TrainingFeedbackReport = () => {
   const isViewClicked = true; // or useState(false)
 
   useEffect(() => {
+    // Set today's date initially
+    const today = dayjs().format("YYYY-MM-DD");
+    setFromDate(today);
+    setToDate(today);
+  }, []);
+
+  useEffect(() => {
     fetch("https://indicators.shinovadatabase.in/TrainingFeedBackReport/")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();
       })
       .then((data) => {
-        // Parse JSON strings into objects
         const parsedData = data.map((item) => ({
           ...item,
           detailsOfTrainingTopic: JSON.parse(item.detailsOfTrainingTopic),
           trainer: JSON.parse(item.trainer),
         }));
         setData(parsedData);
-        setFilteredData(parsedData);
+        setFilteredData(parsedData); // Optional - filtering is handled below
       })
       .catch((err) => setError(err.message));
   }, []);
@@ -73,7 +80,7 @@ const TrainingFeedbackReport = () => {
     // Create a flattened version of the data for Excel export
     const flattenedData = filteredData.map((item) => ({
       Date: item.selectedDate,
-      ID: item.id,
+      ID: item.ID,
       Name: item.name,
       Department: item.department,
       TrainingTopic: item.trainingTopic,
@@ -114,21 +121,23 @@ const TrainingFeedbackReport = () => {
         <Col xs={12} md={3}>
           <label>From Date</label>
           <DatePicker
-            selected={fromDate}
-            onChange={(date) => setFromDate(date)}
-            dateFormat="yyyy-MM-dd"
+            value={fromDate ? dayjs(fromDate) : null}
+            onChange={(date) =>
+              setFromDate(date ? date.format("YYYY-MM-DD") : "")
+            }
+            format="YYYY-MM-DD"
             className="form-control"
-            placeholderText="From Date"
           />
         </Col>
         <Col xs={12} md={3}>
           <label>To Date</label>
           <DatePicker
-            selected={toDate}
-            onChange={(date) => setToDate(date)}
-            dateFormat="yyyy-MM-dd"
+            value={toDate ? dayjs(toDate) : null}
+            onChange={(date) =>
+              setToDate(date ? date.format("YYYY-MM-DD") : "")
+            }
+            format="YYYY-MM-DD"
             className="form-control"
-            placeholderText="To Date"
           />
         </Col>
 
@@ -207,7 +216,7 @@ const TrainingFeedbackReport = () => {
               {filteredData.map((item, idx) => (
                 <tr key={idx}>
                   <td className="border px-2 py-1">{item.selectedDate}</td>
-                  <td className="border px-2 py-1">{item.id}</td>
+                  <td className="border px-2 py-1">{item.ID}</td>
                   <td className="border px-2 py-1">{item.name}</td>
                   <td className="border px-2 py-1">{item.department}</td>
                   <td className="border px-2 py-1">{item.trainingTopic}</td>

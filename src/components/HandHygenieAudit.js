@@ -17,7 +17,7 @@ const HandHygenieAudit = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    id: "",
+    ID: "",
     auditBy: "",
     selectedDate: "",
     nameOfTheStaff: "",
@@ -26,15 +26,17 @@ const HandHygenieAudit = () => {
     typeOfHandHygiencePractice: "",
     fiveMoments: [], // Change from "" to []
     ornamentsIfAny: "",
+    totalNumberOfActionsPerformed: "",
+    totalNumberOfHandHygieneOpportunities: "",
   });
 
   useEffect(() => {
-    const id = localStorage.getItem("userId");
+    const ID = localStorage.getItem("userId");
     const auditBy = localStorage.getItem("userName");
-    if (id && auditBy) {
+    if (ID && auditBy) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        id,
+        ID,
         auditBy,
       }));
     }
@@ -76,13 +78,13 @@ const HandHygenieAudit = () => {
       e.stopPropagation();
     } else {
       try {
-        const id = localStorage.getItem("userId");
+        const ID = localStorage.getItem("userId");
         const auditBy = localStorage.getItem("userName");
 
         // Format the data properly
         const formDataWithUser = {
           ...formData,
-          id,
+          ID,
           auditBy,
           // No need to include selectedDate separately as it's already in formData
           // Use formData.fiveMoments instead of fiveMoments
@@ -102,29 +104,22 @@ const HandHygenieAudit = () => {
 
         if (response.status === 400) {
           const errorText = await response.json();
-          if (
-            errorText.error ===
-            "Hand hygenie audit with this nameOfTheStaff already exists."
-          ) {
-            setError(
-              "Hand hygenie audit with this nameOfTheStaff already exists."
-            );
+          if (errorText.error === "Failed to Submit.") {
+            setError("Failed to Submit.");
           } else {
-            throw new Error(
-              errorText.error ||
-                "Hand hygenie audit with this nameOfTheStaff already exists."
-            );
+            throw new Error(errorText.error || "Failed to Submit.");
           }
         } else {
           setFormSubmitted(true); // Display success message
           setError(""); // Clear any previous errors
+          // Auto-refresh after 2 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         }
       } catch (error) {
         console.error("Error:", error.message);
-        setError(
-          error.message ||
-            "Hand hygenie audit with this nameOfTheStaff already exists."
-        );
+        setError(error.message || "Failed to submit.");
       }
     }
 
@@ -137,7 +132,7 @@ const HandHygenieAudit = () => {
       <div style={{ float: "right" }} className="mt-3">
         <div>
           <b>ID: </b>
-          {formData.id}
+          {formData.ID}
         </div>
         <div>
           <b>Name: </b>
@@ -282,6 +277,35 @@ const HandHygenieAudit = () => {
               required
               type="text"
               value={formData.ornamentsIfAny}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="totalNumberOfActionsPerformed">
+            <Form.Label>Total Number Of Actions Performed:</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              value={formData.totalNumberOfActionsPerformed}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group controlId="totalNumberOfHandHygieneOpportunities">
+            <Form.Label>Total Number Of Hand Hygiene Opportunities:</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              value={formData.totalNumberOfHandHygieneOpportunities}
               onChange={handleChange}
             />
             <Form.Control.Feedback type="invalid">

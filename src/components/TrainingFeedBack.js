@@ -24,7 +24,7 @@ const TrainingFeedBack = () => {
   const [error, setError] = useState("");
   const [trainingTopicError, setTrainingTopicError] = useState(false);
   const [formData, setFormData] = useState({
-    id: "",
+    ID: "",
     name: "",
     selectedDate: "",
     department: "",
@@ -47,12 +47,12 @@ const TrainingFeedBack = () => {
   });
 
   useEffect(() => {
-    const id = localStorage.getItem("userId");
+    const ID = localStorage.getItem("userId");
     const name = localStorage.getItem("userName");
-    if (id && name) {
+    if (ID && name) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        id,
+        ID,
         name,
       }));
     }
@@ -114,12 +114,12 @@ const TrainingFeedBack = () => {
       e.stopPropagation();
     } else {
       try {
-        const id = localStorage.getItem("userId");
+        const ID = localStorage.getItem("userId");
         const name = localStorage.getItem("userName");
         // Inside handleSubmit, before making the fetch request:
         const formDataWithUser = {
           ...formData,
-          id,
+          ID,
           name,
           // Convert objects to strings
           detailsOfTrainingTopic: JSON.stringify({
@@ -153,6 +153,10 @@ const TrainingFeedBack = () => {
         } else {
           setFormSubmitted(true); // Display success message
           setError(""); // Clear any previous errors
+          // Auto-refresh after 2 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         }
       } catch (error) {
         console.error("Error:", error.message);
@@ -168,7 +172,7 @@ const TrainingFeedBack = () => {
       <div style={{ float: "right" }} className="mt-3">
         <div>
           <b>ID: </b>
-          {formData.id}
+          {formData.ID}
         </div>
         <div>
           <b>Name: </b>

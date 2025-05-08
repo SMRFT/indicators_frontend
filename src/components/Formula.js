@@ -116,6 +116,10 @@ const EmergencyRoomData = () => {
       let totalNumberOfVariationsObservedInMockDrill = 0;
       let totalPrescriptionInCapitalLetters = 0;
       let totalNumberOfPrescriptions = 0;
+      let totalNumberOfActionsPerformed = 0;
+      let totalNumberOfHandHygieneOpportunities = 0;
+      let totalNumberOfMedicalRecords = 0;
+      let totalNumberOfDischargeAndDeath = 0;
 
       let recordDetails = [];
 
@@ -279,6 +283,20 @@ const EmergencyRoomData = () => {
           item.totalNumberOfPrescriptions
         );
 
+        const NumberOfActionsPerformed = parseFloat(
+          item.totalNumberOfActionsPerformed
+        );
+
+        const NumberOfHandHygieneOpportunities = parseFloat(
+          item.totalNumberOfHandHygieneOpportunities
+        );
+
+        const NumberOfMedicalRecords = parseFloat(item.numberOfMedicalRecords);
+
+        const NumberOfDischargeAndDeath =
+          parseFloat(item.numberOfDischarge || 0) +
+          parseFloat(item.numberOfDeath || 0);
+
         if (!isNaN(time) && !isNaN(admissions)) {
           if (time === 0 || admissions === 0) {
             zeroRecords++;
@@ -370,6 +388,17 @@ const EmergencyRoomData = () => {
           totalPrescriptionInCapitalLetters += PrescriptionInCapitalLetters;
         if (!isNaN(NumberOfPrescriptions))
           totalNumberOfPrescriptions += NumberOfPrescriptions;
+
+        if (!isNaN(NumberOfActionsPerformed))
+          totalNumberOfActionsPerformed += NumberOfActionsPerformed;
+        if (!isNaN(NumberOfHandHygieneOpportunities))
+          totalNumberOfHandHygieneOpportunities +=
+            NumberOfHandHygieneOpportunities;
+
+        if (!isNaN(NumberOfMedicalRecords))
+          totalNumberOfMedicalRecords += NumberOfMedicalRecords;
+        if (!isNaN(NumberOfDischargeAndDeath))
+          totalNumberOfDischargeAndDeath += NumberOfDischargeAndDeath;
 
         recordDetails.push({
           id: item.id,
@@ -528,7 +557,7 @@ const EmergencyRoomData = () => {
 
       const HandoverRate =
         totalHandoverOpportunity > 0
-          ? (totalHandoverOpportunity * 100).toFixed(2)
+          ? ((totalHandoverDone / totalHandoverOpportunity) * 100).toFixed(2)
           : "0.00";
 
       // const EMStockOutRate =
@@ -540,6 +569,23 @@ const EmergencyRoomData = () => {
         totalNumberOfPrescriptions > 0
           ? (
               (totalPrescriptionInCapitalLetters / totalNumberOfPrescriptions) *
+              100
+            ).toFixed(2)
+          : "0.00";
+
+      const HandHygenieRate =
+        totalNumberOfHandHygieneOpportunities > 0
+          ? (
+              (totalNumberOfActionsPerformed /
+                totalNumberOfHandHygieneOpportunities) *
+              100
+            ).toFixed(2)
+          : "0.00";
+
+      const ImproperConsentRate =
+        totalNumberOfDischargeAndDeath > 0
+          ? (
+              (totalNumberOfMedicalRecords / totalNumberOfDischargeAndDeath) *
               100
             ).toFixed(2)
           : "0.00";
@@ -683,6 +729,26 @@ const EmergencyRoomData = () => {
         MedicationPrescriptionCapitalRate
       );
 
+      console.log(
+        "Total Number Of Actions Performed:",
+        totalNumberOfActionsPerformed
+      );
+      console.log(
+        "Total Number Of Hand Hygiene Opportunities:",
+        totalNumberOfHandHygieneOpportunities
+      );
+      console.log("Hand Hygenie Rate:", HandHygenieRate);
+
+      console.log(
+        "Total Number Of Medical Records:",
+        totalNumberOfMedicalRecords
+      );
+      console.log(
+        "Total Number Of Discharge And Death:",
+        totalNumberOfDischargeAndDeath
+      );
+      console.log("Improper Consent Rate:", ImproperConsentRate);
+
       setData({
         totalSumOfTime,
         totalAdmissions,
@@ -768,6 +834,12 @@ const EmergencyRoomData = () => {
         totalPrescriptionInCapitalLetters,
         totalNumberOfPrescriptions,
         MedicationPrescriptionCapitalRate,
+        totalNumberOfActionsPerformed,
+        totalNumberOfHandHygieneOpportunities,
+        HandHygenieRate,
+        totalNumberOfMedicalRecords,
+        totalNumberOfDischargeAndDeath,
+        ImproperConsentRate,
       });
     } catch (error) {
       console.error("Fetch error:", error);
@@ -1342,8 +1414,13 @@ const EmergencyRoomData = () => {
                   <td>17.</td>
                   <td>PSQ3b</td>
                   <td>Hand Hygiene Compliance Rate</td>
-                  <td></td>
-                  <td>93%</td>
+                  <td
+                    style={{
+                      color:
+                        parseFloat(data.HandHygenieRate) < 98 ? "red" : "black",
+                    }}
+                  >{`${data.HandHygenieRate}%`}</td>
+                  <td>100%</td>
                 </tr>
                 <tr>
                   <td>18.</td>
@@ -1457,15 +1534,14 @@ const EmergencyRoomData = () => {
                     Percentage of medical records having incomplete and/or
                     improper consent
                   </td>
-                  <td></td>
-                  {/* <td
+                  <td
                     style={{
                       color:
                         parseFloat(data.ImproperConsentRate) > 0.3
                           ? "red"
                           : "black",
                     }}
-                  >{`${data.ImproperConsentRate} Minutes`}</td> */}
+                  >{`${data.ImproperConsentRate} %`}</td>
                   <td>&lt; 0.3%</td>
                 </tr>
                 <tr>
