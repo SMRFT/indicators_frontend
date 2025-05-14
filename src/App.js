@@ -1,60 +1,60 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import LandingPage from "./components/LandingPage";
-import { AdminLogin, EmployeeLogin } from "./components/Login";
-import Availability from "./components/Availability";
-import Formula from "./components/Formula";
-import Physiotherapy from "./components/Physiotherapy";
-import FirstSuit from "./components/FirstSuit";
-import FirstFloor from "./components/FirstFloor";
-import FrontOffice from "./components/FrontOffice";
-import SecondSuit from "./components/SecondSuit";
-import ThirdFloor from "./components/ThirdFloor";
-import CT from "./components/CT";
-import ChemoWard from "./components/ChemoWard";
-import EmergencyRoom from "./components/EmergencyRoom";
-import Lab from "./components/Lab";
-import OTForm from "./components/OTForm";
-import XRay from "./components/X-Ray";
-import MRDForm from "./components/MRDForm";
-import MICUForm from "./components/MICUForm";
-import NICUForm from "./components/NICUForm";
-import Dialysis from "./components/Dialysis";
-import RecoveryWard from "./components/RecoveryWard";
-import SecondFloor from "./components/SecondFloor";
-import SICUForm from "./components/SICUForm";
-import MRI from "./components/MRI";
-import Report from "./components/Report";
-import Register from "./components/Register";
-import FirstFloorRawData from "./components/FirstFloorRawData";
-import SecondFloorRawData from "./components/SecondFloorRawData";
-import Logo from "../src/images/shanmuga-hospital-logo.jpg";
-import Sidebar from "./components/VerticalNavbar";
+import LandingPage from "./components/Homepage/LandingPage";
+import { AdminLogin, EmployeeLogin } from "./components/Auth/Login";
+import Availability from "./components/Report/Availability";
+import Formula from "./components/Report/Formula";
+import Physiotherapy from "./components/Others/Physiotherapy";
+import FirstSuit from "./components/Firstfloor/FirstSuit";
+import FirstFloor from "./components/Firstfloor/FirstFloor";
+import FrontOffice from "./components/GroundFloor/FrontOffice";
+import SecondSuit from "./components/Secondfloor/SecondSuit";
+import ThirdFloor from "./components/Thirdfloor/ThirdFloor";
+import CT from "./components/Others/CT";
+import ChemoWard from "./components/Basement/ChemoWard";
+import EmergencyRoom from "./components/GroundFloor/EmergencyRoom";
+import Lab from "./components/Basement/Lab";
+import OTForm from "./components/Firstfloor/OTForm";
+import XRay from "./components/Basement/X-Ray";
+import MRDForm from "./components/Basement/MRDForm";
+import MICUForm from "./components/Firstfloor/MICUForm";
+import NICUForm from "./components/Firstfloor/NICUForm";
+import Dialysis from "./components/Firstfloor/Dialysis";
+import RecoveryWard from "./components/Firstfloor/RecoveryWard";
+import SecondFloor from "./components/Secondfloor/SecondFloor";
+import SICUForm from "./components/Secondfloor/SICUForm";
+import MRI from "./components/Others/MRI";
+import Report from "./components/Report/Report";
+import Register from "./components/Auth/Register";
+import FirstFloorRawData from "./components/Firstfloor/FirstFloorRawData";
+import SecondFloorRawData from "./components/Secondfloor/SecondFloorRawData";
+import Logo from "./components/images/shanmuga-hospital-logo.jpg";
+import Sidebar from "./components/Homepage/VerticalNavbar";
 import "./App.css";
-import SecondSuitRawData from "./components/SecondSuitRawData";
-import FirstSuitRawData from "./components/FirstSuitRawData";
-import MasterDataReport from "./components/MasterDataReport";
-import OPD from "./components/OPD";
-import HR from "./components/HR";
-import RecoveryWardRawData from "./components/RecoveryWardRawData";
-import SICURawData from "./components/SICURawData";
-import NICURawData from "./components/NICURawData";
-import MICURawData from "./components/MICURawData";
-import ThirdFloorRawData from "./components/ThirdFloorRawData";
-import EmergencyRoomRawData from "./components/EmergencyRoomRawData";
-import ChemoWardRawData from "./components/ChemoWardRawData";
+import SecondSuitRawData from "./components/Secondfloor/SecondSuitRawData";
+import FirstSuitRawData from "./components/Firstfloor/FirstSuitRawData";
+import MasterDataReport from "./components/Report/MasterDataReport";
+import OPD from "./components/GroundFloor/OPD";
+import HR from "./components/Basement/HR";
+import RecoveryWardRawData from "./components/Firstfloor/RecoveryWardRawData";
+import SICURawData from "./components/Secondfloor/SICURawData";
+import NICURawData from "./components/Firstfloor/NICURawData";
+import MICURawData from "./components/Firstfloor/MICURawData";
+import ThirdFloorRawData from "./components/Thirdfloor/ThirdFloorRawData";
+import EmergencyRoomRawData from "./components/GroundFloor/EmergencyRoomRawData";
+import ChemoWardRawData from "./components/Basement/ChemoWardRawData";
 import HandHygieneAudit from "./components/HandHygenieAudit";
-import HandHygieneReport from "./components/HandHygieneReport";
+import HandHygieneReport from "./components/Report/HandHygieneReport";
 import TrainingFeedBack from "./components/TrainingFeedBack";
-import TrainingFeedbackReport from "./components/TrainingFeedBackReport";
-import Pharmacy from "./components/Pharmacy";
-import Mockdrills from "./components/Mockdrills";
+import TrainingFeedbackReport from "./components/Report/TrainingFeedBackReport";
+import Pharmacy from "./components/Basement/Pharmacy";
+import Mockdrills from "./components/Others/Mockdrills";
 
 function App() {
   const location = useLocation();
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
-
+  const BASE_PATH = process.env.PUBLIC_URL;
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole"));
   }, [location]);
@@ -103,7 +103,7 @@ function App() {
       )}
 
       <div className={hideMainContent ? "" : "main-content"}>
-        <Routes>
+        <Routes basename={BASE_PATH}>
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/EmployeeLogin"

@@ -11,34 +11,34 @@ const StyledContainer = styled.div`
   padding: 20px;
 `;
 
-const HandHygenieAudit = () => {
+const CT = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
-    ID: "",
-    auditBy: "",
+    id: "",
+    name: "",
     selectedDate: "",
-    nameOfTheStaff: "",
-    area: "",
-    category: "",
-    typeOfHandHygiencePractice: "",
-    fiveMoments: [], // Change from "" to []
-    ornamentsIfAny: "",
-    totalNumberOfActionsPerformed: "",
-    totalNumberOfHandHygieneOpportunities: "",
+    numberOfReportingErrors: "",
+    numberOfReportingErrorsRemarks: "",
+    numberOfCasePerformed: "",
+    numberOfTestsPerformed: "",
+    numberOfStaffAdheringToSafety: "",
+    numberOfStaffAudited: "",
+    waitingTimeForDiagnostics: "",
+    numberOfPatientsReportedInDiagnostics: "",
   });
 
   useEffect(() => {
-    const ID = localStorage.getItem("userId");
-    const auditBy = localStorage.getItem("userName");
-    if (ID && auditBy) {
+    const id = localStorage.getItem("userId");
+    const name = localStorage.getItem("userName");
+    if (id && name) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        ID,
-        auditBy,
+        id,
+        name,
       }));
     }
   }, []);
@@ -79,21 +79,15 @@ const HandHygenieAudit = () => {
       e.stopPropagation();
     } else {
       try {
-        const ID = localStorage.getItem("userId");
-        const auditBy = localStorage.getItem("userName");
-
-        // Format the data properly
+        const id = localStorage.getItem("userId");
+        const name = localStorage.getItem("userName");
         const formDataWithUser = {
           ...formData,
-          ID,
-          auditBy,
-          // No need to include selectedDate separately as it's already in formData
-          // Use formData.fiveMoments instead of fiveMoments
-          fiveMoments: JSON.stringify(formData.fiveMoments),
+          id,
+          name,
         };
-
         const response = await fetch(
-          `${IndicatorBaseUrl}HandHygenieAudit/`,
+          `${IndicatorBaseUrl}CT/`,
           {
             method: "POST",
             headers: {
@@ -105,22 +99,18 @@ const HandHygenieAudit = () => {
 
         if (response.status === 400) {
           const errorText = await response.json();
-          if (errorText.error === "Failed to Submit.") {
-            setError("Failed to Submit.");
+          if (errorText.error === "Data already exists for this date.") {
+            setError("Data already exists for this date.");
           } else {
-            throw new Error(errorText.error || "Failed to Submit.");
+            throw new Error(errorText.error || "Failed to submit data");
           }
         } else {
           setFormSubmitted(true); // Display success message
           setError(""); // Clear any previous errors
-          // Auto-refresh after 2 seconds
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
         }
       } catch (error) {
         console.error("Error:", error.message);
-        setError(error.message || "Failed to submit.");
+        setError(error.message || "Failed to submit data");
       }
     }
 
@@ -129,15 +119,15 @@ const HandHygenieAudit = () => {
 
   return (
     <StyledContainer className="NumericalData">
-      <h2 className="text-center">Hand Hygiene Audit</h2>
+      <h2 className="text-center">CT</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
           <b>ID: </b>
-          {formData.ID}
+          {formData.id}
         </div>
         <div>
           <b>Name: </b>
-          {formData.auditBy}
+          {formData.name}
         </div>
       </div>
       <br />
@@ -169,115 +159,49 @@ const HandHygenieAudit = () => {
         </Form.Group>
         <br />
         <Row className="mb-3">
-          <Form.Group controlId="nameOfTheStaff">
-            <Form.Label>Name Of The Staff:</Form.Label>
-            <Form.Control
-              required
-              type="text"
-              value={formData.nameOfTheStaff}
-              onChange={handleChange}
-            />
-            <Form.Control.Feedback type="invalid">
-              Please fill out this field
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Row>
-
-        <Row className="mb-3">
-          <Form.Group controlId="area">
-            <Form.Label>Area:</Form.Label>
-            <Form.Control
-              required
-              type="text"
-              value={formData.area}
-              onChange={handleChange}
-            />
-            <Form.Control.Feedback type="invalid">
-              Please fill out this field
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Row>
-
-        <Row className="mb-3">
-          <Form.Group controlId="category">
-            <Form.Label>Category:</Form.Label>
-            <Form.Select
-              required
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-            >
-              <option value="">-- Select Category --</option>
-              <option value="Staff Nurses">Staff Nurses</option>
-              <option value="Doctors">Doctors</option>
-              <option value="House keeping">House keeping</option>
-              <option value="Para medical">Para medical</option>
-              <option value="Laboratory">Laboratory</option>
-              <option value="Physiotherapy">Physiotherapy</option>
-            </Form.Select>
-          </Form.Group>
-        </Row>
-
-        <Row className="mb-3">
-          <Form.Group controlId="typeOfHandHygiencePractice">
-            <Form.Label>Type of Hand Hygiene Practice:</Form.Label>
-            <Form.Select
-              required
-              value={formData.typeOfHandHygiencePractice}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  typeOfHandHygiencePractice: e.target.value,
-                })
-              }
-            >
-              <option value="">-- Select Practice Type --</option>
-              <option value="Hand Wash">Hand Wash</option>
-              <option value="Hand rub">Hand rub</option>
-            </Form.Select>
-          </Form.Group>
-        </Row>
-
-        <Row className="mb-3">
-          <Form.Group controlId="fiveMoments">
-            <Form.Label>Five Moments:</Form.Label>
-            {[
-              "Before touching Patient",
-              "Before Aseptic Procedure",
-              "After body Fluid exposure",
-              "After touching a Patient",
-              "After touching patient Surroundings",
-              "No Missed Movements",
-            ].map((moment) => (
-              <Form.Check
-                key={moment}
-                type="checkbox"
-                label={moment}
-                value={moment}
-                checked={formData.fiveMoments.includes(moment)}
-                onChange={(e) => {
-                  const selected = [...formData.fiveMoments];
-                  if (e.target.checked) {
-                    selected.push(moment);
-                  } else {
-                    const index = selected.indexOf(moment);
-                    if (index !== -1) selected.splice(index, 1);
+          <Col sm="8">
+            <Form.Group controlId="numberOfReportingErrors">
+              <Form.Label>Number of Reporting Errors</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.numberOfReportingErrors}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col sm="4">
+            <Form.Group controlId="numberOfReportingErrorsRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfReportingErrorsRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
                   }
-                  setFormData({ ...formData, fiveMoments: selected });
                 }}
               />
-            ))}
-          </Form.Group>
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
         </Row>
 
         <Row className="mb-3">
-          <Form.Group controlId="ornamentsIfAny">
-            <Form.Label>Ornaments If Any:</Form.Label>
+          <Form.Group controlId="numberOfCasePerformed">
+            <Form.Label>Number of Case Performed</Form.Label>
             <Form.Control
               required
               type="text"
-              value={formData.ornamentsIfAny}
+              value={formData.numberOfCasePerformed}
               onChange={handleChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -287,12 +211,12 @@ const HandHygenieAudit = () => {
         </Row>
 
         <Row className="mb-3">
-          <Form.Group controlId="totalNumberOfActionsPerformed">
-            <Form.Label>Total Number Of Actions Performed:</Form.Label>
+          <Form.Group controlId="numberOfTestsPerformed">
+            <Form.Label>Number of Tests Performed</Form.Label>
             <Form.Control
               required
               type="text"
-              value={formData.totalNumberOfActionsPerformed}
+              value={formData.numberOfTestsPerformed}
               onChange={handleChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -300,13 +224,61 @@ const HandHygenieAudit = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+
         <Row className="mb-3">
-          <Form.Group controlId="totalNumberOfHandHygieneOpportunities">
-            <Form.Label>Total Number Of Hand Hygiene Opportunities:</Form.Label>
+          <Form.Group controlId="numberOfStaffAdheringToSafety">
+            <Form.Label>
+              Number of Staff Adhering to Safety Precautions
+            </Form.Label>
             <Form.Control
               required
               type="text"
-              value={formData.totalNumberOfHandHygieneOpportunities}
+              value={formData.numberOfStaffAdheringToSafety}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfStaffAudited">
+            <Form.Label>Number of Staff Audited</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              value={formData.numberOfStaffAudited}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="waitingTimeForDiagnostics">
+            <Form.Label>Waiting time for Diagnostics</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              value={formData.waitingTimeForDiagnostics}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfPatientsReportedInDiagnostics">
+            <Form.Label>Number of patients reported in Diagnostics</Form.Label>
+            <Form.Control
+              required
+              type="text"
+              value={formData.numberOfPatientsReportedInDiagnostics}
               onChange={handleChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -336,4 +308,4 @@ const HandHygenieAudit = () => {
   );
 };
 
-export default HandHygenieAudit;
+export default CT;

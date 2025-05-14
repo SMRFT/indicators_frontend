@@ -23,6 +23,7 @@ const TrainingFeedBack = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [trainingTopicError, setTrainingTopicError] = useState(false);
+  const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
     ID: "",
     name: "",
@@ -133,7 +134,7 @@ const TrainingFeedBack = () => {
           }),
         };
         const response = await fetch(
-          "https://indicators.shinovadatabase.in/TrainingFeedBack/",
+          `${IndicatorBaseUrl}TrainingFeedBack/`,
           {
             method: "POST",
             headers: {

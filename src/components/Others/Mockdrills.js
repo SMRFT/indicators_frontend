@@ -11,17 +11,19 @@ const StyledContainer = styled.div`
   padding: 20px;
 `;
 
-const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
+const Mockdrills = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
     id: "",
     name: "",
     selectedDate: "",
+    totalNumberOfVariationsObservedInMockDrill: "",
   });
-  const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+
   useEffect(() => {
     const id = localStorage.getItem("userId");
     const name = localStorage.getItem("userName");
@@ -36,6 +38,7 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
 
   useEffect(() => {
     if (selectedDate) {
+      // Adjust date to UTC
       const adjustedDate = new Date(
         selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
       );
@@ -62,32 +65,32 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
       e.stopPropagation();
     } else {
       try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
-
+        const response = await fetch(
+          `${IndicatorBaseUrl}mockdrills/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
         if (response.ok) {
-          console.log("Data submitted successfully");
           setFormSubmitted(true);
+          setError("");
         } else {
           const errorText = await response.text();
           throw new Error(errorText || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError("Failed to submit data");
+      } catch (err) {
+        setError(err.message);
       }
     }
     setValidated(true);
   };
-
   return (
-    <StyledContainer>
-      <h2 className="text-center">{title}</h2>
+    <StyledContainer className="NumericalData">
+      <h2 className="text-center">Mock Drill</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
           <b>ID: </b>
@@ -100,56 +103,47 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
       </div>
       <br />
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div
-                className="position-absolute top-100 start-0 translate-middle-y"
-                style={{ marginLeft: "50px", marginTop: "-15px" }}
-              >
-                {selectedDate.toLocaleDateString("en-GB")}
-              </div>
-            )}
-          </div>
+        <Form.Group controlId="selectedDate" className="mb-3">
+          <FontAwesomeIcon
+            icon={faCalendarAlt}
+            style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
+            onClick={() => document.getElementById("datePicker").click()}
+          />
+          <DatePicker
+            id="datePicker"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            className="d-none"
+          />
+          {selectedDate && (
+            <div style={{ marginLeft: "50px", marginTop: "-15px" }}>
+              {selectedDate.toLocaleDateString("en-GB")}
+            </div>
+          )}
         </Form.Group>
-
-        {fields.map(({ id, label, type }) => (
-          <Row className="mb-3" key={id}>
-            <Form.Group controlId={id}>
-              <Form.Label>{label}</Form.Label>
-              <Form.Control
-                required
-                type={type}
-                value={formData[id] || ""}
-                onChange={handleChange}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Row>
-        ))}
-
-        <button type="submit" className="mb-3">
+        <Form.Group
+          controlId="totalNumberOfVariationsObservedInMockDrill"
+          className="mb-3"
+        >
+          <Form.Label>
+            Total number of variations observed in mock drill
+          </Form.Label>
+          <Form.Control
+            required
+            type="text"
+            value={formData.totalNumberOfVariationsObservedInMockDrill}
+            onChange={handleChange}
+          />
+          <Form.Control.Feedback type="invalid">
+            Required field
+          </Form.Control.Feedback>
+        </Form.Group>
+        <button variant="primary" type="submit" className="mb-3">
           Save
         </button>
-
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.
         </Alert>
-
         <Alert variant="danger" show={error !== ""}>
           {error}
         </Alert>
@@ -157,5 +151,4 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
     </StyledContainer>
   );
 };
-
-export default CommonPharmacyForm;
+export default Mockdrills;
