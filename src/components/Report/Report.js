@@ -10,11 +10,13 @@ import * as XLSX from "xlsx";
 import Alert from "react-bootstrap/Alert";
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 
+
 function getTransposedData(dataArray) {
   const transposedData = {};
 
   dataArray.forEach((data) => {
     Object.keys(data).forEach((key) => {
+      // Format the key
       let formattedKey;
       if (key.endsWith("Insurance")) {
         formattedKey = key.replace(/Insurance$/, "").trim() + " ( Insurance )";
@@ -34,31 +36,50 @@ function getTransposedData(dataArray) {
       }
 
       let formattedValue;
+      
+      // Special handling for numberOfUnitsTransfusedRemarks field
       if (key === "numberOfUnitsTransfusedRemarks") {
-        let transfusedRemarks = {};
+        let transfusionInfo = "";
+        
         try {
-          transfusedRemarks = JSON.parse(data[key]?.replace(/'/g, '"') || "{}");
+          // Handle the JSON string correctly
+          const remarksStr = data[key] || "{}";
+          // Replace single quotes with double quotes for proper JSON parsing
+          const parsedRemarks = JSON.parse(remarksStr.replace(/'/g, '"'));
+          
+          // Get all transfusion entries
+          const transfusionEntries = [];
+          
+          // Loop through all keys to find transfused-X patterns
+          const transfusedKeys = Object.keys(parsedRemarks).filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
+          
+          transfusedKeys.forEach(transfusedKey => {
+            const index = transfusedKey.split('-')[1];
+            const units = parsedRemarks[transfusedKey] || "";
+            const remarks = parsedRemarks[`remarks-${index}`] || "";
+            
+            transfusionEntries.push(`${parseInt(index) + 1} - ${units} units: ${remarks}`);
+          });
+          
+          transfusionInfo = transfusionEntries.join('\n');
+          
+          // If no entries were found but we have a simple structure
+          if (transfusionEntries.length === 0) {
+            // Try to handle the format in your example
+            if (parsedRemarks['transfused-0']) {
+              const units = parsedRemarks['transfused-0'];
+              const remarks = parsedRemarks['remarks-0'] || "";
+              transfusionInfo = `1 - ${units} units: ${remarks}`;
+            }
+          }
         } catch (error) {
           console.error("Error parsing transfusion remarks:", error);
+          transfusionInfo = String(data[key]); // Fallback to original value
         }
-
-        formattedValue =
-          Object.keys(transfusedRemarks)
-            .map((transKey) => {
-              if (
-                transKey.startsWith("transfused-") &&
-                !transKey.includes("remarks")
-              ) {
-                let index = parseInt(transKey.split("-")[1]) + 1;
-                let remarksKey = `remarks-${index - 1}`;
-                let remarks = transfusedRemarks[remarksKey] || "";
-                return `${index} - ${remarks}`;
-              }
-              return null;
-            })
-            .filter((item) => item !== null)
-            .join(",\n") || "";
+        
+        formattedValue = transfusionInfo || "No transfusion data";
       } else {
+        // Format other fields
         formattedValue =
           typeof data[key] === "string"
             ? data[key]
@@ -270,6 +291,7 @@ function Report() {
     }
   };
 
+
   const getDisplayValue = (displayField, colIndex) => {
     // Get the original database field name from our mapping
     const dbField = fieldMapping[displayField];
@@ -324,6 +346,21 @@ function Report() {
       }
     }
     // First check for edited values for non-transfusion fields
+
+// Get the display value for a field and column
+const getDisplayValue = (displayField, colIndex) => {
+  // Get the original database field name from our mapping
+  const dbField = fieldMapping[displayField];
+
+  if (!dbField) {
+    console.error("No mapping found for display field:", displayField);
+    return "Nil";
+  }
+
+  // Special handling for transfusion remarks
+  if (dbField === "numberOfUnitsTransfusedRemarks") {
+    // First check for edited values
+
     if (
       isEditing &&
       editedValues[colIndex] &&
@@ -331,6 +368,7 @@ function Report() {
     ) {
       return editedValues[colIndex][dbField];
     }
+
     // Otherwise return the original value
     const value = exportData[colIndex][dbField];
     return value === null ||
@@ -339,6 +377,98 @@ function Report() {
       ? "Nil"
       : value;
   };
+
+
+
+    // Get the raw value
+    const rawValue = exportData[colIndex][dbField];
+    
+    // If null/undefined/nil, return "Nil"
+    if (rawValue === null || 
+        rawValue === undefined || 
+        rawValue.toString().toLowerCase() === "nil") {
+      return "Nil";
+    }
+    
+    // Process the transfusion data
+    try {
+      // Clean and parse the JSON string
+      const cleanValue = rawValue.replace(/'/g, '"');
+      const parsedRemarks = JSON.parse(cleanValue);
+      
+      // Get all transfusion entries
+      const transfusionEntries = [];
+      
+      // Look for transfused keys
+      const transfusedKeys = Object.keys(parsedRemarks)
+        .filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
+      
+      if (transfusedKeys.length > 0) {
+        transfusedKeys.forEach(transfusedKey => {
+          const index = transfusedKey.split('-')[1];
+          const displayIndex = parseInt(index) + 1;
+          
+          // Look for corresponding remarks in either format
+          let remarks = "";
+          if (parsedRemarks[`remarks-${index}`]) {
+            remarks = parsedRemarks[`remarks-${index}`];
+          } else if (parsedRemarks[`transfused-remarks-${index}`]) {
+            remarks = parsedRemarks[`transfused-remarks-${index}`];
+          }
+          
+          // Format with line breaks, using React's line break rendering approach
+          transfusionEntries.push(`${displayIndex} - remarks: ${remarks}`);
+        });
+        
+        // Return the joined string that will be rendered properly with line breaks
+        return (
+          <div>
+            {transfusionEntries.map((entry, idx) => (
+              <div key={idx}>{entry}</div>
+            ))}
+          </div>
+        );
+      } 
+      
+      // Fallback for simpler structure
+      if (parsedRemarks['transfused-0']) {
+        const remarks = parsedRemarks['remarks-0'] || "";
+        return `1 - remarks: ${remarks}`;
+      }
+      
+      // If we can't parse it in our expected format, return with line breaks
+      return (
+        <div>
+          {Object.entries(parsedRemarks).map(([k, v], idx) => (
+            <div key={idx}>{k}: {v}</div>
+          ))}
+        </div>
+      );
+      
+    } catch (error) {
+      console.error("Error parsing transfusion remarks:", error);
+      // If all else fails, return the raw value
+      return rawValue;
+    }
+  }
+
+  // First check for edited values for non-transfusion fields
+  if (
+    isEditing &&
+    editedValues[colIndex] &&
+    dbField in editedValues[colIndex]
+  ) {
+    return editedValues[colIndex][dbField];
+  }
+
+  // Otherwise return the original value
+  const value = exportData[colIndex][dbField];
+  return value === null ||
+    value === undefined ||
+    value.toString().toLowerCase() === "nil"
+    ? "Nil"
+    : value;
+};
 
   // Handle input change for a field
   const handleInputChange = (displayField, colIndex, value) => {
