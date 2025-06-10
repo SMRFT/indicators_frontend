@@ -34,8 +34,6 @@ function MICU() {
     totalNumberOfMedicationErrors: "",
     totalNumberOfMedicationErrorsRemarks: "",
     totalNumberOfOpportunitiesOfMedicationErrors: "",
-    numberOfMedicationChartsWithErrorProneAbbreviation: "",
-    numberOfMedicationChartsWithErrorProneAbbreviationRemarks: "",
     numberOfMedicationChartsReviewed: "",
     numberOfMedicationChartsReviewedRemarks: "",
     numberOfPatientsDevelopingAdverseDrugReactions: "",
@@ -174,16 +172,13 @@ function MICU() {
           id,
           name,
         };
-        const response = await fetch(
-          `${IndicatorBaseUrl}MICU/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
+        const response = await fetch(`${IndicatorBaseUrl}MICU/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formDataWithUser),
+        });
 
         if (response.status === 400) {
           const errorText = await response.json();
@@ -430,50 +425,6 @@ function MICU() {
               Please fill out this field
             </Form.Control.Feedback>
           </Form.Group>
-        </Row>
-
-        <Row className="mb-3">
-          <Col sm="8">
-            <Form.Group controlId="numberOfMedicationChartsWithErrorProneAbbreviation">
-              <Form.Label>
-                Number of Medication Charts with Error Prone Abbreviation
-              </Form.Label>
-              <Form.Control
-                required
-                type="text"
-                value={
-                  formData.numberOfMedicationChartsWithErrorProneAbbreviation
-                }
-                onChange={handleChange}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-
-          <Col sm="4">
-            <Form.Group controlId="numberOfMedicationChartsWithErrorProneAbbreviationRemarks">
-              <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                required
-                as="textarea"
-                rows={1} // Adjust the number of visible rows
-                value={
-                  formData.numberOfMedicationChartsWithErrorProneAbbreviationRemarks
-                }
-                onChange={handleChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // Prevent form submission if applicable
-                  }
-                }}
-              />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
         </Row>
 
         <Row className="mb-3">

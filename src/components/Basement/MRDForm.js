@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Form, Button ,Alert,Container} from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import styled from 'styled-components';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from "react";
+import { Row, Col, Form, Button, Alert, Container } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import styled from "styled-components";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -16,179 +16,264 @@ function MRDForm() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
-    id: '',  
-    name: '',
-    selectedDate: '',
-    numberOfMedicalRecords: '',
-    numberOfDischarge: '',
-    numberOfDeath: '',
+    id: "",
+    name: "",
+    selectedDate: "",
+    numberOfMedicalRecords: "",
+    numberOfMedicalRecordsRemarks: "",
+    numberOfDischarge: "",
+    numberOfDeath: "",
+    numberOfDeathRemarks: "",
   });
 
   useEffect(() => {
-    const id = localStorage.getItem('userId');
-    const name = localStorage.getItem('userName');
+    const id = localStorage.getItem("userId");
+    const name = localStorage.getItem("userName");
     if (id && name) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        id,   // Updated field
+        id, // Updated field
         name, // Updated field
       }));
     }
-  }, []);  
+  }, []);
 
   useEffect(() => {
     if (selectedDate) {
       // Adjust date to UTC
-      const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000);
+      const adjustedDate = new Date(
+        selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
+      );
       setFormData((prevFormData) => ({
         ...prevFormData,
-        selectedDate: adjustedDate.toISOString().split('T')[0],
+        selectedDate: adjustedDate.toISOString().split("T")[0],
       }));
     }
   }, [selectedDate]);
-  
-    const handleChange = (e) => {
-        const { id, value } = e.target;
-        setFormData({ ...formData, [id]: value });
-    };
-  
-    const handleDateChange = (date) => {
-      setSelectedDate(date);
-    };
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-    
-      // Check if the date is selected
-      if (!selectedDate) {
-        setError('Please select a date');
-        return; // Prevent form submission if date is not selected
-      }
-    
-      if (form.checkValidity() === false) {
-        e.stopPropagation();
-      } else {
-          try {
-            const id = localStorage.getItem('userId');
-            const name = localStorage.getItem('userName');
-            const formDataWithUser = {
-              ...formData,
-              id,  
-              name 
-            };
-            const response = await fetch(`${IndicatorBaseUrl}MRD/`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(formDataWithUser),
-            });
-            if (response.status === 400) {
-              const errorText = await response.json();
-              if (errorText.error === 'Data already exists for this date.') {
-                setError('Data already exists for this date.');
-              } else {
-                throw new Error(errorText.error || 'Failed to submit data');
-              }
-            } else {
-              setFormSubmitted(true); // Display success message
-              setError(''); // Clear any previous errors
-            }
-          } catch (error) {
-            console.error('Error:', error.message);
-            setError(error.message || 'Failed to submit data');
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+
+    // Check if the date is selected
+    if (!selectedDate) {
+      setError("Please select a date");
+      return; // Prevent form submission if date is not selected
+    }
+
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+    } else {
+      try {
+        const id = localStorage.getItem("userId");
+        const name = localStorage.getItem("userName");
+        const formDataWithUser = {
+          ...formData,
+          id,
+          name,
+        };
+        const response = await fetch(`${IndicatorBaseUrl}MRD/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formDataWithUser),
+        });
+        if (response.status === 400) {
+          const errorText = await response.json();
+          if (errorText.error === "Data already exists for this date.") {
+            setError("Data already exists for this date.");
+          } else {
+            throw new Error(errorText.error || "Failed to submit data");
           }
+        } else {
+          setFormSubmitted(true); // Display success message
+          setError(""); // Clear any previous errors
         }
-      
-        setValidated(true);
-      };
+      } catch (error) {
+        console.error("Error:", error.message);
+        setError(error.message || "Failed to submit data");
+      }
+    }
+
+    setValidated(true);
+  };
 
   return (
     <StyledContainer className="NumericalData">
-       <h2 className="text-center">MRD</h2>
-       <div style={{float:"right"}} className='mt-3'>
-          <div><b>ID: </b>{formData.id}</div>
-          <div><b>Name: </b>{formData.name}</div>
+      <h2 className="text-center">MRD</h2>
+      <div style={{ float: "right" }} className="mt-3">
+        <div>
+          <b>ID: </b>
+          {formData.id}
         </div>
-       <br/>
-     <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: 'pointer',  color: '#EBB099',  fontSize: '25px' }}
-              onClick={() => document.getElementById('datePicker').click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div className="position-absolute top-100 start-0 translate-middle-y" style={{ marginLeft: '50px', marginTop: '-15px' }}>
-                {selectedDate.toLocaleDateString('en-GB')}
+        <div>
+          <b>Name: </b>
+          {formData.name}
+        </div>
+      </div>
+      <br />
+      <Form noValidate validated={validated} onSubmit={handleSubmit}>
+        <Row className="mb-3">
+          <Col sm="12">
+            <Form.Group className="position-relative" controlId="selectedDate">
+              <div className="position-relative">
+                <FontAwesomeIcon
+                  icon={faCalendarAlt}
+                  style={{
+                    cursor: "pointer",
+                    color: "#EBB099",
+                    fontSize: "25px",
+                  }}
+                  onClick={() => document.getElementById("datePicker").click()}
+                />
+                <DatePicker
+                  id="datePicker"
+                  selected={selectedDate}
+                  onChange={handleDateChange}
+                  className="position-absolute top-100 start-0 d-none"
+                  calendarClassName="position-absolute top-100 start-0"
+                  placeholderText="Select Date"
+                />
+                {selectedDate && (
+                  <div
+                    className="position-absolute top-100 start-0 translate-middle-y"
+                    style={{ marginLeft: "50px", marginTop: "-15px" }}
+                  >
+                    {selectedDate.toLocaleDateString("en-GB")}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </Form.Group>
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <br />
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="numberOfMedicalRecords">
+              <Form.Label>
+                Number of Medical Records having Incomplete and /or Improper
+                Consent{" "}
+              </Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.numberOfMedicalRecords}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
 
-      
-        <Form.Group className="mb-3" controlId="numberOfMedicalRecords">
-          <Form.Label>Number of Medical Records having Incomplete and /or Improper Consent </Form.Label>
-          <Form.Control 
-           required
-          type="text" 
-          value={formData.numberOfMedicalRecords} 
-          onChange={handleChange} />
-           <Form.Control.Feedback type="invalid">
-            Please fill out this field
-          </Form.Control.Feedback>
-        </Form.Group>
+          <Col sm="4">
+            <Form.Group controlId="numberOfMedicalRecordsRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfMedicalRecordsRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3" controlId="numberOfDischarge">
-          <Form.Label>Number of discharge</Form.Label>
-          <Form.Control 
-           required
-          type="text" value={formData.numberOfDischarge} 
-          onChange={handleChange} />
-           <Form.Control.Feedback type="invalid">
-            Please fill out this field
-          </Form.Control.Feedback>
-        </Form.Group>
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="numberOfDischarge">
+              <Form.Label>Number of discharge</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.numberOfDischarge}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3" controlId="numberOfDeath">
-          <Form.Label>Number of death</Form.Label>
-          <Form.Control 
-           required
-          type="text" value={formData.numberOfDeath}
-          onChange={handleChange} />
-           <Form.Control.Feedback type="invalid">
-            Please fill out this field
-          </Form.Control.Feedback>
-        </Form.Group>
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="numberOfDeath">
+              <Form.Label>Number of death</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                value={formData.numberOfDeath}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
 
-        
-        <button variant="primary" type="submit" className="mb-3" onClick={handleSubmit}>
-          Save
-        </button>
-        
+          <Col sm="4">
+            <Form.Group controlId="numberOfDeathRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfDeathRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col sm="12">
+            <button
+              variant="primary"
+              type="submit"
+              className="mb-3"
+              onClick={handleSubmit}
+            >
+              Save
+            </button>
+          </Col>
+        </Row>
+
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.
         </Alert>
 
-        <Alert variant="danger" show={error !== ''}>
+        <Alert variant="danger" show={error !== ""}>
           {error}
         </Alert>
-        
       </Form>
     </StyledContainer>
   );

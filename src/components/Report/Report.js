@@ -291,6 +291,62 @@ function Report() {
     }
   };
 
+
+  const getDisplayValue = (displayField, colIndex) => {
+    // Get the original database field name from our mapping
+    const dbField = fieldMapping[displayField];
+    if (!dbField) {
+      console.error("No mapping found for display field:", displayField);
+      return "Nil";
+    }
+    // Special handling for transfusion remarks
+    if (dbField === "numberOfUnitsTransfusedRemarks") {
+      if (
+        isEditing &&
+        editedValues[colIndex] &&
+        dbField in editedValues[colIndex]
+      ) {
+        return editedValues[colIndex][dbField];
+      }
+      const rawValue = exportData[colIndex][dbField];
+      if (
+        rawValue === null ||
+        rawValue === undefined ||
+        rawValue.toString().toLowerCase() === "nil"
+      ) {
+        return "Nil";
+      }
+      try {
+        const cleanValue = rawValue.replace(/'/g, '"');
+        const parsedRemarks = JSON.parse(cleanValue);
+        const transfusionEntries = [];
+        let i = 0;
+        while (
+          `transfused-${i}` in parsedRemarks ||
+          `remarks-${i}` in parsedRemarks
+        ) {
+          const transfused = parsedRemarks[`transfused-${i}`] || "";
+          const remarks = parsedRemarks[`remarks-${i}`] || "";
+          if (transfused || remarks) {
+            transfusionEntries.push(`${transfused} - ${remarks}`);
+          }
+          i++;
+        }
+        if (transfusionEntries.length === 0) return "Nil";
+        return (
+          <div>
+            {transfusionEntries.map((entry, idx) => (
+              <div key={idx}>{entry}</div>
+            ))}
+          </div>
+        );
+      } catch (error) {
+        console.error("Error parsing transfusion remarks:", error);
+        return rawValue;
+      }
+    }
+    // First check for edited values for non-transfusion fields
+
 // Get the display value for a field and column
 const getDisplayValue = (displayField, colIndex) => {
   // Get the original database field name from our mapping
@@ -304,6 +360,7 @@ const getDisplayValue = (displayField, colIndex) => {
   // Special handling for transfusion remarks
   if (dbField === "numberOfUnitsTransfusedRemarks") {
     // First check for edited values
+
     if (
       isEditing &&
       editedValues[colIndex] &&
@@ -311,6 +368,17 @@ const getDisplayValue = (displayField, colIndex) => {
     ) {
       return editedValues[colIndex][dbField];
     }
+
+    // Otherwise return the original value
+    const value = exportData[colIndex][dbField];
+    return value === null ||
+      value === undefined ||
+      value.toString().toLowerCase() === "nil"
+      ? "Nil"
+      : value;
+  };
+
+
 
     // Get the raw value
     const rawValue = exportData[colIndex][dbField];
@@ -401,6 +469,7 @@ const getDisplayValue = (displayField, colIndex) => {
     ? "Nil"
     : value;
 };
+
   // Handle input change for a field
   const handleInputChange = (displayField, colIndex, value) => {
     // Get the original database field name from our mapping
