@@ -54,7 +54,7 @@ import Mockdrills from "./components/Others/Mockdrills";
 function App() {
   const location = useLocation();
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
-  const BASE_PATH = process.env.PUBLIC_URL;
+
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole"));
   }, [location]);
@@ -103,7 +103,7 @@ function App() {
       )}
 
       <div className={hideMainContent ? "" : "main-content"}>
-        <Routes basename={BASE_PATH}>
+        <Routes >
           <Route path="/" element={<LandingPage />} />
           <Route
             path="/EmployeeLogin"

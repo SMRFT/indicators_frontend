@@ -1,13 +1,11 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 
-const BASE_PATH = process.env.PUBLIC_URL || "/indicators"; // or any subdirectory you're using
-
-ReactDOM.render(
-  <BrowserRouter basename={BASE_PATH}>
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <BrowserRouter basename={process.env.PUBLIC_URL || "/"}>
     <App />
-  </BrowserRouter>,
-  document.getElementById("root")
+  </BrowserRouter>
 );
