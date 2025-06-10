@@ -72,8 +72,6 @@ const EmergencyRoomData = () => {
       let totalStaffAudited = 0;
       let totalMedicationErrors = 0;
       let totalOpportunityMedicationErrors = 0;
-      let totalMedicationChartsWithErrorProneAbbreviation = 0;
-      let totalMedicationChartsReviewed = 0;
       let totalAdverseDrug = 0;
       let totalInpatients = 0;
       let totalUplannedOT = 0;
@@ -159,9 +157,6 @@ const EmergencyRoomData = () => {
           item.totalNumberOfOpportunitiesOfMedicationErrors
         );
 
-        const MedicationChartsWithErrorProneAbbreviation = parseFloat(
-          item.numberOfMedicationChartsWithErrorProneAbbreviation
-        );
         const MedicationChartsReviewed = parseFloat(
           item.numberOfMedicationChartsReviewed
         );
@@ -314,11 +309,6 @@ const EmergencyRoomData = () => {
         if (!isNaN(medication)) totalMedicationErrors += medication;
         if (!isNaN(opportunity))
           totalOpportunityMedicationErrors += opportunity;
-        if (!isNaN(MedicationChartsWithErrorProneAbbreviation))
-          totalMedicationChartsWithErrorProneAbbreviation +=
-            MedicationChartsWithErrorProneAbbreviation;
-        if (!isNaN(MedicationChartsReviewed))
-          totalMedicationChartsReviewed += MedicationChartsReviewed;
         if (!isNaN(adversedrug)) totalAdverseDrug += adversedrug;
         if (!isNaN(inPatients)) totalInpatients += inPatients;
         if (!isNaN(unplannedOT)) totalUplannedOT += unplannedOT;
@@ -433,14 +423,6 @@ const EmergencyRoomData = () => {
         totalOpportunityMedicationErrors > 0
           ? (
               (totalMedicationErrors / totalOpportunityMedicationErrors) *
-              100
-            ).toFixed(2)
-          : "0.00";
-      const medicationChartError =
-        totalMedicationChartsReviewed > 0
-          ? (
-              (totalMedicationChartsWithErrorProneAbbreviation /
-                totalMedicationChartsReviewed) *
               100
             ).toFixed(2)
           : "0.00";
@@ -606,16 +588,6 @@ const EmergencyRoomData = () => {
       );
       console.log("Adherence Rate (%):", medicationError);
 
-      console.log(
-        "Total Medication Charts With Error Prone Abbreviation:",
-        totalMedicationChartsWithErrorProneAbbreviation
-      );
-      console.log(
-        "Total Medication Chart sReviewed:",
-        totalMedicationChartsReviewed
-      );
-      console.log("medication Chart Error (%):", medicationChartError);
-
       console.log("Total Number of Adverse Drug:", totalAdverseDrug);
       console.log("Total Number of In-Patients:", totalInpatients);
       console.log("Adverse Drug Rate (%):", adversedrugrate);
@@ -766,9 +738,6 @@ const EmergencyRoomData = () => {
         totalMedicationErrors,
         totalOpportunityMedicationErrors,
         medicationError,
-        totalMedicationChartsWithErrorProneAbbreviation,
-        totalMedicationChartsReviewed,
-        medicationChartError,
         totalInpatients,
         adversedrugrate,
         totalUplannedOT,
@@ -1243,16 +1212,6 @@ const EmergencyRoomData = () => {
                   <td>5.</td>
                   <td>PSQ3a</td>
                   <td>
-                    Percentage of medication charts with error-prone
-                    abbreviations
-                  </td>
-                  <td>{`${data.medicationChartError}%`}</td>
-                  <td>0</td>
-                </tr>
-                <tr>
-                  <td>6.</td>
-                  <td>PSQ3a</td>
-                  <td>
                     Percentage of in-patients developing adverse drug
                     reaction(s).
                   </td>
@@ -1267,7 +1226,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 2/1000 (0.002)</td>
                 </tr>
                 <tr>
-                  <td>7.</td>
+                  <td>6.</td>
                   <td>PSQ3a</td>
                   <td>Percentage of unplanned return to OT</td>
                   <td
@@ -1281,7 +1240,7 @@ const EmergencyRoomData = () => {
                   <td>1.76%</td>
                 </tr>
                 <tr>
-                  <td>8.</td>
+                  <td>7.</td>
                   <td>PSQ3a</td>
                   <td>
                     Percentage of surgeries where the organisation's procedure
@@ -1297,7 +1256,7 @@ const EmergencyRoomData = () => {
                   <td>100%</td>
                 </tr>
                 <tr>
-                  <td>9.</td>
+                  <td>8.</td>
                   <td>PSQ3a</td>
                   <td>Percentage of transfusion reactions</td>
                   <td
@@ -1309,7 +1268,7 @@ const EmergencyRoomData = () => {
                   <td>1%</td>
                 </tr>
                 <tr>
-                  <td>10.</td>
+                  <td>9.</td>
                   <td>PSQ3a</td>
                   <td>Standardised Mortality Ratio for ICU</td>
                   <td
@@ -1323,7 +1282,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 1%</td>
                 </tr>
                 <tr>
-                  <td>11.</td>
+                  <td>10.</td>
                   <td>PSQ3a</td>
                   <td>
                     Return to the emergency department within 72 hours with
@@ -1340,7 +1299,7 @@ const EmergencyRoomData = () => {
                   <td>0.80%</td>
                 </tr>
                 <tr>
-                  <td>12.</td>
+                  <td>11.</td>
                   <td>PSQ3a</td>
                   <td>
                     Incidence of hospital associated pressure ulcers after
@@ -1357,7 +1316,7 @@ const EmergencyRoomData = () => {
                   <td>0.57%</td>
                 </tr>
                 <tr>
-                  <td>13.</td>
+                  <td>12.</td>
                   <td>PSQ3b</td>
                   <td>Catheter associated Urinary Tract infection rate</td>
                   <td
@@ -1368,7 +1327,7 @@ const EmergencyRoomData = () => {
                   <td>1.68%</td>
                 </tr>
                 <tr>
-                  <td>14.</td>
+                  <td>13.</td>
                   <td>PSQ3b</td>
                   <td>Ventilator associated Pneumonia rate</td>
                   <td
@@ -1383,7 +1342,7 @@ const EmergencyRoomData = () => {
                   <td>1-3%</td>
                 </tr>
                 <tr>
-                  <td>15.</td>
+                  <td>14.</td>
                   <td>PSQ3b</td>
                   <td>Central line - associated Blood stream infection rate</td>
                   <td
@@ -1397,7 +1356,7 @@ const EmergencyRoomData = () => {
                   <td>0.80%</td>
                 </tr>
                 <tr>
-                  <td>16.</td>
+                  <td>15.</td>
                   <td>PSQ3b</td>
                   <td>Surgical site infection rate</td>
                   <td
@@ -1411,7 +1370,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 3%</td>
                 </tr>
                 <tr>
-                  <td>17.</td>
+                  <td>16.</td>
                   <td>PSQ3b</td>
                   <td>Hand Hygiene Compliance Rate</td>
                   <td
@@ -1423,7 +1382,7 @@ const EmergencyRoomData = () => {
                   <td>100%</td>
                 </tr>
                 <tr>
-                  <td>18.</td>
+                  <td>17.</td>
                   <td>PSQ3b</td>
                   <td>
                     Percentage of cases who received appropriate prophylactic
@@ -1440,7 +1399,7 @@ const EmergencyRoomData = () => {
                   <td>100%</td>
                 </tr>
                 <tr>
-                  <td>19.</td>
+                  <td>18.</td>
                   <td>PSQ3c</td>
                   <td>Percentage of re-scheduling of surgeries</td>
                   <td
@@ -1454,7 +1413,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 6%</td>
                 </tr>
                 <tr>
-                  <td>20.</td>
+                  <td>19.</td>
                   <td>PSQ3c</td>
                   <td>
                     Turnaround time for issue of blood and blood components
@@ -1471,7 +1430,7 @@ const EmergencyRoomData = () => {
                   <td>11-35 Minutes</td>
                 </tr>
                 <tr>
-                  <td>21.</td>
+                  <td>20.</td>
                   <td>PSQ3c</td>
                   <td>Nurse-Patient ratio for ICUs and wards</td>
                   <td
@@ -1485,7 +1444,7 @@ const EmergencyRoomData = () => {
                   <td>1:2</td>
                 </tr>
                 <tr>
-                  <td>22.</td>
+                  <td>21.</td>
                   <td>PSQ3c</td>
                   <td>Waiting time for out-patient consultation</td>
                   <td
@@ -1500,7 +1459,7 @@ const EmergencyRoomData = () => {
                   <td>11-20 Minutes</td>
                 </tr>
                 <tr>
-                  <td>23.</td>
+                  <td>22.</td>
                   <td>PSQ4c</td>
                   <td>Waiting time for diagnostics</td>
                   <td
@@ -1514,7 +1473,7 @@ const EmergencyRoomData = () => {
                   <td>60 Minutes</td>
                 </tr>
                 <tr>
-                  <td>24.</td>
+                  <td>23.</td>
                   <td>PSQ4c</td>
                   <td>Time taken for Discharge</td>
                   <td
@@ -1528,7 +1487,7 @@ const EmergencyRoomData = () => {
                   <td>150 Minutes</td>
                 </tr>
                 <tr>
-                  <td>25.</td>
+                  <td>24.</td>
                   <td>PSQ4c</td>
                   <td>
                     Percentage of medical records having incomplete and/or
@@ -1545,7 +1504,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 0.3%</td>
                 </tr>
                 <tr>
-                  <td>26.</td>
+                  <td>25.</td>
                   <td>PSQ4c</td>
                   <td>Stock out Rate of Emergency medications</td>
                   <td
@@ -1559,7 +1518,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 20</td>
                 </tr>
                 <tr>
-                  <td>27.</td>
+                  <td>26.</td>
                   <td>PSQ4c</td>
                   <td>Number of variations observed in mock drills</td>
                   <td
@@ -1575,7 +1534,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 3/Drill</td>
                 </tr>
                 <tr>
-                  <td>28.</td>
+                  <td>27.</td>
                   <td>PSQ4d</td>
                   <td>Patient fall rate (Falls per 1000 patient days)</td>
                   <td
@@ -1589,7 +1548,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 3/1000</td>
                 </tr>
                 <tr>
-                  <td>29.</td>
+                  <td>28.</td>
                   <td>PSQ4d</td>
                   <td>Percentage of near misses</td>
                   <td
@@ -1603,7 +1562,7 @@ const EmergencyRoomData = () => {
                   <td>3.42%</td>
                 </tr>
                 <tr>
-                  <td>30.</td>
+                  <td>29.</td>
                   <td>PSQ3d</td>
                   <td>Incidence of needle stick injuries</td>
                   <td
@@ -1617,7 +1576,7 @@ const EmergencyRoomData = () => {
                   <td>&lt; 2</td>
                 </tr>
                 <tr>
-                  <td>31.</td>
+                  <td>30.</td>
                   <td>PSQ3d</td>
                   <td>
                     Appropriate handovers during shift change (To be done
@@ -1632,7 +1591,7 @@ const EmergencyRoomData = () => {
                   <td>&gt; 98%</td>
                 </tr>
                 <tr>
-                  <td>32.</td>
+                  <td>31.</td>
                   <td>PSQ3d</td>
                   <td>
                     Compliance rate to Medication Prescription in capitals

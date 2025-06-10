@@ -28,7 +28,6 @@ const FirstFloor = () => {
     totalNumberOfMedicationErrors: "",
     totalNumberOfMedicationErrorsRemarks: "",
     totalNumberOfOpportunitiesOfMedicationErrors: "",
-    numberMedicationChartsWithErrorPhoneAbbreviation: "",
     numberOfMedicationChartsReviewed: "",
     numberOfMedicationChartsReviewedRemarks: "",
     numberOfPatientsDevelopingAdverseDrugReactions: "",
@@ -159,16 +158,13 @@ const FirstFloor = () => {
           id,
           name,
         };
-        const response = await fetch(
-          `${IndicatorBaseUrl}FirstFloor/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
+        const response = await fetch(`${IndicatorBaseUrl}FirstFloor/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formDataWithUser),
+        });
 
         if (response.status === 400) {
           const errorText = await response.json();
