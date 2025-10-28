@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+import apiRequest from "../apiRequest"; // Adjust the import path as necessary
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -18,6 +19,7 @@ function ChemoWard() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
     id: "",
@@ -137,54 +139,54 @@ function ChemoWard() {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+  if (!selectedDate) {
+    setError("Please select a date");
+    return;
+  }
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(`${IndicatorBaseUrl}ChemoWard/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+  } else {
+    setIsSubmitting(true); // 🔒 disable submit immediately
+    try {
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
-        } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
-        }
-      } catch (error) {
-        console.error("Error:", error.message);
+      const response = await apiRequest(
+        `${IndicatorBaseUrl}ChemoWard/`,
+        "POST",
+        formDataWithUser
+      );
+
+      setFormSubmitted(true);
+      setError("");
+    } catch (error) {
+      if (error.message === "Data already exists for this date.") {
+        setError("Data already exists for this date.");
+      } else {
         setError(error.message || "Failed to submit data");
       }
+      console.error("Error:", error.message);
     }
+    finally {
+      // 🔓 Re-enable after 3 seconds
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 3000);
+    }
+  }
 
-    setValidated(true);
-  };
+  setValidated(true);
+};
 
   useEffect(() => {
     if (formSubmitted) {
@@ -1212,9 +1214,11 @@ function ChemoWard() {
           variant="primary"
           type="submit"
           className="mb-3"
-          onClick={handleSubmit}
+          onClick={handleSubmit}        
+          disabled={isSubmitting} // ✅ prevents duplicate clicks
         >
-          Save
+        {isSubmitting ? "Saving..." : "Save"}
+          {/* Save */}
         </button>
 
         <Alert variant="success" show={formSubmitted}>

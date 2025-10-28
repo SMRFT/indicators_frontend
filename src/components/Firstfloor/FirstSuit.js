@@ -31,8 +31,8 @@ const FirstSuit = () => {
     totalNumberOfMedicationErrorsRemarks: '',
     totalNumberOfOpportunitiesOfMedicationErrors: '',
     numberMedicationChartsWithErrorPhoneAbbreviation: '',
-    numberOfMedicationChartsReviewed: '',
-    numberOfMedicationChartsReviewedRemarks: '',
+    // numberOfMedicationChartsReviewed: '',
+    // numberOfMedicationChartsReviewedRemarks: '',
     numberOfPatientsDevelopingAdverseDrugReactions: '',
     numberOfPatientsDevelopingAdverseDrugReactionsRemarks: '',
     adverseDrugReactionsRemarks: '',
@@ -75,7 +75,12 @@ const FirstSuit = () => {
     numberOfParenteralExposuresRemarks: '',
     incidentsOfDelining: '',
     incidentsOfDeliningRemarks: '',
-
+    numberOfPatientCatheter:"",
+    numberOfPatientCatheterRemarks:"",
+    numberOfPatientCentralLine:"",
+    numberOfPatientCentralLineRemarks:"",
+    numberOfRestrainedPatients: "",
+    restrainedPatientsDetails: [],
   });
 
   useEffect(() => {
@@ -116,6 +121,41 @@ const FirstSuit = () => {
     };
   }, [error]);
 
+ // 1. COMPLETE the handleNumberChange function (around line 105)
+// Handles number input change
+const handleNumberChange = (e) => {
+  const num = parseInt(e.target.value, 10) || 0;
+
+  const newDetails = {};
+  for (let i = 0; i < num; i++) {
+    newDetails[`restrained-${i}`] =
+      formData.restrainedPatientsDetails[`restrained-${i}`] || {
+        type: "",
+        remark: "",
+      };
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    numberOfRestrainedPatients: num,
+    restrainedPatientsDetails: newDetails,
+  }));
+};
+
+// Handles individual field change
+const handleDetailChange = (key, field, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    restrainedPatientsDetails: {
+      ...prev.restrainedPatientsDetails,
+      [key]: {
+        ...prev.restrainedPatientsDetails[key],
+        [field]: value,
+      },
+    },
+  }));
+};
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     if (value.length > MAX_CHAR_LIMIT) {
@@ -138,56 +178,67 @@ const FirstSuit = () => {
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-  
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError('Please select a date');
-      return; // Prevent form submission if date is not selected
-    }
-  
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem('userId');
-        const name = localStorage.getItem('userName');
-        const formDataWithUser = {
-          ...formData,
-          id,  
-          name 
-        };
-        const response = await fetch(`${IndicatorBaseUrl}FirstSuit/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-  
-        if (response.status === 400) {
-          const errorText = await response.json();
-          console.error('errorText:', errorText);
-          if (errorText.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(errorText.error || 'Failed to submit data');
-          }
+
+const [isSubmitting, setIsSubmitting] = useState(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true); // 🔹 Disable the submit button immediately
+
+  const form = e.currentTarget;
+
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError('Please select a date');
+    setIsSubmitting(false); // 🔹 Re-enable if invalid
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false); // 🔹 Re-enable if invalid form
+  } else {
+    try {
+      const id = localStorage.getItem('userId');
+      const name = localStorage.getItem('userName');
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}FirstSuit/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        console.error('errorText:', errorText);
+        if (errorText.error === 'Data already exists for this date.') {
+          setError('Data already exists for this date.');
         } else {
-          // Set success message after successful submission
-          setFormSubmitted(true);
-          setError('');
+          throw new Error(errorText.error || 'Failed to submit data');
         }
-      } catch (error) {
-        console.error('Error:', error.message);
-        setError(error.message || 'Failed to submit data');
+        setIsSubmitting(false); // 🔹 Re-enable on error
+      } else {
+        setFormSubmitted(true);
+        setError('');
+        // 🔹 Keep button disabled briefly (3 seconds) after success
+        setTimeout(() => setIsSubmitting(false), 3000);
       }
+    } catch (error) {
+      console.error('Error:', error.message);
+      setError(error.message || 'Failed to submit data');
+      setIsSubmitting(false); // 🔹 Re-enable on catch
     }
-  
-    setValidated(true);
-  };
+  }
+
+  setValidated(true);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -244,6 +295,15 @@ const FirstSuit = () => {
          <Form.Group controlId="numberOfInPatients">
            <Form.Label>Number of In-Patients</Form.Label>
            <Form.Control type="text" value={formData.numberOfInPatients} onChange={handleChange} required />
+         </Form.Group>
+       </Col>
+     </Row>
+
+     <Row className="mb-3">
+       <Col>
+         <Form.Group controlId="numberOfBedsOccupied">
+           <Form.Label>Number of Bed Occupied</Form.Label>
+           <Form.Control type="text" value={formData.numberOfBedsOccupied} onChange={handleChange} required />
          </Form.Group>
        </Col>
      </Row>
@@ -318,7 +378,7 @@ const FirstSuit = () => {
        </Col>
      </Row>
      
-     <Row className="mb-3">
+     {/* <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfMedicationChartsReviewed">
            <Form.Label>Number of Medication Charts Reviewed</Form.Label>
@@ -342,7 +402,7 @@ const FirstSuit = () => {
                         />
          </Form.Group>
        </Col>
-     </Row>
+     </Row> */}
 
      <Row className="mb-3">
        <Col sm>
@@ -399,7 +459,7 @@ const FirstSuit = () => {
      <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfUnitsTransfused">
-           <Form.Label>Number of Units Transfused</Form.Label>
+           <Form.Label>Number of Units Transfused (Blood/Blood Products)</Form.Label>
            <Form.Control type="text" value={formData.numberOfUnitsTransfused} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -451,7 +511,7 @@ const FirstSuit = () => {
      <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfTransfusionReaction">
-           <Form.Label>Number of Transfusion Reactions</Form.Label>
+           <Form.Label>Number of Transfusion Reactions (Blood/Blood Products)</Form.Label>
            <Form.Control type="text" value={formData.numberOfTransfusionReaction} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -485,8 +545,17 @@ const FirstSuit = () => {
 
      <Row className="mb-3">
        <Col>
+         <Form.Group controlId="totalNumberOfBloodAndBloodComponentsCrossMatchedOrReserved">
+           <Form.Label>Total No of Blood & Blood Components Cross-Matched/ Reserved</Form.Label>
+           <Form.Control type="text" value={formData.totalNumberOfBloodAndBloodComponentsCrossMatchedOrReserved} onChange={handleChange} required />
+         </Form.Group>
+       </Col>
+     </Row>
+
+     <Row className="mb-3">
+       <Col>
          <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonth">
-           <Form.Label>Number of uninary cather associated UTI's In a month</Form.Label>
+           <Form.Label>Number of uninary cather Infection (CAUTI) In a month</Form.Label>
            <Form.Control type="text" value={formData.numberOfUrinaryCatheterAssociatedUtisInThatMonth} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -534,6 +603,38 @@ const FirstSuit = () => {
          </Form.Group>
        </Col>
      </Row>
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheter">
+              <Form.Label>
+                Number of Patients in Catheter
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCatheter}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheterRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCatheterRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
      <Row className="mb-3">
       <Col>
@@ -589,6 +690,39 @@ const FirstSuit = () => {
          </Col>
          </Row> 
    
+           <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLine">
+              <Form.Label>
+                Number of Patients in Central Line
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCentralLine}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLineRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCentralLineRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
      <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfSurgicalSiteInfectionsInAGivenMonth">
@@ -613,15 +747,6 @@ const FirstSuit = () => {
                           }
                         }} 
                         />
-         </Form.Group>
-       </Col>
-     </Row>
-
-     <Row className="mb-3">
-       <Col>
-         <Form.Group controlId="totalNumberOfBloodAndBloodComponentsCrossMatchedOrReserved">
-           <Form.Label>Total No of Blood & Blood Components Cross-Matched/ Reserved</Form.Label>
-           <Form.Control type="text" value={formData.totalNumberOfBloodAndBloodComponentsCrossMatchedOrReserved} onChange={handleChange} required />
          </Form.Group>
        </Col>
      </Row>
@@ -706,15 +831,6 @@ const FirstSuit = () => {
 
      <Row className="mb-3">
        <Col>
-         <Form.Group controlId="numberOfBedsOccupied">
-           <Form.Label>Number of Bed Occupied</Form.Label>
-           <Form.Control type="text" value={formData.numberOfBedsOccupied} onChange={handleChange} required />
-         </Form.Group>
-       </Col>
-     </Row>
-
-     <Row className="mb-3">
-       <Col>
          <Form.Group controlId="numberOfNursingStaff">
            <Form.Label>Number of Nursing Staff </Form.Label>
            <Form.Control type="text" value={formData.numberOfNursingStaff} onChange={handleChange} required />
@@ -734,7 +850,61 @@ const FirstSuit = () => {
            <Form.Label>Total Number of Handover Opportunities</Form.Label>
            <Form.Control type="text" value={formData.totalNumberOfHandoverOpportunities} onChange={handleChange} required />
          </Form.Group>
-       
+         
+{/* RESTRAINED PATIENTS SECTION - START */}
+        {/* DYNAMIC RESTRAINED PATIENTS FIELDS */}{/* Number input */}
+<Row className="mb-3">
+  <Col md={4}>
+    <Form.Group controlId="numberOfRestrainedPatients">
+      <Form.Label>Number of Restrained Patients</Form.Label>
+      <Form.Control
+        type="number"
+        min="0"
+        value={formData.numberOfRestrainedPatients}
+        onChange={handleNumberChange}
+        required
+      />
+    </Form.Group>
+  </Col>
+</Row>
+
+{/* Dynamic fields */}
+{Object.entries(formData.restrainedPatientsDetails).map(([key, detail], index) => (
+  <Row className="mb-3 border p-3 rounded" key={key}>
+    <h5 className="mb-3">Patient {index + 1}</h5>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientType-${key}`}>
+        <Form.Label>Type of Restraint</Form.Label>
+        <Form.Select
+          value={detail.type || ""}
+          onChange={(e) => handleDetailChange(key, "type", e.target.value)}
+          required
+        >
+          <option value="">Select Type</option>
+          <option value="chemical">Chemical</option>
+          <option value="physical">Physical</option>
+        </Form.Select>
+      </Form.Group>
+    </Col>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientRemark-${key}`}>
+        <Form.Label>Remark</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={1}
+          value={detail.remark || ""}
+          onChange={(e) => handleDetailChange(key, "remark", e.target.value)}
+          required
+          maxLength={MAX_CHAR_LIMIT}
+        />
+      </Form.Group>
+    </Col>
+  </Row>
+))}
+
+
      </Row>
      <Row className="mb-3">
        <Col>
@@ -874,8 +1044,9 @@ const FirstSuit = () => {
        </Col>        
      </Row>
 
-     <button variant="primary" type="submit" className="mb-3" onClick={handleSubmit}>
-       Save
+     <button variant="primary" type="submit" className="mb-3" onClick={handleSubmit}disabled={isSubmitting}
+>
+  {isSubmitting ? "Saving..." : "Save"}
     </button>
        
     <Alert variant="success" show={formSubmitted}>

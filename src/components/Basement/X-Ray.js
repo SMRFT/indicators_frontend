@@ -65,58 +65,61 @@ const XRay = () => {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(
-          `${IndicatorBaseUrl}Xray/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
-        if (response.status === 400) {
-          const errorText = await response.json();
-          console.error("errorText:", errorText);
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
+  if (!selectedDate) {
+    setError("Please select a date");
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+  } else {
+    try {
+      setIsSubmitting(true); // 🔹 Disable button here
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}Xray/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        console.error("errorText:", errorText);
+        if (errorText.error === "Data already exists for this date.") {
+          setError("Data already exists for this date.");
         } else {
-          // Set success message after successful submission
-          setFormSubmitted(true);
-          setError("");
+          throw new Error(errorText.error || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
+      } else {
+        setFormSubmitted(true);
+        setError("");
       }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit data");
+    } finally {
+      setIsSubmitting(false); // 🔹 Re-enable button after done
     }
+  }
 
-    setValidated(true);
-  };
+  setValidated(true);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -293,8 +296,9 @@ const XRay = () => {
           type="submit"
           className="mb-3"
           onClick={handleSubmit}
+          disabled={isSubmitting} // 🔹 Disable while submitting
         >
-          Save
+        {isSubmitting ? "Saving..." : "Save"}  {/* 🔹 Change text */}       
         </button>
 
         <Alert variant="success" show={formSubmitted}>

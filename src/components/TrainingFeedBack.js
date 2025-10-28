@@ -101,72 +101,81 @@ const TrainingFeedBack = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+  const [isSubmitting, setIsSubmitting] = useState(false); // new state
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (isSubmitting) return; // prevent multiple clicks
+  setIsSubmitting(true);    // disable submit immediately
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const ID = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        // Inside handleSubmit, before making the fetch request:
-        const formDataWithUser = {
-          ...formData,
-          ID,
-          name,
-          // Convert objects to strings
-          detailsOfTrainingTopic: JSON.stringify({
-            relevance: formData.detailsOfTrainingTopic.relevance,
-            content: formData.detailsOfTrainingTopic.content,
-            clarity: formData.detailsOfTrainingTopic.clarity,
-          }),
-          trainer: JSON.stringify({
-            communicationskill: formData.trainer.communicationskill,
-            knowledge: formData.trainer.knowledge,
-          }),
-        };
-        const response = await fetch(
-          `${IndicatorBaseUrl}TrainingFeedBack/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
+  const form = e.currentTarget;
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError("Please select a date");
+    setIsSubmitting(false);
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false);
+  } else {
+    try {
+      const ID = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+
+      const formDataWithUser = {
+        ...formData,
+        ID,
+        name,
+        detailsOfTrainingTopic: JSON.stringify({
+          relevance: formData.detailsOfTrainingTopic.relevance,
+          content: formData.detailsOfTrainingTopic.content,
+          clarity: formData.detailsOfTrainingTopic.clarity,
+        }),
+        trainer: JSON.stringify({
+          communicationskill: formData.trainer.communicationskill,
+          knowledge: formData.trainer.knowledge,
+        }),
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}TrainingFeedBack/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        if (errorText.error === "Data already exists for this date.") {
+          setError("Data already exists for this date.");
         } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
-          // Auto-refresh after 2 seconds
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          throw new Error(errorText.error || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
-      }
-    }
+        setIsSubmitting(false);
+      } else {
+        setFormSubmitted(true);
+        setError("");
 
-    setValidated(true);
-  };
+        // Auto-refresh after 2 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit data");
+      setIsSubmitting(false);
+    }
+  }
+
+  setValidated(true);
+};
+
   return (
     <StyledContainer className="NumericalData">
       <h2 className="text-center">Training Feed Back Form</h2>
@@ -508,14 +517,16 @@ const TrainingFeedBack = () => {
           </Form.Group>
         </Row>
 
-        <button
-          variant="primary"
-          type="submit"
-          className="mb-3"
-          onClick={handleSubmit}
-        >
-          Save
-        </button>
+<button
+  variant="primary"
+  type="submit"
+  className="mb-3"
+  onClick={handleSubmit}
+  disabled={isSubmitting}  // disable button during submission
+>
+  {isSubmitting ? "Saving..." : "Save"}
+</button>
+
 
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.

@@ -51,6 +51,7 @@ import TrainingFeedbackReport from "./components/Report/TrainingFeedBackReport";
 import Pharmacy from "./components/Basement/Pharmacy";
 import Mockdrills from "./components/Others/Mockdrills";
 
+
 function App() {
   const location = useLocation();
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
@@ -87,7 +88,6 @@ function App() {
     "/MICURawData",
   ].includes(location.pathname);
 
-  console.log("Rendering App with userRole:", userRole);
 
   return (
     <div className="App">
@@ -113,7 +113,7 @@ function App() {
             path="/AdminLogin"
             element={<AdminLogin setUserRole={setUserRole} />}
           />
-          <Route path="/Register" element={<Register />} />
+          {/* <Route path="/Register" element={<Register />} /> */}
           <Route path="/Availability" element={<Availability />} />
           <Route path="/Report" element={<Report />} />
           <Route path="/MasterDataReport" element={<MasterDataReport />} />

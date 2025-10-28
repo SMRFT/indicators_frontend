@@ -5,6 +5,7 @@ import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import styled from 'styled-components';
+import apiRequest from "../apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -16,7 +17,9 @@ const HR = () => {
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ New state
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+
   const [formData, setFormData] = useState({
     id: '',  
     name: '',
@@ -38,15 +41,14 @@ const HR = () => {
     if (id && name) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        id,   // Updated field
-        name, // Updated field
+        id,
+        name,
       }));
     }
   }, []);  
 
   useEffect(() => {
     if (selectedDate) {
-      // Adjust date to UTC
       const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000);
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -67,16 +69,17 @@ const HR = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-  
-    // Check if the date is selected
+
     if (!selectedDate) {
       setError('Please select a date');
-      return; // Prevent form submission if date is not selected
+      return;
     }
-  
+
     if (form.checkValidity() === false) {
       e.stopPropagation();
     } else {
+      setIsSubmitting(true); // 🔒 disable submit immediately
+
       try {
         const id = localStorage.getItem('userId');
         const name = localStorage.getItem('userName');
@@ -85,43 +88,43 @@ const HR = () => {
           id,
           name,
         };
-        const response = await fetch(`${IndicatorBaseUrl}HR/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-  
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(errorText.error || 'Failed to submit data');
-          }
-        } else {
-          setFormSubmitted(true); // Display success message
-          setError(''); // Clear any previous errors
-        }
-        
-      } catch (error) {
-        console.error('Error:', error.message);
-        setError(error.message || 'Failed to submit data');
+
+        const response = await apiRequest(
+          `${IndicatorBaseUrl}HR/`,
+          'POST',
+          formDataWithUser
+        );
+
+         if (response?.error === 'Data already exists for this date.') {
+    setError('Data already exists for this date.');
+  } else {
+    setFormSubmitted(true);
+    setError('');
+  }
+
+} catch (error) {
+  console.error('Error:', error.message);
+  setError(error.message || 'Failed to submit data');
+} finally {
+        // 🔓 Re-enable after 3 seconds
+        setTimeout(() => {
+          setIsSubmitting(false);
+        }, 3000);
       }
     }
-  
+
     setValidated(true);
   };
-  
+
   return (
     <StyledContainer className="NumericalData">
-    <h2 className="text-center">HR</h2>
-    <div style={{float:"right"}} className='mt-3'>
-       <div><b>ID: </b>{formData.id}</div>
-       <div><b>Name: </b>{formData.name}</div>
-    </div>
-    <br/>
+      <h2 className="text-center">HR</h2>
+      <div style={{ float: "right" }} className="mt-3">
+        <div><b>ID: </b>{formData.id}</div>
+        <div><b>Name: </b>{formData.name}</div>
+      </div>
+      <br/>
+
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
           <div className="position-relative">
@@ -282,8 +285,13 @@ const HR = () => {
           </Form.Group>
         </Row>
 
-        <button variant="primary" type="submit" className="mb-3">
-          Save
+        <button
+          variant="primary"
+          type="submit"
+          className="mb-3"
+          disabled={isSubmitting} // ✅ disable after submit
+        >
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
 
         <Alert variant="success" show={formSubmitted}>

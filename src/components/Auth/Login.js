@@ -13,6 +13,7 @@ const Login = ({ title, endpoint, setUserRole }) => {
   const navigate = useNavigate();
   const { sectionName } = location.state || {};
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+  
   useEffect(() => {
     console.log('Location state:', location.state);
     console.log('Section name before login:', sectionName);

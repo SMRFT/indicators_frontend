@@ -24,18 +24,26 @@ const HandHygieneReport = () => {
     setToDate(today);
   }, []);
 
-  useEffect(() => {
-    fetch(`${IndicatorBaseUrl}HandHygieneReport/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch data");
-        return res.json();
+    useEffect(() => {
+      const token = localStorage.getItem("access_token");
+
+      fetch(`${IndicatorBaseUrl}HandHygieneReport/`, {
+        headers: {
+          Authorization: token, // Add "Bearer " if your backend expects it
+          "Content-Type": "application/json", // Optional but good practice
+        },
       })
-      .then((data) => {
-        setData(data);
-        setFilteredData(data);
-      })
-      .catch((err) => setError(err.message));
-  }, []);
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch data");
+          return res.json();
+        })
+        .then((data) => {
+          setData(data);
+          setFilteredData(data);
+        })
+        .catch((err) => setError(err.message));
+    }, []);
+
 
   useEffect(() => {
     if (fromDate && toDate) {

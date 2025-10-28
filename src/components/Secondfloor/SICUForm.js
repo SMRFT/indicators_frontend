@@ -76,6 +76,12 @@ function SICU() {
     numberOfPatientsOnIVTherapy: "",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
+    numberOfPatientCatheter:"",
+    numberOfPatientCatheterRemarks:"",
+    numberOfPatientCentralLine:"",
+    numberOfPatientCentralLineRemarks:"",
+    numberOfPatientVentilator:"",
+    numberOfPatientVentilatorRemarks:"",
   });
 
   useEffect(() => {
@@ -135,60 +141,69 @@ function SICU() {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
+const [isSubmitting, setIsSubmitting] = useState(false);
+const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // Prevent multiple clicks
+    setIsSubmitting(true);    // Disable immediately
+
     const form = e.currentTarget;
 
-    // Check if the date is selected
     if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
+        setError("Please select a date");
+        setIsSubmitting(false); // Re-enable if validation fails
+        return;
     }
 
     if (form.checkValidity() === false) {
-      e.stopPropagation();
+        e.stopPropagation();
+        setIsSubmitting(false); // Re-enable if validation fails
     } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(`${IndicatorBaseUrl}SICU/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
+        try {
+            const id = localStorage.getItem("userId");
+            const name = localStorage.getItem("userName");
+            const formDataWithUser = {
+                ...formData,
+                id,
+                name,
+            };
+            const response = await fetch(`${IndicatorBaseUrl}SICU/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formDataWithUser),
+            });
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
-        } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
+            if (response.status === 400) {
+                const errorText = await response.json();
+                if (errorText.error === "Data already exists for this date.") {
+                    setError("Data already exists for this date.");
+                } else {
+                    throw new Error(errorText.error || "Failed to submit data");
+                }
+            } else {
+                setFormSubmitted(true); // Display success message
+                setError(""); // Clear any previous errors
+            }
+        } catch (error) {
+            console.error("Error:", error.message);
+            setError(error.message || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
-      }
     }
 
     setValidated(true);
-  };
+
+    // Re-enable button after 2 seconds
+    setTimeout(() => setIsSubmitting(false), 2000);
+};
 
   useEffect(() => {
     if (formSubmitted) {
       const timeout = setTimeout(() => {
         window.location.reload(); // Refresh the page
-      }, 4000); // 6 seconds
+      }, 5000); // 5 seconds
 
       return () => clearTimeout(timeout); // Cleanup timeout
     }
@@ -356,6 +371,39 @@ function SICU() {
         </Row>
 
         <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilator">
+              <Form.Label>
+                Number of Patients in Ventilator
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientVentilator}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilatorRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientVentilatorRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="totalNumberOfMedicationErrors">
               <Form.Label>Total Number of Medication Errors</Form.Label>
@@ -490,7 +538,7 @@ function SICU() {
         <Row className="mb-3">
           <Col>
             <Form.Group controlId="numberOfUnitsTransfused">
-              <Form.Label>Number of Units Transfused</Form.Label>
+              <Form.Label>Number of Units Transfused (Blood/Blood Products)</Form.Label>
               <Form.Control
                 required
                 value={formData.numberOfUnitsTransfused}
@@ -563,7 +611,7 @@ function SICU() {
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="numberOfTransfusionReaction">
-              <Form.Label>Number of Transfusion Reaction</Form.Label>
+              <Form.Label>Number of Transfusion Reaction (Blood/Blood Products)</Form.Label>
               <Form.Control
                 required
                 type="text"
@@ -681,7 +729,7 @@ function SICU() {
           <Col sm="8">
             <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonth">
               <Form.Label>
-                Number of Urinary Catheter Associated UTIs In a Month
+                Number of uninary cather Infection (CAUTI) In a month
               </Form.Label>
               <Form.Control
                 required
@@ -757,6 +805,39 @@ function SICU() {
               <Form.Control.Feedback type="invalid">
                 Please fill out this field
               </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheter">
+              <Form.Label>
+                Number of Patients in Catheter
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCatheter}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheterRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCatheterRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -840,6 +921,39 @@ function SICU() {
               <Form.Control.Feedback type="invalid">
                 Please fill out this field
               </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLine">
+              <Form.Label>
+                Number of Patients in Central Line
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCentralLine}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLineRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCentralLineRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -1259,8 +1373,8 @@ function SICU() {
           type="submit"
           className="mb-3"
           onClick={handleSubmit}
-        >
-          Save
+          disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
 
         <Alert variant="success" show={formSubmitted}>

@@ -65,57 +65,72 @@ const CT = () => {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+const [isSubmitting, setIsSubmitting] = useState(false); // new state
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(
-          `${IndicatorBaseUrl}CT/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
+  if (isSubmitting) return; // Prevent multiple submissions
+  setIsSubmitting(true);    // Disable button immediately
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
+  const form = e.currentTarget;
+
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError("Please select a date");
+    setIsSubmitting(false); // re-enable button if error
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false); // re-enable button if form invalid
+  } else {
+    try {
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}CT/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        if (errorText.error === "Data already exists for this date.") {
+          setError("Data already exists for this date.");
         } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
+          throw new Error(errorText.error || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
-      }
-    }
+        setIsSubmitting(false); // re-enable if error
+      } else {
+        setFormSubmitted(true);
+        setError("");
 
-    setValidated(true);
-  };
+        // Optional: auto-refresh or re-enable button after 2 seconds
+        setTimeout(() => {
+          setIsSubmitting(false); // or window.location.reload() if you want
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit data");
+      setIsSubmitting(false); // re-enable on exception
+    }
+  }
+
+  setValidated(true);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -287,14 +302,14 @@ const CT = () => {
           </Form.Group>
         </Row>
 
-        <button
-          variant="primary"
-          type="submit"
-          className="mb-3"
-          onClick={handleSubmit}
-        >
-          Save
-        </button>
+<button
+  type="submit"
+  className="mb-3"
+  onClick={handleSubmit}
+  disabled={isSubmitting} // disables button after one submit
+>
+  {isSubmitting ? "Saving..." : "Save"}
+</button>
 
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.

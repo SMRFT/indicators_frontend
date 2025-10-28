@@ -75,6 +75,12 @@ const ThirdFloor = () => {
     numberOfParenteralExposuresRemarks: '',
     incidentsOfDelining: '',
     incidentsOfDeliningRemarks: '',
+    numberOfPatientCatheter:"",
+    numberOfPatientCatheterRemarks:"",
+    numberOfPatientCentralLine:"",
+    numberOfPatientCentralLineRemarks:"",
+    numberOfRestrainedPatients: "",
+    restrainedPatientsDetails: {},
   });
 
   useEffect(() => {
@@ -115,6 +121,40 @@ const ThirdFloor = () => {
     };
   }, [error]);
 
+ // 1. COMPLETE the handleNumberChange function (around line 105)
+// Handles number input change
+const handleNumberChange = (e) => {
+  const num = parseInt(e.target.value, 10) || 0;
+
+  const newDetails = {};
+  for (let i = 0; i < num; i++) {
+    newDetails[`restrained-${i}`] =
+      formData.restrainedPatientsDetails[`restrained-${i}`] || {
+        type: "",
+        remark: "",
+      };
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    numberOfRestrainedPatients: num,
+    restrainedPatientsDetails: newDetails,
+  }));
+};
+
+// Handles individual field change
+const handleDetailChange = (key, field, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    restrainedPatientsDetails: {
+      ...prev.restrainedPatientsDetails,
+      [key]: {
+        ...prev.restrainedPatientsDetails[key],
+        [field]: value,
+      },
+    },
+  }));
+};
   const handleChange = (e) => {
     const { id, value } = e.target;
     if (value.length > MAX_CHAR_LIMIT) {
@@ -138,55 +178,66 @@ const ThirdFloor = () => {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
+ const [isSubmitting, setIsSubmitting] = useState(false);
+
+ const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // Prevent multiple clicks
+    setIsSubmitting(true);    // Lock the button
+
     const form = e.currentTarget;
-  
+
     // Check if the date is selected
     if (!selectedDate) {
-      setError('Please select a date');
-      return; // Prevent form submission if date is not selected
+        setError('Please select a date');
+        setIsSubmitting(false); // Re-enable if validation fails
+        return;
     }
-  
+
     if (form.checkValidity() === false) {
-      e.stopPropagation();
+        e.stopPropagation();
+        setIsSubmitting(false); // Re-enable if validation fails
     } else {
-      try {
-        const id = localStorage.getItem('userId');
-        const name = localStorage.getItem('userName');
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(`${IndicatorBaseUrl}ThirdFloor/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-  
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(errorText.error || 'Failed to submit data');
-          }
-        } else {
-          setFormSubmitted(true); // Display success message
-          setError(''); // Clear any previous errors
+        try {
+            const id = localStorage.getItem('userId');
+            const name = localStorage.getItem('userName');
+            const formDataWithUser = {
+                ...formData,
+                id,
+                name,
+            };
+
+            const response = await fetch(`${IndicatorBaseUrl}ThirdFloor/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formDataWithUser),
+            });
+
+            if (response.status === 400) {
+                const errorText = await response.json();
+                if (errorText.error === 'Data already exists for this date.') {
+                    setError('Data already exists for this date.');
+                } else {
+                    throw new Error(errorText.error || 'Failed to submit data');
+                }
+            } else {
+                setFormSubmitted(true); // Display success message
+                setError('');           // Clear any previous errors
+            }
+        } catch (error) {
+            console.error('Error:', error.message);
+            setError(error.message || 'Failed to submit data');
         }
-        
-      } catch (error) {
-        console.error('Error:', error.message);
-        setError(error.message || 'Failed to submit data');
-      }
     }
-  
+
     setValidated(true);
-  };
+
+    // Re-enable submit button after 2 seconds
+    setTimeout(() => setIsSubmitting(false), 2000);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -243,6 +294,15 @@ const ThirdFloor = () => {
          <Form.Group controlId="numberOfInPatients">
            <Form.Label>Number of In-Patients</Form.Label>
            <Form.Control type="text" value={formData.numberOfInPatients} onChange={handleChange} required />
+         </Form.Group>
+       </Col>
+     </Row>
+     
+     <Row className="mb-3">
+       <Col>
+         <Form.Group controlId="numberOfBedsOccupied">
+           <Form.Label>Number of Bed Occupied</Form.Label>
+           <Form.Control type="text" value={formData.numberOfBedsOccupied} onChange={handleChange} required />
          </Form.Group>
        </Col>
      </Row>
@@ -398,7 +458,7 @@ const ThirdFloor = () => {
      <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfUnitsTransfused">
-           <Form.Label>Number of Units Transfused</Form.Label>
+           <Form.Label>Number of Units Transfused (Blood/Blood Products)</Form.Label>
            <Form.Control type="text" value={formData.numberOfUnitsTransfused} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -450,7 +510,7 @@ const ThirdFloor = () => {
      <Row className="mb-3">
      <Col sm='8'>
          <Form.Group controlId="numberOfTransfusionReaction">
-           <Form.Label>Number of Transfusion Reactions</Form.Label>
+           <Form.Label>Number of Transfusion Reactions (Blood/Blood Products)</Form.Label>
            <Form.Control type="text" value={formData.numberOfTransfusionReaction} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -485,7 +545,7 @@ const ThirdFloor = () => {
      <Row className="mb-3">
      <Col sm='8'>
          <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonth">
-           <Form.Label>Number of uninary cather associated UTI's In a month</Form.Label>
+           <Form.Label>Number of uninary cather Infection (CAUTI) In a month</Form.Label>
            <Form.Control type="text" value={formData.numberOfUrinaryCatheterAssociatedUtisInThatMonth} onChange={handleChange} required />
          </Form.Group>
        </Col>
@@ -533,6 +593,39 @@ const ThirdFloor = () => {
          </Form.Group>
        </Col>
      </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheter">
+              <Form.Label>
+                Number of Patients in Catheter
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCatheter}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheterRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCatheterRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
      <Row className="mb-3">
      <Col sm='8'>
@@ -588,6 +681,39 @@ const ThirdFloor = () => {
          </Col>
          </Row> 
    
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLine">
+              <Form.Label>
+                Number of Patients in Central Line
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCentralLine}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLineRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCentralLineRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
      <Row className="mb-3">
      <Col sm='8'>
          <Form.Group controlId="numberOfSurgicalSiteInfectionsInAGivenMonth">
@@ -705,15 +831,6 @@ const ThirdFloor = () => {
 
      <Row className="mb-3">
        <Col>
-         <Form.Group controlId="numberOfBedsOccupied">
-           <Form.Label>Number of Bed Occupied</Form.Label>
-           <Form.Control type="text" value={formData.numberOfBedsOccupied} onChange={handleChange} required />
-         </Form.Group>
-       </Col>
-     </Row>
-
-     <Row className="mb-3">
-       <Col>
          <Form.Group controlId="numberOfNursingStaff">
            <Form.Label>Number of Nursing Staff </Form.Label>
            <Form.Control type="text" value={formData.numberOfNursingStaff} onChange={handleChange} required />
@@ -735,6 +852,61 @@ const ThirdFloor = () => {
          </Form.Group>
        
      </Row>
+     
+{/* RESTRAINED PATIENTS SECTION - START */}
+        {/* DYNAMIC RESTRAINED PATIENTS FIELDS */}{/* Number input */}
+<Row className="mb-3">
+  <Col md={4}>
+    <Form.Group controlId="numberOfRestrainedPatients">
+      <Form.Label>Number of Restrained Patients</Form.Label>
+      <Form.Control
+        type="number"
+        min="0"
+        value={formData.numberOfRestrainedPatients}
+        onChange={handleNumberChange}
+        required
+      />
+    </Form.Group>
+  </Col>
+</Row>
+
+{/* Dynamic fields */}
+{Object.entries(formData.restrainedPatientsDetails).map(([key, detail], index) => (
+  <Row className="mb-3 border p-3 rounded" key={key}>
+    <h5 className="mb-3">Patient {index + 1}</h5>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientType-${key}`}>
+        <Form.Label>Type of Restraint</Form.Label>
+        <Form.Select
+          value={detail.type || ""}
+          onChange={(e) => handleDetailChange(key, "type", e.target.value)}
+          required
+        >
+          <option value="">Select Type</option>
+          <option value="chemical">Chemical</option>
+          <option value="physical">Physical</option>
+        </Form.Select>
+      </Form.Group>
+    </Col>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientRemark-${key}`}>
+        <Form.Label>Remark</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={1}
+          value={detail.remark || ""}
+          onChange={(e) => handleDetailChange(key, "remark", e.target.value)}
+          required
+          maxLength={MAX_CHAR_LIMIT}
+        />
+      </Form.Group>
+    </Col>
+  </Row>
+))}
+
+
      <Row className="mb-3">
      <Col sm='8'>
          <Form.Group controlId="numberOfRestraintInjuriesOrStrangulation">
@@ -873,9 +1045,16 @@ const ThirdFloor = () => {
        </Col>        
      </Row>
 
-     <button variant="primary" type="submit" className="mb-3" onClick={handleSubmit}>
-       Save
-    </button>
+<button
+    variant="primary"
+    type="submit"
+    className="mb-3"
+    onClick={handleSubmit}
+    disabled={isSubmitting}
+>
+    {isSubmitting ? 'Saving...' : 'Save'}
+</button>
+
        
     <Alert variant="success" show={formSubmitted}>
        Form submitted successfully.

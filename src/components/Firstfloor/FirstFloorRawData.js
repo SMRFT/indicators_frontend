@@ -99,65 +99,76 @@ const FirstFloorRawData = ({ showHeading = true }) => {
         setFormData(newPatients);
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-    
-        // Check if the date is selected
-        if (!selectedDate) {
-            setError('Please select a date');
-            return; // Prevent form submission if date is not selected
-        }
-    
-        if (form.checkValidity() === false) {
-            e.stopPropagation();
-        } else {
-            try {
-                // Adjusting the date by removing timezone offset
-                const adjustedDate = selectedDate
-                    ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
-                        .toISOString()
-                        .split('T')[0]
-                    : null;
-    
-                const formDataWithUser = {
-                    id: userId,
-                    name: userName,
-                    selectedDate: adjustedDate, // Ensure adjusted date is sent here
-                    raw_data: formData.map(patient => {
-                        const { selectedDate, ...rest } = patient; // Exclude selectedDate from patient data
-                        return rest;
-                    }),
-                };
-    
-                const response = await fetch(`${IndicatorBaseUrl}FirstFloorRawData/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formDataWithUser),
-                });
-    
-                if (response.status === 400) {
-                    const errorText = await response.json();
-                    console.error('errorText:', errorText);
-                    if (errorText.error === 'Data already exists for this date.') {
-                        setError('Data already exists for this date.');
-                    } else {
-                        throw new Error(errorText.error || 'Failed to submit data');
-                    }
+const [isSubmitting, setIsSubmitting] = useState(false);
+
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true); // Disable button immediately
+
+    const form = e.currentTarget;
+
+    // Check if the date is selected
+    if (!selectedDate) {
+        setError('Please select a date');
+        setIsSubmitting(false); // Re-enable on error
+        return; 
+    }
+
+    if (form.checkValidity() === false) {
+        e.stopPropagation();
+        setIsSubmitting(false); // Re-enable on invalid form
+    } else {
+        try {
+            // Adjusting the date by removing timezone offset
+            const adjustedDate = selectedDate
+                ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .split('T')[0]
+                : null;
+
+            const formDataWithUser = {
+                id: userId,
+                name: userName,
+                selectedDate: adjustedDate,
+                raw_data: formData.map(patient => {
+                    const { selectedDate, ...rest } = patient;
+                    return rest;
+                }),
+            };
+
+            const response = await fetch(`${IndicatorBaseUrl}FirstFloorRawData/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem("access_token"),
+                },
+                body: JSON.stringify(formDataWithUser),
+            });
+
+            if (response.status === 400) {
+                const errorText = await response.json();
+                console.error('errorText:', errorText);
+                if (errorText.error === 'Data already exists for this date.') {
+                    setError('Data already exists for this date.');
                 } else {
-                    // Set success message after successful submission
-                    setFormSubmitted(true);
-                    setError('');
+                    throw new Error(errorText.error || 'Failed to submit data');
                 }
-            } catch (error) {
-                console.error('Error:', error.message);
-                setError(error.message || 'Failed to submit data');
+                setIsSubmitting(false); // Re-enable on error
+            } else {
+                setFormSubmitted(true);
+                setError('');
+                // Keep disabled for 3 seconds after successful submission
+                setTimeout(() => setIsSubmitting(false), 3000);
             }
+        } catch (error) {
+            console.error('Error:', error.message);
+            setError(error.message || 'Failed to submit data');
+            setIsSubmitting(false); // Re-enable on exception
         }
-        setValidated(true);
-    };
+    }
+
+    setValidated(true);
+};
 
     return (
         <Container className="RawData">
@@ -240,7 +251,10 @@ const FirstFloorRawData = ({ showHeading = true }) => {
                             ))}
                         </tbody>
                     </Table>
-                    <button type="submit">Save</button>
+                    <button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save"}
+                    </button>
+
                     {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
                     {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
                 </Form>

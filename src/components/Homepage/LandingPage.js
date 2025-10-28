@@ -30,13 +30,12 @@ function LandingPage() {
     setCurrentIcons(null);
   };
 
-  const handleIconClick = (sectionName) => {
-    if (sectionName) {
-      if (window.location.pathname !== '/EmployeeLogin') {
-        navigate('/EmployeeLogin', { state: { sectionName } });
-      }
-    }
-  };
+const handleIconClick = (sectionName) => {
+  if (sectionName) {
+    navigate(`/${sectionName}`);
+  }
+};
+
 
   const getIconsForFloor = (floor) => {
     switch (floor) {
@@ -64,7 +63,7 @@ function LandingPage() {
       </div>
       <div className="landing-page">
         <div style={{ marginLeft: "1070px", marginTop: "80px" }}>
-          <Link style={{ color: "#109b76", fontSize: "22px", cursor: "pointer", whiteSpace: "nowrap" }} to='/AdminLogin'>Admin Login</Link>
+          <Link style={{ color: "#109b76", fontSize: "22px", cursor: "pointer", whiteSpace: "nowrap" }} to='/Report'>Admin Login</Link>
         </div>
         <div className='row floor-container'>
           <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Basement')}>

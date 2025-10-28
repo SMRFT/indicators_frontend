@@ -18,7 +18,9 @@ function FrontOffice() {
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ New state
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+
   const [formData, setFormData] = useState({
     id: '',
     name: '',
@@ -53,11 +55,7 @@ function FrontOffice() {
     const id = localStorage.getItem('userId');
     const name = localStorage.getItem('userName');
     if (id && name) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        id,
-        name,
-      }));
+      setFormData((prevFormData) => ({ ...prevFormData, id, name }));
     }
   }, []);
 
@@ -90,48 +88,43 @@ function FrontOffice() {
       const DialysisTotal = ['DialysisInsurance', 'DialysisPay']
         .reduce((sum, field) => sum + (parseInt(updatedFormData[field], 10) || 0), 0);
 
-      return {
-        ...updatedFormData,
-        totalNumberOfOutPatients,
-        sumOfTotalPatientReportingtime,
-        totalNumberOfInPatients,
-        DialysisTotal,
-      };
+      return { ...updatedFormData, totalNumberOfOutPatients, sumOfTotalPatientReportingtime, totalNumberOfInPatients, DialysisTotal };
     });
   };
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
+  const handleDateChange = (date) => setSelectedDate(date);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // Prevent multiple submits
+    setIsSubmitting(true); // ✅ Disable submit
+
     const form = e.currentTarget;
-  
-    // Check if the date is selected
     if (!selectedDate) {
       setError('Please select a date');
-      return; // Prevent form submission if date is not selected
+      setIsSubmitting(false);
+      return;
     }
-  
+
     if (form.checkValidity() === false) {
       e.stopPropagation();
+      setIsSubmitting(false);
     } else {
       try {
         const id = localStorage.getItem('userId');
         const name = localStorage.getItem('userName');
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
+        const formDataWithUser = { ...formData, id, name };
+
         const response = await fetch(`${IndicatorBaseUrl}FrontOffice/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: localStorage.getItem("access_token"),
           },
           body: JSON.stringify(formDataWithUser),
         });
+
         if (response.status === 400) {
           const errorText = await response.json();
           if (errorText.error === 'Data already exists for this date.') {
@@ -140,17 +133,19 @@ function FrontOffice() {
             throw new Error(errorText.error || 'Failed to submit data');
           }
         } else {
-          setFormSubmitted(true); // Display success message
-          setError(''); // Clear any previous errors
+          setFormSubmitted(true);
+          setError('');
         }
-      } catch (error) {
-        setError(error.message || 'Failed to submit data');
+      } catch (err) {
+        setError(err.message || 'Failed to submit data');
       }
     }
-  
+
     setValidated(true);
+
+    // ✅ Re-enable submit after 2 seconds
+    setTimeout(() => setIsSubmitting(false), 2000);
   };
-  
 
   return (
     <StyledContainer className="NumericalData">
@@ -159,6 +154,7 @@ function FrontOffice() {
         <div><b>ID: </b>{formData.id}</div>
         <div><b>Name: </b>{formData.name}</div>
       </div>
+
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
           <div className="position-relative">
@@ -182,6 +178,9 @@ function FrontOffice() {
             )}
           </div>
         </Form.Group>
+
+        {/* All your other form groups remain the same */}
+        
         <br />
         <Form.Group className="mb-3" controlId="sumTotalPatientInTimeForConsultation">
           <Form.Label>Sum total Patient - in time for Consultation</Form.Label>
@@ -464,20 +463,13 @@ function FrontOffice() {
             readOnly />
         </Form.Group>
 
-        <button variant="primary" type="submit">
-          Save
+        <button variant="primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </Form>
-      {formSubmitted && (
-        <Alert variant="success" className="mt-3">
-          Form submitted successfully!
-        </Alert>
-      )}
-      {error && (
-        <Alert variant="danger" className="mt-3">
-          {error}
-        </Alert>
-      )}
+
+      {formSubmitted && <Alert variant="success" className="mt-3">Form submitted successfully!</Alert>}
+      {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
     </StyledContainer>
   );
 }

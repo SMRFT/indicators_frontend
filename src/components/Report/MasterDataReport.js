@@ -31,37 +31,46 @@ function MasterDataReport() {
     fetchExportData();
   }, [selectedWard, selectedDate, selectedMonth]);
 
-  const fetchExportData = () => {
-    let apiUrl = `${IndicatorBaseUrl}get_export_rawdata/?ward=${selectedWard}`;
-    if (
-      selectedDate &&
-      selectedDate instanceof Date &&
-      !isNaN(selectedDate.getTime())
-    ) {
-      const isoDate = new Date(
-        selectedDate.getTime() + 24 * 60 * 60 * 1000
-      ).toISOString();
-      apiUrl += `&date=${isoDate}`;
-    } else if (selectedMonth) {
-      const year = selectedMonth.getFullYear();
-      const month = selectedMonth.getMonth() + 1;
-      apiUrl += `&year=${year}&month=${month}`;
-    }
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          // Sort data based on date
-          const sortedData = data.sort(
-            (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
-          );
-          setExportData(sortedData);
-        } else {
-          console.error("Error fetching data:", data);
-        }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  };
+const fetchExportData = () => {
+  let apiUrl = `${IndicatorBaseUrl}get_export_rawdata/?ward=${selectedWard}`;
+
+  if (
+    selectedDate &&
+    selectedDate instanceof Date &&
+    !isNaN(selectedDate.getTime())
+  ) {
+    const isoDate = new Date(
+      selectedDate.getTime() + 24 * 60 * 60 * 1000
+    ).toISOString();
+    apiUrl += `&date=${isoDate}`;
+  } else if (selectedMonth) {
+    const year = selectedMonth.getFullYear();
+    const month = selectedMonth.getMonth() + 1;
+    apiUrl += `&year=${year}&month=${month}`;
+  }
+
+  const token = localStorage.getItem("access_token");
+
+  fetch(apiUrl, {
+    headers: {
+      Authorization: token, // or just token if Bearer is not needed
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        const sortedData = data.sort(
+          (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
+        );
+        setExportData(sortedData);
+      } else {
+        console.error("Error fetching data:", data);
+      }
+    })
+    .catch((error) => console.error("Error fetching data:", error));
+};
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -132,6 +141,7 @@ function MasterDataReport() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: localStorage.getItem("access_token"),
       },
       body: JSON.stringify(updatedData),
     })

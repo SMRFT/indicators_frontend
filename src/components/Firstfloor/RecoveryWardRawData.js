@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Alert, Col, Table, Button } from 'react-bootstrap';
+import { Row, Form, Alert, Col, Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -20,7 +20,9 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
     const [formData, setFormData] = useState([]);
     const [userId, setUserId] = useState('');
     const [userName, setUserName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false); // ✅ new state
     const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+
     const patientFields = [
         { key: 'patientName', label: 'Patient Name' },
         { key: 'age', label: 'Age' },
@@ -57,9 +59,7 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
         }
     }, [selectedDate]);
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
-    };
+    const handleDateChange = (date) => setSelectedDate(date);
 
     const handlePatientCountChange = (e) => {
         const value = parseInt(e.target.value, 10) || '';
@@ -102,42 +102,46 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = e.currentTarget;
-    
-        // Check if the date is selected
+
+        // ✅ Disable button immediately
+        setIsSubmitting(true);
+
         if (!selectedDate) {
             setError('Please select a date');
-            return; // Prevent form submission if date is not selected
+            setIsSubmitting(false);
+            return;
         }
-    
+
         if (form.checkValidity() === false) {
             e.stopPropagation();
+            setIsSubmitting(false);
         } else {
             try {
-                // Adjusting the date by removing timezone offset
                 const adjustedDate = selectedDate
                     ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
                         .toISOString()
                         .split('T')[0]
                     : null;
-    
+
                 const formDataWithUser = {
                     id: userId,
                     name: userName,
-                    selectedDate: adjustedDate, // Ensure adjusted date is sent here
+                    selectedDate: adjustedDate,
                     raw_data: formData.map(patient => {
-                        const { selectedDate, ...rest } = patient; // Exclude selectedDate from patient data
+                        const { selectedDate, ...rest } = patient;
                         return rest;
                     }),
                 };
-    
+
                 const response = await fetch(`${IndicatorBaseUrl}RecoverywardRawData/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem("access_token"),
                     },
                     body: JSON.stringify(formDataWithUser),
                 });
-    
+
                 if (response.status === 400) {
                     const errorText = await response.json();
                     console.error('errorText:', errorText);
@@ -147,7 +151,6 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
                         throw new Error(errorText.error || 'Failed to submit data');
                     }
                 } else {
-                    // Set success message after successful submission
                     setFormSubmitted(true);
                     setError('');
                 }
@@ -157,6 +160,9 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
             }
         }
         setValidated(true);
+
+        // ✅ Re-enable after 2 seconds
+        setTimeout(() => setIsSubmitting(false), 2000);
     };
 
     return (
@@ -240,7 +246,12 @@ const RecoveryWardRawData = ({ showHeading = true }) => {
                             ))}
                         </tbody>
                     </Table>
-                    <button type="submit">Save</button>
+
+                    {/* ✅ Disable for 2s after submit */}
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Save'}
+                    </button>
+
                     {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
                     {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
                 </Form>

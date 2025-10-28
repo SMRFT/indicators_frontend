@@ -64,68 +64,71 @@ const HandHygenieAudit = () => {
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
+const [isSubmitting, setIsSubmitting] = useState(false); // new state
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (isSubmitting) return; // prevent multiple clicks
+  setIsSubmitting(true);    // disable submit immediately
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+  const form = e.currentTarget;
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const ID = localStorage.getItem("userId");
-        const auditBy = localStorage.getItem("userName");
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError("Please select a date");
+    setIsSubmitting(false);
+    return; 
+  }
 
-        // Format the data properly
-        const formDataWithUser = {
-          ...formData,
-          ID,
-          auditBy,
-          // No need to include selectedDate separately as it's already in formData
-          // Use formData.fiveMoments instead of fiveMoments
-          fiveMoments: JSON.stringify(formData.fiveMoments),
-        };
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false);
+  } else {
+    try {
+      const ID = localStorage.getItem("userId");
+      const auditBy = localStorage.getItem("userName");
 
-        const response = await fetch(
-          `${IndicatorBaseUrl}HandHygenieAudit/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
+      const formDataWithUser = {
+        ...formData,
+        ID,
+        auditBy,
+        fiveMoments: JSON.stringify(formData.fiveMoments),
+      };
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Failed to Submit.") {
-            setError("Failed to Submit.");
-          } else {
-            throw new Error(errorText.error || "Failed to Submit.");
-          }
+      const response = await fetch(`${IndicatorBaseUrl}HandHygenieAudit/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        if (errorText.error === "Failed to Submit.") {
+          setError("Failed to Submit.");
         } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
-          // Auto-refresh after 2 seconds
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+          throw new Error(errorText.error || "Failed to Submit.");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit.");
-      }
-    }
+        setIsSubmitting(false);
+      } else {
+        setFormSubmitted(true);
+        setError("");
 
-    setValidated(true);
-  };
+        // Auto-refresh after 2 seconds
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit.");
+      setIsSubmitting(false);
+    }
+  }
+
+  setValidated(true);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -315,14 +318,15 @@ const HandHygenieAudit = () => {
           </Form.Group>
         </Row>
 
-        <button
-          variant="primary"
-          type="submit"
-          className="mb-3"
-          onClick={handleSubmit}
-        >
-          Save
-        </button>
+<button
+  variant="primary"
+  type="submit"
+  className="mb-3"
+  onClick={handleSubmit}
+  disabled={isSubmitting}  // disables button after one submit
+>
+  {isSubmitting ? "Saving..." : "Save"}
+</button>
 
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.
