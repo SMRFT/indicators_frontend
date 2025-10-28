@@ -113,56 +113,67 @@ function RecoveryWard() {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-  
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError('Please select a date');
-      return; // Prevent form submission if date is not selected
-    }
-  
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem('userId');
-        const name = localStorage.getItem('userName');
-        const formDataWithUser = {
-          ...formData,
-          id,  
-          name 
-        };
-        const response = await fetch(`${IndicatorBaseUrl}RecoveryWard/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-  
-        if (response.status === 400) {
-          const errorText = await response.json();
-          console.error('errorText:', errorText);
-          if (errorText.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(errorText.error || 'Failed to submit data');
-          }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+
+  // Disable button immediately to prevent double submission
+  setIsSubmitting(true);
+
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError('Please select a date');
+    setIsSubmitting(false); // Re-enable if validation fails
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false); // Re-enable if form invalid
+  } else {
+    try {
+      const id = localStorage.getItem('userId');
+      const name = localStorage.getItem('userName');
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}RecoveryWard/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('access_token'),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        console.error('errorText:', errorText);
+        if (errorText.error === 'Data already exists for this date.') {
+          setError('Data already exists for this date.');
         } else {
-          // Set success message after successful submission
-          setFormSubmitted(true);
-          setError('');
+          throw new Error(errorText.error || 'Failed to submit data');
         }
-      } catch (error) {
-        console.error('Error:', error.message);
-        setError(error.message || 'Failed to submit data');
+      } else {
+        setFormSubmitted(true);
+        setError('');
       }
+    } catch (error) {
+      console.error('Error:', error.message);
+      setError(error.message || 'Failed to submit data');
     }
-  
-    setValidated(true);
-  };
+  }
+
+  setValidated(true);
+
+  // Re-enable submit button after 2 seconds
+  setTimeout(() => setIsSubmitting(false), 2000);
+};
 
   return (
     <StyledContainer className="NumericalData">
@@ -669,9 +680,15 @@ function RecoveryWard() {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <button variant="primary" type="submit" className="mb-3">
-          Save
-        </button>
+<button
+  variant="primary"
+  type="submit"
+  className="mb-3"
+  disabled={isSubmitting}
+>
+  {isSubmitting ? 'Saving...' : 'Save'}
+</button>
+
           
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.

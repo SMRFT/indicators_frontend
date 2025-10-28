@@ -36,7 +36,12 @@ const EmergencyRoomData = () => {
       console.log(`API URL: ${apiUrl}`);
       console.log(`Parameters:`, params);
 
-      const response = await axios.get(apiUrl, { params });
+      const response = await axios.get(apiUrl, {
+  params,
+  headers: {
+    Authorization: localStorage.getItem("access_token"),
+  },
+});
 
       setRawResponseObject(response);
       setApiResponse(response.data);

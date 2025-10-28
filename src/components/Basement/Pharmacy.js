@@ -16,6 +16,7 @@ const Pharmacy = () => {
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // <-- added
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
   const [formData, setFormData] = useState({
     id: "",
@@ -47,15 +48,14 @@ const Pharmacy = () => {
     if (id && name) {
       setFormData((prevFormData) => ({
         ...prevFormData,
-        id, // Updated field
-        name, // Updated field
+        id,
+        name,
       }));
     }
   }, []);
 
   useEffect(() => {
     if (selectedDate) {
-      // Adjust date to UTC
       const adjustedDate = new Date(
         selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
       );
@@ -78,43 +78,47 @@ const Pharmacy = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
+
     if (form.checkValidity() === false) {
       e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(
-          `${IndicatorBaseUrl}Pharmacy/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formDataWithUser),
-          }
-        );
-        if (response.ok) {
-          console.log("Data submitted successfully");
-          setFormSubmitted(true); // Update form submission status
+      return;
+    }
+
+    setIsSubmitting(true); // disable submit
+    try {
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+      const formDataWithUser = { ...formData, id, name };
+
+      const response = await fetch(`${IndicatorBaseUrl}Pharmacy/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.ok) {
+        console.log("Data submitted successfully");
+        setFormSubmitted(true);
+        setError("");
+      } else {
+        const errorText = await response.text();
+        if (errorText.includes("Data already exists")) {
+          setError("Data already exists for this date.");
         } else {
-          const errorText = await response.text();
           throw new Error(errorText || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        if (error.message === "Failed to submit data") {
-          setError(error.message);
-        } else {
-          setError("Failed to submit data");
-        }
       }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit data");
+    } finally {
+      // re-enable button after 3 seconds
+      setTimeout(() => setIsSubmitting(false), 3000);
     }
+
     setValidated(true);
   };
 
@@ -133,7 +137,8 @@ const Pharmacy = () => {
       </div>
       <br />
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
+        {/* existing fields untouched */}
+      <Form.Group className="position-relative mb-3" controlId="selectedDate">
           <div className="position-relative">
             <FontAwesomeIcon
               icon={faCalendarAlt}
@@ -517,8 +522,13 @@ const Pharmacy = () => {
           </Col>
         </Row>
 
-        <button variant="primary" type="submit" className="mb-3">
-          Save
+        <button
+          variant="primary"
+          type="submit"
+          className="mb-3"
+          disabled={isSubmitting} // disable button
+        >
+          {isSubmitting ? "Saving..." : "Save"}
         </button>
 
         <Alert variant="success" show={formSubmitted}>

@@ -99,12 +99,12 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
             </div>
           )}
         </div>
-        <NavLink exact to="/Register" activeClassName="activeClicked">
+        {/* <NavLink exact to="/Register" activeClassName="activeClicked">
           <CDBSidebarMenuItem className="sidebar-menu-item">
             <FaUserPlus />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Registration
           </CDBSidebarMenuItem>
-        </NavLink>
+        </NavLink> */}
         <NavLink exact to="/Availability" activeClassName="activeClicked">
           <CDBSidebarMenuItem className="sidebar-menu-item">
             <FaTable />

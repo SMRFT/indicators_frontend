@@ -58,56 +58,61 @@ useEffect(() => {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-  
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError('Please select a date');
-      return; // Prevent form submission if date is not selected
-    }
-  
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem('userId');
-        const name = localStorage.getItem('userName');
-        const formDataWithUser = {
-          ...formData,
-          id,  
-          name 
-        };
-        const response = await fetch(`${IndicatorBaseUrl}Dialysis/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-  
-        if (response.status === 400) {
-          const errorText = await response.json();
-          console.error('errorText:', errorText);
-          if (errorText.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(errorText.error || 'Failed to submit data');
-          }
+const [isSubmitting, setIsSubmitting] = useState(false);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+
+  if (!selectedDate) {
+    setError('Please select a date');
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+  } else {
+    try {
+      setIsSubmitting(true); // 🔹 Disable the button during submit
+      const id = localStorage.getItem('userId');
+      const name = localStorage.getItem('userName');
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}Dialysis/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        console.error('errorText:', errorText);
+        if (errorText.error === 'Data already exists for this date.') {
+          setError('Data already exists for this date.');
         } else {
-          // Set success message after successful submission
-          setFormSubmitted(true);
-          setError('');
+          throw new Error(errorText.error || 'Failed to submit data');
         }
-      } catch (error) {
-        console.error('Error:', error.message);
-        setError(error.message || 'Failed to submit data');
+      } else {
+        setFormSubmitted(true);
+        setError('');
       }
+    } catch (error) {
+      console.error('Error:', error.message);
+      setError(error.message || 'Failed to submit data');
+    } finally {
+      setIsSubmitting(false); // 🔹 Re-enable after request finishes
     }
-  
-    setValidated(true);
-  };
+  }
+
+  setValidated(true);
+};
     
   return (
     <StyledContainer className="NumericalData">
@@ -175,10 +180,17 @@ useEffect(() => {
                 </Form.Group>
       
         <br/>
-      
-        <button variant="primary" type="submit" className="mb-3" onClick={handleSubmit}>
-          Save
-        </button>
+                
+          <button
+            variant="primary"
+            type="submit"
+            className="mb-3"
+            onClick={handleSubmit}
+            disabled={isSubmitting} // 🔹 Prevent duplicate clicks
+          >
+            {isSubmitting ? "Saving..." : "Save"}
+          </button>
+
 
 <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.

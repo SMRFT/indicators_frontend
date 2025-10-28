@@ -92,6 +92,12 @@ function MICU() {
     NumberofReintubationRemarks: "",
     NumberofExtubation: "",
     NumberofExtubationRemarks: "",
+    numberOfPatientCatheter:"",
+    numberOfPatientCatheterRemarks:"",
+    numberOfPatientCentralLine:"",
+    numberOfPatientCentralLineRemarks:"",
+    numberOfPatientVentilator:"",
+    numberOfPatientVentilatorRemarks:"",
   });
 
   useEffect(() => {
@@ -151,66 +157,78 @@ function MICU() {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Check if the date is selected
-    if (!selectedDate) {
-      setError("Please select a date");
-      return; // Prevent form submission if date is not selected
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = {
-          ...formData,
-          id,
-          name,
-        };
-        const response = await fetch(`${IndicatorBaseUrl}MICU/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
+  if (isSubmitting) return; // Prevent multiple clicks
+  setIsSubmitting(true); // Disable button immediately
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          console.error("errorText:", errorText);
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
+  const form = e.currentTarget;
+
+  // Check if the date is selected
+  if (!selectedDate) {
+    setError("Please select a date");
+    setIsSubmitting(false);
+    return;
+  }
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false);
+  } else {
+    try {
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+      };
+
+      const response = await fetch(`${IndicatorBaseUrl}MICU/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formDataWithUser),
+      });
+
+      if (response.status === 400) {
+        const errorText = await response.json();
+        console.error("errorText:", errorText);
+        if (errorText.error === "Data already exists for this date.") {
+          setError("Data already exists for this date.");
         } else {
-          // Set success message after successful submission
-          setFormSubmitted(true);
-          setError("");
+          throw new Error(errorText.error || "Failed to submit data");
         }
-      } catch (error) {
-        console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
+        setIsSubmitting(false);
+      } else {
+        setFormSubmitted(true);
+        setError("");
       }
+    } catch (error) {
+      console.error("Error:", error.message);
+      setError(error.message || "Failed to submit data");
+      setIsSubmitting(false);
     }
+  }
 
-    setValidated(true);
-  };
+  setValidated(true);
+};
 
-  useEffect(() => {
-    if (formSubmitted) {
-      const timeout = setTimeout(() => {
-        window.location.reload(); // Refresh the page
-      }, 6000); // 6 seconds
+useEffect(() => {
+  if (formSubmitted) {
+    const timeout = setTimeout(() => {
+      window.location.reload(); // Refresh the page
+    }, 5000); // 5 seconds
 
-      return () => clearTimeout(timeout); // Cleanup timeout
-    }
-  }, [formSubmitted]);
+    return () => clearTimeout(timeout);
+  }
+}, [formSubmitted]);
+
 
   return (
     <StyledContainer className="NumericalData">
@@ -427,7 +445,7 @@ function MICU() {
           </Form.Group>
         </Row>
 
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="numberOfMedicationChartsReviewed">
               <Form.Label>Number of Medication Charts Reviewed</Form.Label>
@@ -463,7 +481,7 @@ function MICU() {
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
-        </Row>
+        </Row> */}
 
         <Row className="mb-3">
           <Col sm="8">
@@ -509,7 +527,7 @@ function MICU() {
         <Row className="mb-3">
           <Col>
             <Form.Group controlId="numberOfUnitsTransfused">
-              <Form.Label>Number of Units Transfused</Form.Label>
+              <Form.Label>Number of Units Transfused (Blood/Blood Products)</Form.Label>
               <Form.Control
                 required
                 value={formData.numberOfUnitsTransfused}
@@ -582,7 +600,7 @@ function MICU() {
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="numberOfTransfusionReaction">
-              <Form.Label>Number of Transfusion Reaction</Form.Label>
+              <Form.Label>Number of Transfusion Reaction (Blood/Blood Products)</Form.Label>
               <Form.Control
                 required
                 type="text"
@@ -700,7 +718,7 @@ function MICU() {
           <Col sm="8">
             <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonth">
               <Form.Label>
-                Number of Urinary Catheter Associated UTIs In a Month
+                Number of uninary cather Infection (CAUTI) In a month
               </Form.Label>
               <Form.Control
                 required
@@ -776,6 +794,39 @@ function MICU() {
               <Form.Control.Feedback type="invalid">
                 Please fill out this field
               </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheter">
+              <Form.Label>
+                Number of Patients in Catheter
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCatheter}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheterRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCatheterRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -858,6 +909,39 @@ function MICU() {
               <Form.Control.Feedback type="invalid">
                 Please fill out this field
               </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLine">
+              <Form.Label>
+                Number of Patients in Central Line
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCentralLine}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLineRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCentralLineRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -1333,6 +1417,39 @@ function MICU() {
         </Row>
 
         <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilator">
+              <Form.Label>
+                Number of Patients in Ventilator
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientVentilator}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilatorRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientVentilatorRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="totalNumberOfRestraintPatientsDays">
               <Form.Label>Total Number of Restraint Patients Days</Form.Label>
@@ -1581,14 +1698,16 @@ function MICU() {
         </Row>
         <br />
 
-        <button
-          variant="primary"
-          type="submit"
-          className="mb-3"
-          onClick={handleSubmit}
-        >
-          Save
-        </button>
+<button
+  variant="primary"
+  type="submit"
+  className="mb-3"
+  onClick={handleSubmit}
+  disabled={isSubmitting}
+>
+  {isSubmitting ? "Saving..." : "Save"}
+</button>
+
 
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.

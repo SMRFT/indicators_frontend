@@ -6,7 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
-
+import apiRequest from "../apiRequest";
 const Container = styled.div`
   padding: 20px;
 `;
@@ -131,13 +131,12 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                     }),
                 };
     
-                const response = await fetch(`${IndicatorBaseUrl}ChemowardRawData/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formDataWithUser),
-                });
+                    const response = await apiRequest(
+                    `${IndicatorBaseUrl}ChemowardRawData/`,
+                    'POST',
+                    formDataWithUser
+                    );
+
     
                 if (response.status === 400) {
                     const errorText = await response.json();

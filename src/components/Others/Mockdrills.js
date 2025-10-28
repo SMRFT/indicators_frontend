@@ -58,36 +58,49 @@ const Mockdrills = () => {
     setSelectedDate(date);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-    } else {
-      try {
-        const response = await fetch(
-          `${IndicatorBaseUrl}mockdrills/`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-          }
-        );
-        if (response.ok) {
-          setFormSubmitted(true);
-          setError("");
-        } else {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to submit data");
-        }
-      } catch (err) {
-        setError(err.message);
+const [isSubmitting, setIsSubmitting] = useState(false); // new state
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget;
+
+  if (isSubmitting) return; // prevent multiple clicks
+  setIsSubmitting(true); // disable button immediately
+
+  if (form.checkValidity() === false) {
+    e.stopPropagation();
+    setIsSubmitting(false); // re-enable if form invalid
+  } else {
+    try {
+      const response = await fetch(`${IndicatorBaseUrl}mockdrills/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setFormSubmitted(true);
+        setError("");
+        // Auto re-enable button or refresh after 2 seconds
+        setTimeout(() => {
+          setIsSubmitting(false); // button re-enabled
+          // optionally: window.location.reload();
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to submit data");
       }
+    } catch (err) {
+      setError(err.message);
+      setIsSubmitting(false); // re-enable button on error
     }
-    setValidated(true);
-  };
+  }
+  setValidated(true);
+};
+
   return (
     <StyledContainer className="NumericalData">
       <h2 className="text-center">Mock Drill</h2>
@@ -138,9 +151,15 @@ const Mockdrills = () => {
             Required field
           </Form.Control.Feedback>
         </Form.Group>
-        <button variant="primary" type="submit" className="mb-3">
-          Save
-        </button>
+<button
+  variant="primary"
+  type="submit"
+  className="mb-3"
+  disabled={isSubmitting} // disables button after first click
+>
+  {isSubmitting ? "Saving..." : "Save"}
+</button>
+
         <Alert variant="success" show={formSubmitted}>
           Form submitted successfully.
         </Alert>

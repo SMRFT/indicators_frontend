@@ -6,6 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
+import apiRequest from "../apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -63,18 +64,26 @@ function MRDForm() {
     setSelectedDate(date);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ add this state at top
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
 
+    // Prevent multiple submissions
+    if (isSubmitting) return; // ✅ added
+    setIsSubmitting(true); // ✅ disable button immediately
+
     // Check if the date is selected
     if (!selectedDate) {
       setError("Please select a date");
-      return; // Prevent form submission if date is not selected
+      setIsSubmitting(false); // ✅ re-enable if validation fails
+      return;
     }
 
     if (form.checkValidity() === false) {
       e.stopPropagation();
+      setIsSubmitting(false); // ✅ re-enable if invalid form
     } else {
       try {
         const id = localStorage.getItem("userId");
@@ -84,32 +93,26 @@ function MRDForm() {
           id,
           name,
         };
-        const response = await fetch(`${IndicatorBaseUrl}MRD/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(errorText.error || "Failed to submit data");
-          }
+        const response = await apiRequest(`${IndicatorBaseUrl}MRD/`, "POST", formDataWithUser);
+
+        if (response?.error === "Data already exists for this date.") {
+          setError("Data already exists for this date.");
         } else {
-          setFormSubmitted(true); // Display success message
-          setError(""); // Clear any previous errors
+          setFormSubmitted(true);
+          setError("");
         }
       } catch (error) {
         console.error("Error:", error.message);
         setError(error.message || "Failed to submit data");
+      } finally {
+        // ✅ Re-enable after 3 seconds
+        setTimeout(() => setIsSubmitting(false), 3000);
       }
     }
 
     setValidated(true);
   };
+
 
   return (
     <StyledContainer className="NumericalData">
@@ -261,8 +264,9 @@ function MRDForm() {
               type="submit"
               className="mb-3"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              Save
+              {isSubmitting ? "Saving..." : "Save"}
             </button>
           </Col>
         </Row>

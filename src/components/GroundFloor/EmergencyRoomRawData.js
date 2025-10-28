@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Alert, Col, Table, Button } from 'react-bootstrap';
+import { Row, Form, Alert, Col, Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -20,7 +20,9 @@ const EmergencyRoomRawData = ({ showHeading = true }) => {
     const [formData, setFormData] = useState([]);
     const [userId, setUserId] = useState('');
     const [userName, setUserName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false); // ✅ new state
     const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
+
     const patientFields = [
         { key: 'patientName', label: 'Patient Name' },
         { key: 'age', label: 'Age' },
@@ -46,20 +48,22 @@ const EmergencyRoomRawData = ({ showHeading = true }) => {
     useEffect(() => {
         if (selectedDate) {
             const adjustedDate = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000);
-            setFormData((prevFormData) => {
-                return prevFormData.map((patient, index) => {
-                    if (index === 0) {
-                        return { ...patient, selectedDate: adjustedDate.toISOString().split('T')[0] };
-                    }
-                    return patient;
-                });
-            });
+            setFormData((prevFormData) =>
+                prevFormData.map((patient, index) => index === 0 ? { ...patient, selectedDate: adjustedDate.toISOString().split('T')[0] } : patient)
+            );
         }
     }, [selectedDate]);
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
-    };
+    useEffect(() => {
+        const id = localStorage.getItem('userId');
+        const name = localStorage.getItem('userName');
+        if (id && name) {
+            setUserId(id);
+            setUserName(name);
+        }
+    }, []);
+
+    const handleDateChange = (date) => setSelectedDate(date);
 
     const handlePatientCountChange = (e) => {
         const value = parseInt(e.target.value, 10) || '';
@@ -84,15 +88,6 @@ const EmergencyRoomRawData = ({ showHeading = true }) => {
         setFormData(patients);
     };
 
-    useEffect(() => {
-        const id = localStorage.getItem('userId');
-        const name = localStorage.getItem('userName');
-        if (id && name) {
-            setUserId(id);
-            setUserName(name);
-        }
-    }, []);
-    
     const handlePatientDataChange = (index, field, value) => {
         const newPatients = [...formData];
         newPatients[index] = { ...newPatients[index], [field]: value };
@@ -102,151 +97,150 @@ const EmergencyRoomRawData = ({ showHeading = true }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = e.currentTarget;
-    
-        // Check if the date is selected
+
+        // ✅ Disable submit immediately
+        setIsSubmitting(true);
+
         if (!selectedDate) {
             setError('Please select a date');
-            return; // Prevent form submission if date is not selected
+            setIsSubmitting(false);
+            return;
         }
-    
+
         if (form.checkValidity() === false) {
             e.stopPropagation();
+            setIsSubmitting(false);
         } else {
             try {
-                // Adjusting the date by removing timezone offset
-                const adjustedDate = selectedDate
-                    ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
-                        .toISOString()
-                        .split('T')[0]
-                    : null;
-    
+                const adjustedDate = selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().split('T')[0] : null;
                 const formDataWithUser = {
                     id: userId,
                     name: userName,
-                    selectedDate: adjustedDate, // Ensure adjusted date is sent here
-                    raw_data: formData.map(patient => {
-                        const { selectedDate, ...rest } = patient; // Exclude selectedDate from patient data
-                        return rest;
-                    }),
+                    selectedDate: adjustedDate,
+                    raw_data: formData.map(({ selectedDate, ...rest }) => rest),
                 };
-    
+
                 const response = await fetch(`${IndicatorBaseUrl}EmergencyRoomRawData/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem("access_token"),
                     },
                     body: JSON.stringify(formDataWithUser),
                 });
-    
+
                 if (response.status === 400) {
                     const errorText = await response.json();
-                    console.error('errorText:', errorText);
                     if (errorText.error === 'Data already exists for this date.') {
                         setError('Data already exists for this date.');
                     } else {
                         throw new Error(errorText.error || 'Failed to submit data');
                     }
                 } else {
-                    // Set success message after successful submission
                     setFormSubmitted(true);
                     setError('');
                 }
             } catch (error) {
-                console.error('Error:', error.message);
                 setError(error.message || 'Failed to submit data');
             }
         }
+
         setValidated(true);
+
+        // ✅ Re-enable submit after 2 seconds
+        setTimeout(() => setIsSubmitting(false), 2000);
     };
 
-    return (
-        <Container className="RawData">
-            <div>
-                {showHeading && <h2 className="text-center">ER RawData</h2>}
-                <div style={{ float: "right" }} className='mt-3'>
-                    <div><b>ID: </b>{userId}</div>
-                    <div><b>Name: </b>{userName}</div>
-                </div>
-                <br/>
-                <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Group className="position-relative" controlId="selectedDate">
-                        <div className="position-relative">
-                            <FontAwesomeIcon
-                                icon={faCalendarAlt}
-                                style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
-                                onClick={() => document.getElementById('datePicker').click()}
-                            />
-                            <DatePicker
-                                id="datePicker"
-                                selected={selectedDate}
-                                onChange={handleDateChange}
-                                className="position-absolute top-100 start-0 d-none"
-                                calendarClassName="position-absolute top-100 start-0"
-                                placeholderText="Select Date"
-                            />
-                            {selectedDate && (
-                                <div
-                                    className="position-absolute top-100 start-0 translate-middle-y"
-                                    style={{ marginLeft: '50px', marginTop: '-15px' }}
-                                >
-                                    {selectedDate.toLocaleDateString('en-GB')}
-                                </div>
-                            )}
+return (
+    <Container className="RawData">
+        {showHeading && <h2 className="text-center">ER RawData</h2>}
+        <div style={{ float: "right" }} className='mt-3'>
+            <div><b>ID: </b>{userId}</div>
+            <div><b>Name: </b>{userName}</div>
+        </div>
+        <br/>
+        <Form noValidate validated={validated} onSubmit={handleSubmit}>
+            <Form.Group className="position-relative" controlId="selectedDate">
+                <div className="position-relative">
+                    <FontAwesomeIcon
+                        icon={faCalendarAlt}
+                        style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
+                        onClick={() => document.getElementById('datePicker').click()}
+                    />
+                    <DatePicker
+                        id="datePicker"
+                        selected={selectedDate}
+                        onChange={handleDateChange}
+                        className="position-absolute top-100 start-0 d-none"
+                        calendarClassName="position-absolute top-100 start-0"
+                        placeholderText="Select Date"
+                    />
+                    {selectedDate && (
+                        <div
+                            className="position-absolute top-100 start-0 translate-middle-y"
+                            style={{ marginLeft: '50px', marginTop: '-15px' }}
+                        >
+                            {selectedDate.toLocaleDateString('en-GB')}
                         </div>
-                    </Form.Group>
-                    <br />
-                    <Row>
-                        <Col xs="2">
-                            <Form.Label htmlFor="noOfPatients" style={{ fontWeight: "bold" }}>No of Patients</Form.Label>
-                        </Col>
-                        <Col xs="1" style={{ marginLeft: "-6%", marginTop: "-0.5%" }}>
-                            <Form.Control
-                                required
-                                type="text"
-                                id="noOfPatients"
-                                value={noOfPatients}
-                                onChange={handlePatientCountChange}
-                                pattern="\d*"
-                            />
-                            <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
-                        </Col>
-                    </Row>
-    
-                    <Table bordered className="align-middle mt-2">
-                        <thead>
-                            <tr>
-                                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Field</th>
-                                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Patient 1</th>
-                                {[...Array(parseInt(noOfPatients) - 1 || 0)].map((_, index) => (
-                                    <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }} key={index + 2}>Patient {index + 2}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {patientFields.map(({ key, label }, fieldIndex) => (
-                                <tr key={fieldIndex}>
-                                    <td style={{ textAlign: 'left' }}>{label}</td>
-                                    {formData.map((patient, patientIndex) => (
-                                        <td key={patientIndex} style={{ textAlign: 'left' }}>
-                                            <Form.Control
-                                                style={{ border: "white" }}
-                                                type="text"
-                                                value={patient[key]}
-                                                onChange={(e) => handlePatientDataChange(patientIndex, key, e.target.value)}
-                                            />
-                                        </td>
-                                    ))}
-                                </tr>
+                    )}
+                </div>
+            </Form.Group>
+            <br />
+            <Row>
+                <Col xs="2">
+                    <Form.Label htmlFor="noOfPatients" style={{ fontWeight: "bold" }}>No of Patients</Form.Label>
+                </Col>
+                <Col xs="1" style={{ marginLeft: "-6%", marginTop: "-0.5%" }}>
+                    <Form.Control
+                        required
+                        type="text"
+                        id="noOfPatients"
+                        value={noOfPatients}
+                        onChange={handlePatientCountChange}
+                        pattern="\d*"
+                    />
+                    <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
+                </Col>
+            </Row>
+
+            <Table bordered className="align-middle mt-2">
+                <thead>
+                    <tr>
+                        <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Field</th>
+                        <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Patient 1</th>
+                        {[...Array(parseInt(noOfPatients) - 1 || 0)].map((_, index) => (
+                            <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }} key={index + 2}>Patient {index + 2}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {patientFields.map(({ key, label }, fieldIndex) => (
+                        <tr key={fieldIndex}>
+                            <td style={{ textAlign: 'left' }}>{label}</td>
+                            {formData.map((patient, patientIndex) => (
+                                <td key={patientIndex} style={{ textAlign: 'left' }}>
+                                    <Form.Control
+                                        style={{ border: "white" }}
+                                        type="text"
+                                        value={patient[key]}
+                                        onChange={(e) => handlePatientDataChange(patientIndex, key, e.target.value)}
+                                    />
+                                </td>
                             ))}
-                        </tbody>
-                    </Table>
-                    <button type="submit">Save</button>
-                    {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
-                    {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
-                </Form>
-            </div>
-        </Container>
-    );
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+
+            <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save'}
+            </button>
+
+            {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
+            {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
+        </Form>
+    </Container>
+);
 };
 
 export default EmergencyRoomRawData;

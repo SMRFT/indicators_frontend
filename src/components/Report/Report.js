@@ -8,6 +8,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { wardOptions } from "../constant";
 import * as XLSX from "xlsx";
 import Alert from "react-bootstrap/Alert";
+import apiRequest from "../apiRequest"; // Import the API helper
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 
 
@@ -141,33 +142,42 @@ function Report() {
     }
   }, [exportData]);
 
-  const fetchExportData = () => {
+const fetchExportData = async () => {
+  try {
     let apiUrl = `${IndicatorBaseUrl}get-export-data/?ward=${selectedWard}`;
+
     if (selectedDate instanceof Date && !isNaN(selectedDate)) {
-      const isoDate = new Date(
-        selectedDate.getTime() + 24 * 60 * 60 * 1000
-      ).toISOString();
+      const isoDate = new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000).toISOString();
       apiUrl += `&date=${isoDate}`;
     } else if (selectedMonth) {
       const year = selectedMonth.getFullYear();
       const month = selectedMonth.getMonth() + 1;
       apiUrl += `&year=${year}&month=${month}`;
     }
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          const sortedData = [...data].sort((a, b) => {
-            return new Date(a.selectedDate) - new Date(b.selectedDate);
-          });
-          setExportData(sortedData);
-          setEditedValues({}); // Reset edited values when new data is fetched
-        } else {
-          console.error("Error fetching data:", data);
-        }
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  };
+
+    const response = await apiRequest(apiUrl);
+    console.log("Fetched export data:", response);
+
+    // Try to get data array from possible keys
+    const data = Array.isArray(response)
+      ? response
+      : response?.data || response?.results || [];
+
+    if (Array.isArray(data) && data.length > 0) {
+      const sortedData = [...data].sort(
+        (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
+      );
+      setExportData(sortedData);
+      setEditedValues({});
+    } else {
+      console.error("No valid data array found:", response);
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
+
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

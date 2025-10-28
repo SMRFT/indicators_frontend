@@ -20,6 +20,7 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
     const [formData, setFormData] = useState([]);
     const [userId, setUserId] = useState('');
     const [userName, setUserName] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
     const patientFields = [
         { key: 'patientName', label: 'Patient Name' },
@@ -101,53 +102,52 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // Prevent multiple clicks
+        setIsSubmitting(true);    // Lock the button
+
         const form = e.currentTarget;
-    
-        // Check if the date is selected
+
         if (!selectedDate) {
             setError('Please select a date');
-            return; // Prevent form submission if date is not selected
+            setIsSubmitting(false);
+            return;
         }
-    
+
         if (form.checkValidity() === false) {
             e.stopPropagation();
+            setIsSubmitting(false);
         } else {
             try {
-                // Adjusting the date by removing timezone offset
                 const adjustedDate = selectedDate
                     ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000)
                         .toISOString()
                         .split('T')[0]
                     : null;
-    
+
                 const formDataWithUser = {
                     id: userId,
                     name: userName,
-                    selectedDate: adjustedDate, // Ensure adjusted date is sent here
+                    selectedDate: adjustedDate,
                     raw_data: formData.map(patient => {
-                        const { selectedDate, ...rest } = patient; // Exclude selectedDate from patient data
+                        const { selectedDate, ...rest } = patient;
                         return rest;
                     }),
                 };
-    
+
                 const response = await fetch(`${IndicatorBaseUrl}ThirdFloorRawData/`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formDataWithUser),
                 });
-    
+
                 if (response.status === 400) {
                     const errorText = await response.json();
-                    console.error('errorText:', errorText);
                     if (errorText.error === 'Data already exists for this date.') {
                         setError('Data already exists for this date.');
                     } else {
                         throw new Error(errorText.error || 'Failed to submit data');
                     }
                 } else {
-                    // Set success message after successful submission
                     setFormSubmitted(true);
                     setError('');
                 }
@@ -156,7 +156,11 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
                 setError(error.message || 'Failed to submit data');
             }
         }
+
         setValidated(true);
+
+        // Re-enable submit button after 2 seconds
+        setTimeout(() => setIsSubmitting(false), 2000);
     };
 
     return (
@@ -240,7 +244,9 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
                             ))}
                         </tbody>
                     </Table>
-                    <button type="submit">Save</button>
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Saving...' : 'Save'}
+                    </button>
                     {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
                     {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
                 </Form>
