@@ -167,12 +167,16 @@ const fetchExportData = async () => {
       const sortedData = [...data].sort(
         (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
       );
+      
       setExportData(sortedData);
       setEditedValues({});
     } else {
+      setExportData([]);
+      
       console.error("No valid data array found:", response);
     }
   } catch (error) {
+    setExportData([]);
     console.error("Error fetching data:", error);
   }
 };

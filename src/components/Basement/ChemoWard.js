@@ -75,6 +75,8 @@ function ChemoWard() {
     totalNumberOfRestraintPatientsDays: "",
     totalNumberOfRestraintPatientsDaysRemarks: "",
     numberOfPatientsOnIVTherapy: "",
+    ExtravasationVIPScore:"",
+    ExtravasationVIPScoreRemark:"",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
   });
@@ -1174,6 +1176,44 @@ const handleSubmit = async (e) => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+
+        <Row>
+    
+<Col md={6}>
+  <Form.Group controlId="ExtravasationVIPScore">
+    <Form.Label>Extravasation VIP Score</Form.Label>
+
+    <Form.Select
+      required
+      name="ExtravasationVIPScore"
+      value={formData.ExtravasationVIPScore}
+      onChange={handleChange}
+    >
+      <option value="">Select Type</option>
+      <option value="1">A (1)</option>
+      <option value="2">B (2)</option>
+      <option value="3">C (3)</option>
+      <option value="4">D (4)</option>
+      <option value="5">E (5)</option>
+    </Form.Select>
+  </Form.Group>
+</Col>
+
+<Col md={6}>
+    <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
+      <Form.Label>Remark</Form.Label>
+      <Form.Control
+        as="textarea"
+        rows={1}
+        value={formData.ExtravasationVIPScoreRemark}
+        onChange={handleChange}
+        required
+       	maxLength={MAX_CHAR_LIMIT}
+      />
+    </Form.Group>
+  </Col>
+  </Row>
+
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="incidentsOfDelining">

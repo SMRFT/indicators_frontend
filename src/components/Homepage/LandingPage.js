@@ -16,6 +16,8 @@ function LandingPage() {
   const [showPanel, setShowPanel] = useState(false);
   const [currentFloor, setCurrentFloor] = useState('');
   const [currentIcons, setCurrentIcons] = useState(null);
+  const userRole = localStorage.getItem("userRole");
+
   const navigate = useNavigate();
 
   const handleFloorClick = (floor) => {
@@ -36,6 +38,10 @@ const handleIconClick = (sectionName) => {
   }
 };
 
+const handleSignOut = () => {
+  localStorage.removeItem("userRole");
+  window.location.href = "/Login";
+};
 
   const getIconsForFloor = (floor) => {
     switch (floor) {
@@ -61,10 +67,66 @@ const handleIconClick = (sectionName) => {
       <div className="landing-logo">
         <img src={Logo} alt="Shanmuga Hospital Logo" className="logo" />
       </div>
+
       <div className="landing-page">
-        <div style={{ marginLeft: "1070px", marginTop: "80px" }}>
-          <Link style={{ color: "#109b76", fontSize: "22px", cursor: "pointer", whiteSpace: "nowrap" }} to='/Report'>Admin Login</Link>
-        </div>
+
+{/* Buttons directly under header — aligned correctly */}
+<div
+  style={{
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "right",
+    marginTop: "100px",
+    paddingRight: "50px",
+    gap: "20px"
+  }}
+>
+   {/* Header buttons (outside .landing-page) */}
+  <div className="header-buttons">
+  {/* Admin Login button */}
+  {userRole === "Admin" && (
+    <button
+      className="header-btn admin-btn"
+      onClick={() => navigate("/Report")}
+      style={{
+        background: "#109b76",
+        border: "none",
+        padding: "8px 16px",
+        borderRadius: "6px",
+        color: "#fff",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        fontSize: "18px",
+  
+      }}
+    >
+      Admin Login
+    </button>
+  )}
+
+  {/* Sign Out button */}
+  {userRole && (
+    <button
+      className="header-btn signout-btn"
+      onClick={handleSignOut}
+      style={{
+        background: "#ff5252",
+        border: "none",
+        padding: "8px 16px",
+        borderRadius: "6px",
+        color: "#fff",
+        cursor: "pointer",
+        fontSize: "18px",
+        whiteSpace: "nowrap",
+   
+      }}
+    >
+      Sign Out
+    </button>
+  )}
+</div>
+</div>
         <div className='row floor-container'>
           <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Basement')}>
             <div className="hexagon-container">
@@ -102,9 +164,12 @@ const handleIconClick = (sectionName) => {
             {currentIcons}
           </div>
         )}
+
       </div>
     </div>
+    
   );
 }
+        
 
 export default LandingPage;

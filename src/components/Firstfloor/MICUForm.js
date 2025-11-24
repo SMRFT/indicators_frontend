@@ -82,6 +82,8 @@ function MICU() {
     totalNumberOfRestraintPatientsDays: "",
     totalNumberOfRestraintPatientsDaysRemarks: "",
     numberOfPatientsOnIVTherapy: "",
+    ExtravasationVIPScore:"",
+    ExtravasationVIPScoreRemark:"",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
     NumberofreturnstoICUwithin48hours: "",
@@ -98,6 +100,10 @@ function MICU() {
     numberOfPatientCentralLineRemarks:"",
     numberOfPatientVentilator:"",
     numberOfPatientVentilatorRemarks:"",
+    numberOfRestrainedPatients: "",
+    restrainedPatientsDetails: {},
+    ExtravasationVIPScore:"",
+    ExtravasationVIPScoreRemark:"",
   });
 
   useEffect(() => {
@@ -123,6 +129,41 @@ function MICU() {
       }));
     }
   }, [selectedDate]);
+
+   // 1. COMPLETE the handleNumberChange function (around line 105)
+// Handles number input change
+const handleNumberChange = (e) => {
+  const num = parseInt(e.target.value, 10) || 0;
+
+  const newDetails = {};
+  for (let i = 0; i < num; i++) {
+    newDetails[`restrained-${i}`] =
+      formData.restrainedPatientsDetails[`restrained-${i}`] || {
+        type: "",
+        remark: "",
+      };
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    numberOfRestrainedPatients: num,
+    restrainedPatientsDetails: newDetails,
+  }));
+};
+
+// Handles individual field change
+const handleDetailChange = (key, field, value) => {
+  setFormData((prev) => ({
+    ...prev,
+    restrainedPatientsDetails: {
+      ...prev.restrainedPatientsDetails,
+      [key]: {
+        ...prev.restrainedPatientsDetails[key],
+        [field]: value,
+      },
+    },
+  }));
+};
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -912,7 +953,6 @@ useEffect(() => {
             </Form.Group>
           </Col>
         </Row>
-
         <Row className="mb-3">
           <Col>
             <Form.Group controlId="numberOfPatientCentralLine">
@@ -945,6 +985,40 @@ useEffect(() => {
             </Form.Group>
           </Col>
         </Row>
+
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilator">
+              <Form.Label>
+                Number of Patients in Ventilator
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientVentilator}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilatorRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientVentilatorRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
 
         <Row className="mb-3">
           <Col sm="8">
@@ -1227,6 +1301,60 @@ useEffect(() => {
           </Col>
         </Row>
 
+{/* RESTRAINED PATIENTS SECTION - START */}
+        {/* DYNAMIC RESTRAINED PATIENTS FIELDS */}{/* Number input */}
+<Row className="mb-3">
+  <Col md={4}>
+    <Form.Group controlId="numberOfRestrainedPatients">
+      <Form.Label>Number of Restrained Patients</Form.Label>
+      <Form.Control
+        type="number"
+        min="0"
+        value={formData.numberOfRestrainedPatients}
+        onChange={handleNumberChange}
+        required
+      />
+    </Form.Group>
+  </Col>
+</Row>
+
+{/* Dynamic fields */}
+{Object.entries(formData.restrainedPatientsDetails).map(([key, detail], index) => (
+  <Row className="mb-3 border p-3 rounded" key={key}>
+    <h5 className="mb-3">Patient {index + 1}</h5>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientType-${key}`}>
+        <Form.Label>Type of Restraint</Form.Label>
+        <Form.Select
+          value={detail.type || ""}
+          onChange={(e) => handleDetailChange(key, "type", e.target.value)}
+          required
+        >
+          <option value="">Select Type</option>
+          <option value="chemical">Chemical</option>
+          <option value="physical">Physical</option>
+        </Form.Select>
+      </Form.Group>
+    </Col>
+
+    <Col md={6}>
+      <Form.Group controlId={`restrainedPatientRemark-${key}`}>
+        <Form.Label>Remark</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={1}
+          value={detail.remark || ""}
+          onChange={(e) => handleDetailChange(key, "remark", e.target.value)}
+          required
+          maxLength={MAX_CHAR_LIMIT}
+        />
+      </Form.Group>
+    </Col>
+  </Row>
+))}
+
+
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="numberOfRestraintInjuriesOrStrangulation">
@@ -1417,39 +1545,6 @@ useEffect(() => {
         </Row>
 
         <Row className="mb-3">
-          <Col>
-            <Form.Group controlId="numberOfPatientVentilator">
-              <Form.Label>
-                Number of Patients in Ventilator
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.numberOfPatientVentilator}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group controlId="numberOfPatientVentilatorRemarks">
-              <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                required
-                as="textarea"
-                rows={1} // Adjust the number of visible rows
-                value={formData.numberOfPatientVentilatorRemarks}
-                onChange={handleChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // Prevent form submission if applicable
-                  }
-                }}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="totalNumberOfRestraintPatientsDays">
               <Form.Label>Total Number of Restraint Patients Days</Form.Label>
@@ -1500,7 +1595,42 @@ useEffect(() => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+          <Row>
+    
+<Col md={6}>
+  <Form.Group controlId="ExtravasationVIPScore">
+    <Form.Label>Extravasation VIP Score</Form.Label>
 
+    <Form.Select
+      required
+      name="ExtravasationVIPScore"
+      value={formData.ExtravasationVIPScore}
+      onChange={handleChange}
+    >
+      <option value="">Select Type</option>
+      <option value="1">A (1)</option>
+      <option value="2">B (2)</option>
+      <option value="3">C (3)</option>
+      <option value="4">D (4)</option>
+      <option value="5">E (5)</option>
+    </Form.Select>
+  </Form.Group>
+</Col>
+
+    <Col md={6}>
+      <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
+        <Form.Label>Remark</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={1}
+          value={formData.ExtravasationVIPScoreRemark}
+          onChange={handleChange}
+          required
+          maxLength={MAX_CHAR_LIMIT}
+        />
+      </Form.Group>
+    </Col>
+  </Row>
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="incidentsOfDelining">

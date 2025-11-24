@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  overflow: hidden; /* Prevent scrolling */
+  overflow: visible; /* Prevent scrolling */
 }
 
 .landing-logo {
@@ -12,6 +12,7 @@
   position: fixed;
   top: 8px;
   z-index: 999;
+  
 }
 
 .floor-container {
@@ -346,4 +347,55 @@
     top: 7px;
     right: 7px;
   }
+}
+
+/* Header buttons that sit on top of content (outside .landing-page) */
+.header-buttons {
+  position: fixed;         /* independent of layout, won't be clipped */
+  top: 22px;               /* adjust so it sits below the logo */
+  right: 48px;             /* adjust distance from right edge */
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 1100;           /* above .landing-logo / other content */
+  pointer-events: auto;
+}
+
+/* Base button style */
+.header-btn {
+  white-space: nowrap;     /* keep text on single line */
+  min-width: 110px;        /* ensure both words fit */
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Admin green */
+.admin-btn {
+  background: #109b76;
+  color: #fff;
+}
+
+/* Signout red */
+.signout-btn {
+  background: #ff5252;
+  color: #fff;
+}
+
+/* Small screens: move closer to right and reduce min-width */
+@media (max-width: 575px) {
+  .header-buttons {
+    right: 16px;
+    top: 12px;
+    gap: 8px;
+  }
+  .header-btn { min-width: 90px; font-size: 14px; padding: 6px 10px; }
 }
