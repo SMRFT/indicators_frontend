@@ -83,7 +83,7 @@ function MICU() {
     totalNumberOfRestraintPatientsDaysRemarks: "",
     numberOfPatientsOnIVTherapy: "",
     ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemark:"",
+    ExtravasationVIPScoreRemarks:"",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
     NumberofreturnstoICUwithin48hours: "",
@@ -103,7 +103,7 @@ function MICU() {
     numberOfRestrainedPatients: "",
     restrainedPatientsDetails: {},
     ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemark:"",
+    ExtravasationVIPScoreRemarks:"",
   });
 
   useEffect(() => {
@@ -1618,12 +1618,12 @@ useEffect(() => {
 </Col>
 
     <Col md={6}>
-      <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
+      <Form.Group controlId={"ExtravasationVIPScoreRemarks"}>
         <Form.Label>Remark</Form.Label>
         <Form.Control
           as="textarea"
           rows={1}
-          value={formData.ExtravasationVIPScoreRemark}
+          value={formData.ExtravasationVIPScoreRemarks}
           onChange={handleChange}
           required
           maxLength={MAX_CHAR_LIMIT}

@@ -85,7 +85,7 @@ function NICU() {
     numberOfVentilatorDaysRemark: "",
     numberOfPatientsOnIVTherapy: "",
     ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemark:"",
+    ExtravasationVIPScoreRemarks:"",
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
     numberOfPatientVentilator:"",
@@ -1561,12 +1561,12 @@ const handleSubmit = async (e) => {
 </Col>
 
 <Col md={6}>
-    <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
+    <Form.Group controlId={"ExtravasationVIPScoreRemarks"}>
       <Form.Label>Remark</Form.Label>
       <Form.Control
         as="textarea"
         rows={1}
-        value={formData.ExtravasationVIPScoreRemark}
+        value={formData.ExtravasationVIPScoreRemarks}
         onChange={handleChange}
         required
        	maxLength={MAX_CHAR_LIMIT}

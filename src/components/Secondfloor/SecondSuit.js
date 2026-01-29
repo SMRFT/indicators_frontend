@@ -70,7 +70,7 @@ const SecondSuit = () => {
     totalNumberOfRestraintPatientsDaysRemarks: '',
     numberOfPatientsOnIVTherapy: '',
     ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemark:"",
+    ExtravasationVIPScoreRemarks:"",
     totalNumberOfPatientWhoDevelopsphlebitisOrExtravasation: '',
     totalNumberOfPatientWhoDevelopsphlebitisOrExtravasationRemarks: '',
     numberOfParenteralExposures: '',
@@ -989,12 +989,12 @@ const handleSubmit = async (e) => {
 </Col>
 
 <Col md={6}>
-    <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
+    <Form.Group controlId={"ExtravasationVIPScoreRemarks"}>
       <Form.Label>Remark</Form.Label>
       <Form.Control
         as="textarea"
         rows={1}
-        value={formData.ExtravasationVIPScoreRemark}
+        value={formData.ExtravasationVIPScoreRemarks}
         onChange={handleChange}
         required
        	maxLength={MAX_CHAR_LIMIT}
