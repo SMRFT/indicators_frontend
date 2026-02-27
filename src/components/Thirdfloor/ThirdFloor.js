@@ -22,7 +22,7 @@ const ThirdFloor = () => {
     selectedDate: '',
     sumOfTimeTakenforInitialAssessment: '',
     totalNumberOfAdmissions: '',
-    numberOfInPatients: '',
+    // numberOfInPatients: '',
     numberOfPatientsDischargedInsurance: '',
     sumOfTimeTakenForDischargeInsurance: '',
     numberOfPatientsDischargedPay: '',
@@ -31,8 +31,8 @@ const ThirdFloor = () => {
     totalNumberOfMedicationErrorsRemarks: '',
     totalNumberOfOpportunitiesOfMedicationErrors: '',
     numberMedicationChartsWithErrorPhoneAbbreviation: '',
-    numberOfMedicationChartsReviewed: '',
-    numberOfMedicationChartsReviewedRemarks: '',
+    // numberOfMedicationChartsReviewed: '',
+    // numberOfMedicationChartsReviewedRemarks: '',
     numberOfPatientsDevelopingAdverseDrugReactions: '',
     numberOfPatientsDevelopingAdverseDrugReactionsRemarks: '',
     adverseDrugReactionsRemarks: '',
@@ -69,8 +69,8 @@ const ThirdFloor = () => {
     totalNumberOfRestraintPatientsDays: '',
     totalNumberOfRestraintPatientsDaysRemarks: '',
     numberOfPatientsOnIVTherapy: '',
-    ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemarks:"",
+    totalIVLineChanges:"",
+    ivLineChangeRemarks:{},
     totalNumberOfPatientWhoDevelopsphlebitisOrExtravasation: '',
     totalNumberOfPatientWhoDevelopsphlebitisOrExtravasationRemarks: '',
     numberOfParenteralExposures: '',
@@ -176,6 +176,25 @@ const handleDetailChange = (key, field, value) => {
     }
   };
 
+      const handleivlineChange = (e) => {
+    const { id, value } = e.target;
+    if (value.length > MAX_CHAR_LIMIT) {
+      setError(`Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`);
+      return;
+    }
+    if (id.includes("ExtravasationVIPScore")) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+       ivLineChangeRemarks: {
+      ...prevFormData.ivLineChangeRemarks,
+      [id]: value
+    },     
+      }));
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
+  };
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -204,6 +223,8 @@ const handleDetailChange = (key, field, value) => {
         try {
             const id = localStorage.getItem('userId');
             const name = localStorage.getItem('userName');
+            const token = localStorage.getItem("access_token");
+    
             const formDataWithUser = {
                 ...formData,
                 id,
@@ -214,6 +235,7 @@ const handleDetailChange = (key, field, value) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization":`${token}`,
                 },
                 body: JSON.stringify(formDataWithUser),
             });
@@ -291,14 +313,14 @@ const handleDetailChange = (key, field, value) => {
        </Col>
      </Row>
      
-     <Row className="mb-3">
+     {/* <Row className="mb-3">
        <Col>
          <Form.Group controlId="numberOfInPatients">
            <Form.Label>Number of In-Patients</Form.Label>
            <Form.Control type="text" value={formData.numberOfInPatients} onChange={handleChange} required />
          </Form.Group>
        </Col>
-     </Row>
+     </Row> */}
      
      <Row className="mb-3">
        <Col>
@@ -379,7 +401,7 @@ const handleDetailChange = (key, field, value) => {
        </Col>
      </Row>
      
-     <Row className="mb-3">
+     {/* <Row className="mb-3">
      <Col sm='8'>
          <Form.Group controlId="numberOfMedicationChartsReviewed">
            <Form.Label>Number of Medication Charts Reviewed</Form.Label>
@@ -403,7 +425,7 @@ const handleDetailChange = (key, field, value) => {
               />
          </Form.Group>
        </Col>
-     </Row>
+     </Row> */}
 
      <Row className="mb-3">
      <Col sm='8'>
@@ -600,7 +622,7 @@ const handleDetailChange = (key, field, value) => {
           <Col>
             <Form.Group controlId="numberOfPatientCatheter">
               <Form.Label>
-                Number of Patients in Catheter
+                Number of Patients in Catheter (new)
               </Form.Label>
               <Form.Control
                 type="text"
@@ -687,7 +709,7 @@ const handleDetailChange = (key, field, value) => {
           <Col>
             <Form.Group controlId="numberOfPatientCentralLine">
               <Form.Label>
-                Number of Patients in Central Line
+                Number of Patients in Central Line (new)
               </Form.Label>
               <Form.Control
                 type="text"
@@ -969,42 +991,72 @@ const handleDetailChange = (key, field, value) => {
          </Form.Group>
        </Col>
      </Row>
-<Row>
-    
-<Col md={6}>
-  <Form.Group controlId="ExtravasationVIPScore">
-    <Form.Label>Extravasation VIP Score</Form.Label>
 
-    <Form.Select
-      required
-      name="ExtravasationVIPScore"
-      value={formData.ExtravasationVIPScore}
-      onChange={handleChange}
-    >
-      <option value="">Select Type</option>
-      <option value="1">A (1)</option>
-      <option value="2">B (2)</option>
-      <option value="3">C (3)</option>
-      <option value="4">D (4)</option>
-      <option value="5">E (5)</option>
-    </Form.Select>
-  </Form.Group>
-</Col>
-
-<Col md={6}>
-    <Form.Group controlId={"ExtravasationVIPScoreRemarks"}>
-      <Form.Label>Remark</Form.Label>
+<Row className="mb-3">
+  <Col md={6}>
+    <Form.Group controlId="totalIVLineChanges">
+      <Form.Label>Total Number of IV Line Changes</Form.Label>
       <Form.Control
-        as="textarea"
-        rows={1}
-        value={formData.ExtravasationVIPScoreRemarks}
-        onChange={handleChange}
+        type="number"
+        min="0"
+        value={formData.totalIVLineChanges}
+        onChange={handleivlineChange}
         required
-       	maxLength={MAX_CHAR_LIMIT}
       />
     </Form.Group>
   </Col>
-  </Row>
+</Row>
+
+{Array.from({ length: formData.totalIVLineChanges || 0 }).map(
+  (_, index) => (
+    <Row className="mb-3" key={index}>
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScore-${index}`}>
+          <Form.Label>{`Extravasation VIP Score ${index + 1}`}</Form.Label>
+          <Form.Select
+            required
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScore-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+          >
+            <option value="">Select Type</option>
+            <option value="1">A (1)</option>
+            <option value="2">B (2)</option>
+            <option value="3">C (3)</option>
+            <option value="4">D (4)</option>
+            <option value="5">E (5)</option>
+          </Form.Select>
+        </Form.Group>
+      </Col>
+
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScoreRemarks-${index}`}>
+          <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={1}
+            required
+            maxLength={MAX_CHAR_LIMIT}
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScoreRemarks-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+              }
+            }}
+          />
+        </Form.Group>
+      </Col>
+    </Row>
+  )
+)}
 
      <Row className="mb-3">
      <Col sm='8'>

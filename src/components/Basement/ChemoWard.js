@@ -32,7 +32,7 @@ function ChemoWard() {
     sumOfTimeTakenForDischargeInsurance: "",
     numberOfPatientsDischargedPay: "",
     sumOfTimeTakenForDischargePay: "",
-    numberOfInPatients: "",
+    // numberOfInPatients: "",
     totalNumberOfMedicationErrors: "",
     totalNumberOfMedicationErrorsRemarks: "",
     totalNumberOfOpportunitiesOfMedicationErrors: "",
@@ -55,6 +55,10 @@ function ChemoWard() {
     numberCentralLineAssociatedBloodStreamInfectionsInAMonthRemarks: "",
     numberOfCentralLineDaysInThatMonth: "",
     numberOfCentralLineDaysInThatMonthRemarks: "",
+    numberOfPatientCatheter:"",
+    numberOfPatientCatheterRemarks:"",
+    numberOfPatientCentralLine:"",
+    numberOfPatientCentralLineRemarks:"",
     numberOfSurgicalSiteInfectionsInAGivenMonth: "",
     numberOfSurgicalSiteInfectionsInAGivenMonthRemarks: "",
     numberOfNursingStaff: "",
@@ -75,8 +79,8 @@ function ChemoWard() {
     totalNumberOfRestraintPatientsDays: "",
     totalNumberOfRestraintPatientsDaysRemarks: "",
     numberOfPatientsOnIVTherapy: "",
-    ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemark:"",
+    totalIVLineChanges:"",
+    ivLineChangeRemarks:{},
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
   });
@@ -105,6 +109,25 @@ function ChemoWard() {
       }));
     }
   }, [selectedDate]);
+
+   const handleivlineChange = (e) => {
+    const { id, value } = e.target;
+    if (value.length > MAX_CHAR_LIMIT) {
+      setError(`Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`);
+      return;
+    }
+    if (id.includes("ExtravasationVIPScore")) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+       ivLineChangeRemarks: {
+      ...prevFormData.ivLineChangeRemarks,
+      [id]: value
+    },     
+      }));
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -330,7 +353,7 @@ const handleSubmit = async (e) => {
           </Form.Group>
         </Row>
 
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Form.Group controlId="numberOfInPatients">
             <Form.Label>Number of In Patients</Form.Label>
             <Form.Control
@@ -343,7 +366,7 @@ const handleSubmit = async (e) => {
               Please fill out this field
             </Form.Control.Feedback>
           </Form.Group>
-        </Row>
+        </Row> */}
 
         <Row className="mb-3">
           <Form.Group controlId="numberOfBedsOccupied">
@@ -654,29 +677,26 @@ const handleSubmit = async (e) => {
         </Row>
 
         <Row className="mb-3">
-          <Col sm="8">
+          <Col>
             <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonth">
               <Form.Label>
-                Number of Urinary Catheter Associated UTIs In a Month
+                Number of uninary cather Infection (CAUTI) In a month
               </Form.Label>
               <Form.Control
-                required
                 type="text"
                 value={
                   formData.numberOfUrinaryCatheterAssociatedUtisInThatMonth
                 }
                 onChange={handleChange}
+                required
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
-
-          <Col sm="4">
+          <Col>
             <Form.Group controlId="numberOfUrinaryCatheterAssociatedUtisInThatMonthRemarks">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
+                required
                 as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={
@@ -689,34 +709,29 @@ const handleSubmit = async (e) => {
                   }
                 }}
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>
 
         <Row className="mb-3">
-          <Col sm="8">
+          <Col>
             <Form.Group controlId="numberOfUrinaryCatheterDaysInThatMonth">
               <Form.Label>
                 Number of Urinary Catheter Days in that Month
               </Form.Label>
               <Form.Control
-                required
                 type="text"
                 value={formData.numberOfUrinaryCatheterDaysInThatMonth}
                 onChange={handleChange}
+                required
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
-          <Col sm="4">
+          <Col>
             <Form.Group controlId="numberOfUrinaryCatheterDaysInThatMonthRemarks">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
+                required
                 as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfUrinaryCatheterDaysInThatMonthRemarks}
@@ -727,38 +742,67 @@ const handleSubmit = async (e) => {
                   }
                 }}
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+       <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheter">
+              <Form.Label>
+                Number of Patients in Catheter (new)
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCatheter}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCatheterRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCatheterRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
 
         <Row className="mb-3">
-          <Col sm="8">
+          <Col>
             <Form.Group controlId="numberCentralLineAssociatedBloodStreamInfectionsInAMonth">
               <Form.Label>
                 Number Central Line - Associated Blood Stream Infections in a
                 Month
               </Form.Label>
               <Form.Control
-                required
                 type="text"
                 value={
                   formData.numberCentralLineAssociatedBloodStreamInfectionsInAMonth
                 }
                 onChange={handleChange}
+                required
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
 
-          <Col sm="4">
+ 
+          <Col>
             <Form.Group controlId="numberCentralLineAssociatedBloodStreamInfectionsInAMonthRemarks">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
+                required
                 as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={
@@ -771,33 +815,27 @@ const handleSubmit = async (e) => {
                   }
                 }}
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
         </Row>
 
         <Row className="mb-3">
-          <Col sm="8">
+          <Col>
             <Form.Group controlId="numberOfCentralLineDaysInThatMonth">
               <Form.Label>Number of Central Line Days in that Month</Form.Label>
               <Form.Control
-                required
                 type="text"
                 value={formData.numberOfCentralLineDaysInThatMonth}
                 onChange={handleChange}
+                required
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
             </Form.Group>
           </Col>
-
-          <Col sm="4">
+          <Col>
             <Form.Group controlId="numberOfCentralLineDaysInThatMonthRemarks">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
+                required
                 as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfCentralLineDaysInThatMonthRemarks}
@@ -808,9 +846,39 @@ const handleSubmit = async (e) => {
                   }
                 }}
               />
-              <Form.Control.Feedback type="invalid">
-                Please fill out this field
-              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+       <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLine">
+              <Form.Label>
+                Number of Patients in Central Line (new)
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientCentralLine}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientCentralLineRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientCentralLineRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -1177,42 +1245,71 @@ const handleSubmit = async (e) => {
           </Form.Group>
         </Row>
 
-        <Row>
-    
-<Col md={6}>
-  <Form.Group controlId="ExtravasationVIPScore">
-    <Form.Label>Extravasation VIP Score</Form.Label>
-
-    <Form.Select
-      required
-      name="ExtravasationVIPScore"
-      value={formData.ExtravasationVIPScore}
-      onChange={handleChange}
-    >
-      <option value="">Select Type</option>
-      <option value="1">A (1)</option>
-      <option value="2">B (2)</option>
-      <option value="3">C (3)</option>
-      <option value="4">D (4)</option>
-      <option value="5">E (5)</option>
-    </Form.Select>
-  </Form.Group>
-</Col>
-
-<Col md={6}>
-    <Form.Group controlId={"ExtravasationVIPScoreRemark"}>
-      <Form.Label>Remark</Form.Label>
+<Row className="mb-3">
+  <Col md={6}>
+    <Form.Group controlId="totalIVLineChanges">
+      <Form.Label>Total Number of IV Line Changes</Form.Label>
       <Form.Control
-        as="textarea"
-        rows={1}
-        value={formData.ExtravasationVIPScoreRemark}
-        onChange={handleChange}
+        type="number"
+        min="0"
+        value={formData.totalIVLineChanges}
+        onChange={handleivlineChange}
         required
-       	maxLength={MAX_CHAR_LIMIT}
       />
     </Form.Group>
   </Col>
-  </Row>
+</Row>
+
+{Array.from({ length: formData.totalIVLineChanges || 0 }).map(
+  (_, index) => (
+    <Row className="mb-3" key={index}>
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScore-${index}`}>
+          <Form.Label>{`Extravasation VIP Score ${index + 1}`}</Form.Label>
+          <Form.Select
+            required
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScore-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+          >
+            <option value="">Select Type</option>
+            <option value="1">A (1)</option>
+            <option value="2">B (2)</option>
+            <option value="3">C (3)</option>
+            <option value="4">D (4)</option>
+            <option value="5">E (5)</option>
+          </Form.Select>
+        </Form.Group>
+      </Col>
+
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScoreRemarks-${index}`}>
+          <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={1}
+            required
+            maxLength={MAX_CHAR_LIMIT}
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScoreRemarks-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+              }
+            }}
+          />
+        </Form.Group>
+      </Col>
+    </Row>
+  )
+)}
 
         <Row className="mb-3">
           <Col sm="8">

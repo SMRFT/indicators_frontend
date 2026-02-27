@@ -86,10 +86,19 @@ const fetchExportData = () => {
     // Initialize transposed structure
     const transposedData = {};
 
-    exportData.forEach((item) => {
-      Object.entries(item).forEach(([key, value]) => {
-        if (key !== "selectedDate") {
-          if (!transposedData[key]) transposedData[key] = [];
+exportData.forEach((item) => {
+  Object.entries(item).forEach(([key, value]) => {
+    const excludedFields = [
+
+      "_id", 
+      "created_by", 
+      "created_date", 
+      "lasstmodified_by", 
+      "lastmodified_date"
+    ];
+
+    if (!excludedFields.includes(key)) {
+      if (!transposedData[key]) transposedData[key] = [];
 
           if (key === "raw_data" && Array.isArray(value)) {
             value.forEach((entry) => {
@@ -431,7 +440,7 @@ const fetchExportData = () => {
           Failed to update. Please try again.
         </Alert>
       )}
-      <Row>
+      <Row>`` 
         <Col xs={12} className="mt-2">
           {exportData.length > 0 ? (
             <div
@@ -488,12 +497,17 @@ const fetchExportData = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.keys(exportData[0]).map((field, index) => {
-                    if (
-                      field !== "selectedDate" &&
-                      field !== "ward" &&
-                      field !== "_id"
-                    ) {
+                  
+  {Object.keys(exportData[0]).map((field, index) => {
+    const excludedFields = [ 
+      "_id", 
+      "created_by", 
+      "created_date", 
+      "lastmodified_by", // Note: Make sure this spelling matches your database exactly
+      "lastmodified_date"
+    ];
+
+    if (!excludedFields.includes(field)) {
                       return (
                         <tr key={index}>
                           <td>{field}</td>

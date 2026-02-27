@@ -22,7 +22,13 @@ const TrainingFeedbackReport = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${IndicatorBaseUrl}TrainingFeedBackReport/`)
+    fetch(`${IndicatorBaseUrl}TrainingFeedBackReport/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: localStorage.getItem("access_token"),
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch data");
         return res.json();

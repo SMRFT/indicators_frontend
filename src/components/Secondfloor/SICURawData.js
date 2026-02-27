@@ -137,11 +137,13 @@ const SICURawData = ({ showHeading = true }) => {
                     return rest;
                 }),
             };
+            const token = localStorage.getItem("access_token");
 
             const response = await fetch(`${IndicatorBaseUrl}SICURawData/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": `${token}`,
                 },
                 body: JSON.stringify(formDataWithUser),
             });

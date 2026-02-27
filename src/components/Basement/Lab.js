@@ -31,6 +31,15 @@ const Lab = () => {
     numberOfStaffAudited: "",
     waitingTimeForDiagnostics: "",
     numberOfPatientsReportedInDiagnostics: "",
+    numberOfRegistrations: "",
+    numberOfIncidentOrAccidentOccur: "",
+    numberOfSampleRejections: "",
+    numberOfRepeats: "",
+    numberOfTurnAroundTimeAndShortTurnAroundCriticalReporting: "",
+    numberOfEquipmentDownTime: "",
+    numberOfPerformanceInILC: "",
+    customerFeedBack: "",
+    numberOfCriticalReporting: "",
   });
 
   useEffect(() => {
@@ -145,15 +154,19 @@ const Lab = () => {
         {/* all your existing fields unchanged */}
         {/* ... */}
 
-         <br />
+        <br />
+        <h4 className="text-center mb-4" style={{ backgroundColor: "#EBB099", color: "white" }}>PRE ANALYTICAL</h4>
+
         <Row className="mb-3">
-          <Col sm="8">
-            <Form.Group controlId="numberOfReportingErrors">
-              <Form.Label>Number of Reporting Errors</Form.Label>
+          <Col >
+            {/* <Col sm="8"> */}
+
+            <Form.Group controlId="numberOfRegistrations">
+              <Form.Label>Number of Registrations</Form.Label>
               <Form.Control
                 required
                 type="text"
-                value={formData.numberOfReportingErrors}
+                value={formData.numberOfRegistrations}
                 onChange={handleChange}
               />
               <Form.Control.Feedback type="invalid">
@@ -161,7 +174,7 @@ const Lab = () => {
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
-          <Col sm="4">
+          {/* <Col sm="4">
             <Form.Group controlId="numberOfReportingErrorsRemarks">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
@@ -180,16 +193,177 @@ const Lab = () => {
                 Please fill out this field
               </Form.Control.Feedback>
             </Form.Group>
-          </Col>
+          </Col> */}
         </Row>
 
         <Row className="mb-3">
           <Form.Group controlId="numberOfTestsPerformed">
             <Form.Label>Number of Tests Performed</Form.Label>
             <Form.Control
-              required
+              // required
               type="text"
               value={formData.numberOfTestsPerformed}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfIncidentOrAccidentOccur">
+            <Form.Label>Number of Incidant/Accident Occurs</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfIncidentOrAccidentOccur}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfSampleRejections">
+            <Form.Label>Number of Sample Rejections</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfSampleRejections}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <h4 className="text-center mb-4" style={{ backgroundColor: "#EBB099", color: "white" }}>ANALYTICAL</h4>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfRepeats">
+            <Form.Label>Number of Repeats (or redos)</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfRepeats}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfEquipmentDownTime">
+            <Form.Label>Number of Equipment Down Time</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfEquipmentDownTime}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfPerformanceInILC">
+            <Form.Label>Number of Performance in ILC</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfPerformanceInILC}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <h4 className="text-center mb-4" style={{ backgroundColor: "#EBB099", color: "white" }}>POST ANALYTICAL</h4>
+
+        <Row className="mb-3">
+          <Form.Group controlId="customerFeedBack">
+            <Form.Label>Customer Feed Back</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.customerFeedBack}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfTurnAroundTimeAndShortTurnAroundCriticalReporting">
+            <Form.Label>Number of Turn Around Time & Short Turn Around Critical reporting</Form.Label>
+            <Form.Control
+              // required
+              type="text"
+              value={formData.numberOfTurnAroundTimeAndShortTurnAroundCriticalReporting}
+              onChange={handleChange}
+            />
+            <Form.Control.Feedback type="invalid">
+              Please fill out this field
+            </Form.Control.Feedback>
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
+          <Col sm="8">
+            <Form.Group controlId="numberOfReportingErrors">
+              <Form.Label>Number of Reporting Errors</Form.Label>
+              <Form.Control
+                // required
+                type="text"
+                value={formData.numberOfReportingErrors}
+                onChange={handleChange}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col sm="4">
+            <Form.Group controlId="numberOfReportingErrorsRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                // required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfReportingErrorsRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+              <Form.Control.Feedback type="invalid">
+                Please fill out this field
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Form.Group controlId="numberOfCriticalReporting">
+            <Form.Label>Number of Critical reporting</Form.Label>
+            <Form.Control
+              // required  
+              type="text"
+              value={formData.numberOfCriticalReporting}
               onChange={handleChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -204,7 +378,7 @@ const Lab = () => {
               Number of Staff Adhering to Safety Precautions
             </Form.Label>
             <Form.Control
-              required
+              // required
               type="text"
               value={formData.numberOfStaffAdheringToSafety}
               onChange={handleChange}
@@ -219,7 +393,7 @@ const Lab = () => {
           <Form.Group controlId="numberOfStaffAudited">
             <Form.Label>Number of Staff Audited</Form.Label>
             <Form.Control
-              required
+              // required
               type="text"
               value={formData.numberOfStaffAudited}
               onChange={handleChange}
@@ -234,7 +408,7 @@ const Lab = () => {
           <Form.Group controlId="waitingTimeForDiagnostics">
             <Form.Label>Waiting time for Diagnostics</Form.Label>
             <Form.Control
-              required
+              // required
               type="text"
               value={formData.waitingTimeForDiagnostics}
               onChange={handleChange}
@@ -249,7 +423,7 @@ const Lab = () => {
           <Form.Group controlId="numberOfPatientsReportedInDiagnostics">
             <Form.Label>Number of patients reported in Diagnostics</Form.Label>
             <Form.Control
-              required
+              // required
               type="text"
               value={formData.numberOfPatientsReportedInDiagnostics}
               onChange={handleChange}
@@ -259,6 +433,7 @@ const Lab = () => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
+
 
         <button
           variant="primary"

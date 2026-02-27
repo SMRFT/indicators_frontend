@@ -88,6 +88,8 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
     useEffect(() => {
         const id = localStorage.getItem('userId');
         const name = localStorage.getItem('userName');
+        const token = localStorage.getItem("access_token");
+
         if (id && name) {
             setUserId(id);
             setUserName(name);
@@ -133,11 +135,15 @@ const ThirdFloorRawData = ({ showHeading = true }) => {
                         return rest;
                     }),
                 };
+      const token = localStorage.getItem("access_token");
 
                 const response = await fetch(`${IndicatorBaseUrl}ThirdFloorRawData/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formDataWithUser),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization":`${token}`,
+                },
+                body: JSON.stringify(formDataWithUser),
                 });
 
                 if (response.status === 400) {

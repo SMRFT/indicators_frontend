@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert, Container } from "react-bootstrap";
+import { Row, Form, Col, Alert, Container,Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import styled from "styled-components";
 import DatePicker from "react-datepicker";
@@ -29,13 +29,13 @@ function MICU() {
     sumOfTimeTakenForDischargeInsurance: "",
     numberOfPatientsDischargedPay: "",
     sumOfTimeTakenForDischargePay: "",
-    numberOfInPatients: "",
+    // numberOfInPatients: "",
     numberOfBedsOccupied: "",
     totalNumberOfMedicationErrors: "",
     totalNumberOfMedicationErrorsRemarks: "",
     totalNumberOfOpportunitiesOfMedicationErrors: "",
-    numberOfMedicationChartsReviewed: "",
-    numberOfMedicationChartsReviewedRemarks: "",
+    // numberOfMedicationChartsReviewed: "",
+    // numberOfMedicationChartsReviewedRemarks: "",
     numberOfPatientsDevelopingAdverseDrugReactions: "",
     numberOfPatientsDevelopingAdverseDrugReactionsRemarks: "",
     numberOfTransfusionReaction: "",
@@ -82,8 +82,8 @@ function MICU() {
     totalNumberOfRestraintPatientsDays: "",
     totalNumberOfRestraintPatientsDaysRemarks: "",
     numberOfPatientsOnIVTherapy: "",
-    ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemarks:"",
+    totalIVLineChanges:"",
+    ivLineChangeRemarks:{},
     incidentsOfDelining: "",
     incidentsOfDeliningRemarks: "",
     NumberofreturnstoICUwithin48hours: "",
@@ -102,9 +102,26 @@ function MICU() {
     numberOfPatientVentilatorRemarks:"",
     numberOfRestrainedPatients: "",
     restrainedPatientsDetails: {},
-    ExtravasationVIPScore:"",
-    ExtravasationVIPScoreRemarks:"",
+
   });
+
+const apacheScores = [
+  { score: 1, factor: 1 / 100 },
+  { score: 3, factor: 3 / 100 },
+  { score: 7, factor: 7 / 100 },
+  { score: 4, factor: 4 / 100 },
+  { score: 8, factor: 8 / 100 },
+  { score: 12, factor: 12 / 100 },
+  { score: 15, factor: 15 / 100 },
+  { score: 24, factor: 24 / 100 },
+  { score: 30, factor: 30 / 100 },
+  { score: 35, factor: 35 / 100 },
+  { score: 40, factor: 40 / 100 },
+  { score: 55, factor: 55 / 100 },
+  { score: 73, factor: 73 / 100 },
+  { score: 85, factor: 85 / 100 },
+  { score: 88, factor: 88 / 100 },
+];
 
   useEffect(() => {
     const id = localStorage.getItem("userId");
@@ -194,9 +211,51 @@ const handleDetailChange = (key, field, value) => {
     }
   };
 
+      const handleivlineChange = (e) => {
+    const { id, value } = e.target;
+    if (value.length > MAX_CHAR_LIMIT) {
+      setError(`Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`);
+      return;
+    }
+    if (id.includes("ExtravasationVIPScore")) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+       ivLineChangeRemarks: {
+      ...prevFormData.ivLineChangeRemarks,
+      [id]: value
+    },     
+      }));
+    } else {
+      setFormData({ ...formData, [id]: value });
+    }
+  };
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
+
+  const [patients, setPatients] = useState({});
+
+const handlePatientChange = (score, value) => {
+  const updatedPatients = {
+    ...patients,
+    [score]: Number(value) || 0,
+  };
+
+  setPatients(updatedPatients);
+
+  const totalPredictedDeaths = apacheScores.reduce(
+    (sum, item) =>
+      sum + (updatedPatients[item.score] || 0) * item.factor,
+    0
+  );
+
+  setFormData((prev) => ({
+    ...prev,
+    predictedDeathsInICU: totalPredictedDeaths.toFixed(2),
+  }));
+};
+
 
 const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -403,7 +462,7 @@ useEffect(() => {
           </Form.Group>
         </Row>
 
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Form.Group controlId="numberOfInPatients">
             <Form.Label>Number of IP Patients</Form.Label>
             <Form.Control
@@ -416,7 +475,7 @@ useEffect(() => {
               Please fill out this field
             </Form.Control.Feedback>
           </Form.Group>
-        </Row>
+        </Row> */}
 
         <Row className="mb-3">
           <Form.Group controlId="numberOfBedsOccupied">
@@ -843,7 +902,7 @@ useEffect(() => {
           <Col>
             <Form.Group controlId="numberOfPatientCatheter">
               <Form.Label>
-                Number of Patients in Catheter
+                Number of Patients in Catheter (new)
               </Form.Label>
               <Form.Control
                 type="text"
@@ -957,7 +1016,7 @@ useEffect(() => {
           <Col>
             <Form.Group controlId="numberOfPatientCentralLine">
               <Form.Label>
-                Number of Patients in Central Line
+                Number of Patients in Central Line (new)
               </Form.Label>
               <Form.Control
                 type="text"
@@ -985,40 +1044,6 @@ useEffect(() => {
             </Form.Group>
           </Col>
         </Row>
-
-        <Row className="mb-3">
-          <Col>
-            <Form.Group controlId="numberOfPatientVentilator">
-              <Form.Label>
-                Number of Patients in Ventilator
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.numberOfPatientVentilator}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-          </Col>
-          <Col>
-            <Form.Group controlId="numberOfPatientVentilatorRemarks">
-              <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                required
-                as="textarea"
-                rows={1} // Adjust the number of visible rows
-                value={formData.numberOfPatientVentilatorRemarks}
-                onChange={handleChange}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // Prevent form submission if applicable
-                  }
-                }}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-
 
         <Row className="mb-3">
           <Col sm="8">
@@ -1431,6 +1456,35 @@ useEffect(() => {
           </Col>
         </Row>
 
+<Table bordered size="sm" className="text-center">
+  <thead>
+    <tr>
+      <th>APACHE Score</th>
+      {apacheScores.map((item) => (
+        <th key={item.score}>{item.score}</th>
+      ))}
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <th>No. of Patients</th>
+      {apacheScores.map((item) => (
+        <td key={item.score}>
+          <Form.Control
+            type="text"
+            min="0"
+            value={patients[item.score] || ""}
+            onChange={(e) =>
+              handlePatientChange(item.score, e.target.value)
+            }
+          />
+        </td>
+      ))}
+    </tr>
+  </tbody>
+</Table>
+
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="predictedDeathsInICU">
@@ -1506,10 +1560,11 @@ useEffect(() => {
             </Form.Group>
           </Col>
         </Row>
+
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="numberOfVentilatorDays">
-              <Form.Label>Number Of Ventilator Days</Form.Label>
+              <Form.Label>Number Of Ventilator Days (new)</Form.Label>
               <Form.Control
                 required
                 type="text"
@@ -1543,6 +1598,40 @@ useEffect(() => {
             </Form.Group>
           </Col>
         </Row>
+        
+        <Row className="mb-3">
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilator">
+              <Form.Label>
+                Number of Patients in Ventilator
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.numberOfPatientVentilator}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+          </Col>
+          <Col>
+            <Form.Group controlId="numberOfPatientVentilatorRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                required
+                as="textarea"
+                rows={1} // Adjust the number of visible rows
+                value={formData.numberOfPatientVentilatorRemarks}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevent form submission if applicable
+                  }
+                }}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+
 
         <Row className="mb-3">
           <Col sm="8">
@@ -1595,42 +1684,73 @@ useEffect(() => {
             </Form.Control.Feedback>
           </Form.Group>
         </Row>
-          <Row>
-    
-<Col md={6}>
-  <Form.Group controlId="ExtravasationVIPScore">
-    <Form.Label>Extravasation VIP Score</Form.Label>
+   
+<Row className="mb-3">
+  <Col md={6}>
+    <Form.Group controlId="totalIVLineChanges">
+      <Form.Label>Total Number of IV Line Changes</Form.Label>
+      <Form.Control
+        type="number"
+        min="0"
+        value={formData.totalIVLineChanges}
+        onChange={handleivlineChange}
+        required
+      />
+    </Form.Group>
+  </Col>
+</Row>
 
-    <Form.Select
-      required
-      name="ExtravasationVIPScore"
-      value={formData.ExtravasationVIPScore}
-      onChange={handleChange}
-    >
-      <option value="">Select Type</option>
-      <option value="1">A (1)</option>
-      <option value="2">B (2)</option>
-      <option value="3">C (3)</option>
-      <option value="4">D (4)</option>
-      <option value="5">E (5)</option>
-    </Form.Select>
-  </Form.Group>
-</Col>
+{Array.from({ length: formData.totalIVLineChanges || 0 }).map(
+  (_, index) => (
+    <Row className="mb-3" key={index}>
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScore-${index}`}>
+          <Form.Label>{`Extravasation VIP Score ${index + 1}`}</Form.Label>
+          <Form.Select
+            required
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScore-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+          >
+            <option value="">Select Type</option>
+            <option value="1">A (1)</option>
+            <option value="2">B (2)</option>
+            <option value="3">C (3)</option>
+            <option value="4">D (4)</option>
+            <option value="5">E (5)</option>
+          </Form.Select>
+        </Form.Group>
+      </Col>
 
-    <Col md={6}>
-      <Form.Group controlId={"ExtravasationVIPScoreRemarks"}>
-        <Form.Label>Remark</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={1}
-          value={formData.ExtravasationVIPScoreRemarks}
-          onChange={handleChange}
-          required
-          maxLength={MAX_CHAR_LIMIT}
-        />
-      </Form.Group>
-    </Col>
-  </Row>
+      <Col md={6}>
+        <Form.Group controlId={`ExtravasationVIPScoreRemarks-${index}`}>
+          <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={1}
+            required
+            maxLength={MAX_CHAR_LIMIT}
+            value={
+              formData.ivLineChangeRemarks?.[
+                `ExtravasationVIPScoreRemarks-${index}`
+              ] || ""
+            }
+            onChange={handleivlineChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+              }
+            }}
+          />
+        </Form.Group>
+      </Col>
+    </Row>
+  )
+)}
+
         <Row className="mb-3">
           <Col sm="8">
             <Form.Group controlId="incidentsOfDelining">
@@ -1713,7 +1833,7 @@ useEffect(() => {
           <Col sm="8">
             <Form.Group controlId="NumberofdischargestransfersfromtheICU">
               <Form.Label>
-                Number of discharges transfers from the ICU
+                Number of discharges /transfers from the ICU
               </Form.Label>
               <Form.Control
                 required

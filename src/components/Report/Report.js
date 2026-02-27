@@ -14,10 +14,15 @@ import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 
 function getTransposedData(dataArray) {
   const transposedData = {};
+  // Standardizing the excluded fields list (matching your database keys)
+  const excludedFields = ["created_by", "created_date", "lastmodified_by", "lastmodified_date", "selectedDate", "ward"];
 
   dataArray.forEach((data) => {
     Object.keys(data).forEach((key) => {
-      // Format the key
+      // 1. Skip if the key is in the excluded list
+      if (excludedFields.includes(key)) return;
+
+      // Format the display key
       let formattedKey;
       if (key.endsWith("Insurance")) {
         formattedKey = key.replace(/Insurance$/, "").trim() + " ( Insurance )";
@@ -119,10 +124,11 @@ function Report() {
   useEffect(() => {
     if (exportData.length > 0) {
       const mapping = {};
-
-      Object.keys(exportData[0]).forEach((key) => {
-        let displayKey = key;
-
+      const excludedFields = ["created_by", "created_date", "lastmodified_by", "lastmodified_date", "selectedDate", "ward"];
+    
+    Object.keys(exportData[0]).forEach((key) => {
+      if (excludedFields.includes(key)) return; // Strictly skip metadata
+      let displayKey = key;
         // Convert to formatted display key
         if (key.endsWith("Insurance")) {
           displayKey = key.replace(/Insurance$/, "").trim() + " ( Insurance )";
@@ -307,113 +313,55 @@ const fetchExportData = async () => {
 
 // Get the display value for a field and column
 const getDisplayValue = (displayField, colIndex) => {
-  // Get the original database field name from our mapping
   const dbField = fieldMapping[displayField];
+  if (!dbField) return "Nil";
 
-  if (!dbField) {
-    console.error("No mapping found for display field:", displayField);
+  // 1. Get the raw value from data
+  const rawValue = exportData[colIndex][dbField];
+  
+  // 2. Handle Edited Values (Ensure we return a string for inputs)
+  if (isEditing && editedValues[colIndex] && dbField in editedValues[colIndex]) {
+    const val = editedValues[colIndex][dbField];
+    // CRITICAL: If the value is an object, stringify it so the input doesn't crash
+    return typeof val === 'object' ? JSON.stringify(val) : (val ?? "");
+  }
+
+  if (rawValue === null || rawValue === undefined || rawValue.toString().toLowerCase() === "nil") {
     return "Nil";
   }
 
-  // Special handling for transfusion remarks
+  // 3. Special handling for Transfusion Remarks
   if (dbField === "numberOfUnitsTransfusedRemarks") {
-    // First check for edited values
-    if (
-      isEditing &&
-      editedValues[colIndex] &&
-      dbField in editedValues[colIndex]
-    ) {
-      return editedValues[colIndex][dbField];
-    }
-
-    // Get the raw value
-    const rawValue = exportData[colIndex][dbField];
-    
-    // If null/undefined/nil, return "Nil"
-    if (rawValue === null || 
-        rawValue === undefined || 
-        rawValue.toString().toLowerCase() === "nil") {
-      return "Nil";
-    }
-    
-    // Process the transfusion data
     try {
-      // Clean and parse the JSON string
-      const cleanValue = rawValue.replace(/'/g, '"');
-      const parsedRemarks = JSON.parse(cleanValue);
+      // If it's already an object, use it; if string, parse it
+      const parsedRemarks = typeof rawValue === 'object' ? rawValue : JSON.parse(rawValue.replace(/'/g, '"'));
       
-      // Get all transfusion entries
-      const transfusionEntries = [];
-      
-      // Look for transfused keys
-      const transfusedKeys = Object.keys(parsedRemarks)
-        .filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
+      const transfusedKeys = Object.keys(parsedRemarks).filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
       
       if (transfusedKeys.length > 0) {
-        transfusedKeys.forEach(transfusedKey => {
-          const index = transfusedKey.split('-')[1];
-          const displayIndex = parseInt(index) + 1;
-          
-          // Look for corresponding remarks in either format
-          let remarks = "";
-          if (parsedRemarks[`remarks-${index}`]) {
-            remarks = parsedRemarks[`remarks-${index}`];
-          } else if (parsedRemarks[`transfused-remarks-${index}`]) {
-            remarks = parsedRemarks[`transfused-remarks-${index}`];
-          }
-          
-          // Format with line breaks, using React's line break rendering approach
-          transfusionEntries.push(`${displayIndex} - remarks: ${remarks}`);
-        });
-        
-        // Return the joined string that will be rendered properly with line breaks
         return (
           <div>
-            {transfusionEntries.map((entry, idx) => (
-              <div key={idx}>{entry}</div>
-            ))}
+            {transfusedKeys.map((transfusedKey, idx) => {
+              const index = transfusedKey.split('-')[1];
+              const remarks = parsedRemarks[`remarks-${index}`] || parsedRemarks[`transfused-remarks-${index}`] || "";
+              return <div key={idx}>{parseInt(index) + 1} - remarks: {remarks}</div>;
+            })}
           </div>
         );
-      } 
-      
-      // Fallback for simpler structure
-      if (parsedRemarks['transfused-0']) {
-        const remarks = parsedRemarks['remarks-0'] || "";
-        return `1 - remarks: ${remarks}`;
       }
-      
-      // If we can't parse it in our expected format, return with line breaks
-      return (
-        <div>
-          {Object.entries(parsedRemarks).map(([k, v], idx) => (
-            <div key={idx}>{k}: {v}</div>
-          ))}
-        </div>
-      );
-      
+      // If it's an object but doesn't match the keys, stringify it to avoid the error
+      return typeof parsedRemarks === 'object' ? JSON.stringify(parsedRemarks) : String(parsedRemarks);
     } catch (error) {
-      console.error("Error parsing transfusion remarks:", error);
-      // If all else fails, return the raw value
-      return rawValue;
+      return String(rawValue);
     }
   }
 
-  // First check for edited values for non-transfusion fields
-  if (
-    isEditing &&
-    editedValues[colIndex] &&
-    dbField in editedValues[colIndex]
-  ) {
-    return editedValues[colIndex][dbField];
+  // 4. Final safety check: if rawValue is an object, stringify it
+  if (typeof rawValue === 'object') {
+    return JSON.stringify(rawValue);
   }
 
-  // Otherwise return the original value
-  const value = exportData[colIndex][dbField];
-  return value === null ||
-    value === undefined ||
-    value.toString().toLowerCase() === "nil"
-    ? "Nil"
-    : value;
+  return rawValue;
 };
   // Handle input change for a field
   const handleInputChange = (displayField, colIndex, value) => {

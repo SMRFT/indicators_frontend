@@ -27,14 +27,14 @@ const EmergencyRoom = () => {
     numberOfReturnsToEmergencyWithin72hoursWithSimilarPresentingComplaints: '',
     numberOfReturnsToEmergencyWithin72hoursWithSimilarPresentingComplaintsRemarks: '',
     numberOfPatientsWhoHaveComeToTheEmergency: '',
-    totalNumberOfSurgicalSiteInfectionInAGivenMonth: '',
-    totalNumberOfSurgicalSiteInfectionInAGivenMonthRemarks: '',
+    // totalNumberOfSurgicalSiteInfectionInAGivenMonth: '',
+    // totalNumberOfSurgicalSiteInfectionInAGivenMonthRemarks: '',
     numberOfParenteralExposures: '',
     numberOfParenteralExposuresRemarks: '',
     numberOfIncidents: '',
     numberOfIncidentsRemarks: '',
-    timeTakenforIndoorPatientsNurses: '',
-    timeTakenforIndoorPatientsDoctors: '',
+    // timeTakenforIndoorPatientsNurses: '',
+    // timeTakenforIndoorPatientsDoctors: '',
   });
 
   useEffect(() => {
@@ -214,7 +214,7 @@ const EmergencyRoom = () => {
           </Form.Group>
         </Row>
 
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Form.Group as={Col} controlId="totalNumberOfSurgicalSiteInfectionInAGivenMonth">
             <Form.Label>Total Number of Surgical Site Infection in a Given Month (Within 30 days)</Form.Label>
             <Form.Control
@@ -241,7 +241,7 @@ const EmergencyRoom = () => {
             />
             <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
           </Form.Group>
-        </Row>
+        </Row> */}
 
         <Row className="mb-3">
           <Form.Group as={Col} controlId="numberOfParenteralExposures">
@@ -300,7 +300,7 @@ const EmergencyRoom = () => {
             <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
           </Form.Group>
         </Row>
-        <Row className="mb-3">
+        {/* <Row className="mb-3">
           <Form.Group controlId="timeTakenforIndoorPatientsNurses">
             <Form.Label>Time Taken for Indoor Patients Nurses (Mins)</Form.Label>
             <Form.Control
@@ -323,7 +323,7 @@ const EmergencyRoom = () => {
             />
             <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
           </Form.Group>
-        </Row>
+        </Row> */}
 
         <button 
           variant="primary" 

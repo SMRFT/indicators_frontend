@@ -130,13 +130,16 @@ const handleSubmit = async (e) => {
                 id: userId,
                 name: userName,
                 selectedDate: adjustedDate,
+
                 raw_data: formData.map(({ selectedDate, ...rest }) => rest),
             };
-
+            const token = localStorage.getItem("access_token");
+            
             const response = await fetch(`${IndicatorBaseUrl}SecondSuitRawData/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "Authorization": `${token}`,
                 },
                 body: JSON.stringify(formDataWithUser),
             });
