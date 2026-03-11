@@ -94,11 +94,11 @@ const handleSubmit = async (e) => {
         auditBy,
         fiveMoments: JSON.stringify(formData.fiveMoments),
       };
-
       const response = await fetch(`${IndicatorBaseUrl}HandHygenieAudit/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+           Authorization: localStorage.getItem("access_token"),
         },
         body: JSON.stringify(formDataWithUser),
       });

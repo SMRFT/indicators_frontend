@@ -217,6 +217,7 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
     if (pathname.includes("SICU")) return "/SICURawData";
     if (pathname.includes("NICU")) return "/NICURawData";
     if (pathname.includes("MICU")) return "/MICURawData";
+    if (pathname.includes("HandHygieneAudit")) return "/HandHygieneAudit";
     return "/FirstFloorRawData"; // Default route if none match
   };
 
@@ -239,7 +240,14 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data
             </CDBSidebarMenuItem>
           </NavLink>
-        )}
+
+        )}        
+          <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
+            <CDBSidebarMenuItem className="sidebar-menu-item">
+              <FaHandsWash />
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
+            </CDBSidebarMenuItem>
+          </NavLink>
 
         {/* Add General Report and Master Data Report for Employees */}
         <div className="sidebar-dropdown">

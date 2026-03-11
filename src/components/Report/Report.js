@@ -675,7 +675,7 @@ const getDisplayValue = (displayField, colIndex) => {
 
                     // Calculate row total for numeric fields
                     const rowTotal =
-                      rowIndex >= 3 && rowIndex < totalRows - 1
+                      rowIndex >= 2 && rowIndex < totalRows - 1
                         ? values.reduce(
                             (sum, val) => sum + (parseFloat(val) || 0),
                             0
