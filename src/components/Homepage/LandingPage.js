@@ -1,65 +1,16 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaTimes } from 'react-icons/fa';
-import { TbHexagonNumber0, TbHexagonNumber1, TbHexagonNumber2, TbHexagonNumber3, TbHexagonPlus } from 'react-icons/tb';
-import { FiHexagon, FiArrowDown } from 'react-icons/fi';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FiBarChart2, FiAlertTriangle } from 'react-icons/fi';
 import Logo from '../images/shanmuga-hospital-logo.jpg';
-import BasementIcons from '../Basement/BasementIcons';
-import FirstFloorIcons from '../Firstfloor/FirstFloorIcons';
-import SecondFloorIcons from '../Secondfloor/SecondFloorIcons';
-import GroundFloorIcons from '../GroundFloor/GroundFloorIcons';
-import ThirdFloorIcons from '../Thirdfloor/ThirdFloorIcons';
-import OtherIcons from '../Others/OtherIcons';
 import './LandingPage.css';
 
 function LandingPage() {
-  const [showPanel, setShowPanel] = useState(false);
-  const [currentFloor, setCurrentFloor] = useState('');
-  const [currentIcons, setCurrentIcons] = useState(null);
   const userRole = localStorage.getItem("userRole");
-
   const navigate = useNavigate();
 
-  const handleFloorClick = (floor) => {
-    setCurrentFloor(floor);
-    setShowPanel(true);
-    setCurrentIcons(getIconsForFloor(floor));
-  };
-
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    setCurrentFloor('');
-    setCurrentIcons(null);
-  };
-
-const handleIconClick = (sectionName) => {
-  if (sectionName) {
-    navigate(`/${sectionName}`);
-  }
-};
-
-const handleSignOut = () => {
-  localStorage.removeItem("userRole");
-  window.location.href = "/Login";
-};
-
-  const getIconsForFloor = (floor) => {
-    switch (floor) {
-      case 'Basement':
-        return <BasementIcons handleIconClick={handleIconClick} />;
-      case 'Ground Floor':
-        return <GroundFloorIcons handleIconClick={handleIconClick} />;
-      case 'Floor 1':
-        return <FirstFloorIcons handleIconClick={handleIconClick} />;
-      case 'Floor 2':
-        return <SecondFloorIcons handleIconClick={handleIconClick} />;
-      case 'Floor 3':
-        return <ThirdFloorIcons handleIconClick={handleIconClick} />;
-      case 'Others':
-        return <OtherIcons handleIconClick={handleIconClick} />;
-      default:
-        return null;
-    }
+  const handleSignOut = () => {
+    localStorage.removeItem("userRole");
+    window.location.href = "/Login";
   };
 
   return (
@@ -69,107 +20,167 @@ const handleSignOut = () => {
       </div>
 
       <div className="landing-page">
+        {/* Header Action Buttons (Admin Login, Sign Out) */}
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            marginTop: "100px",
+            paddingRight: "50px",
+            gap: "20px"
+          }}
+        >
+          <div className="header-buttons">
+            {/* Admin Login button */}
+            {userRole === "Admin" && (
+              <button
+                className="header-btn admin-btn"
+                onClick={() => navigate("/Report")}
+                style={{
+                  background: "#109b76",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  color: "#fff",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  fontSize: "18px",
+                }}
+              >
+                Admin Login
+              </button>
+            )}
 
-{/* Buttons directly under header — aligned correctly */}
-<div
-  style={{
-    width: "100%",
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "right",
-    marginTop: "100px",
-    paddingRight: "50px",
-    gap: "20px"
-  }}
->
-   {/* Header buttons (outside .landing-page) */}
-  <div className="header-buttons">
-  {/* Admin Login button */}
-  {userRole === "Admin" && (
-    <button
-      className="header-btn admin-btn"
-      onClick={() => navigate("/Report")}
-      style={{
-        background: "#109b76",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "6px",
-        color: "#fff",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-        fontSize: "18px",
-  
-      }}
-    >
-      Admin Login
-    </button>
-  )}
-
-  {/* Sign Out button */}
-  {userRole && (
-    <button
-      className="header-btn signout-btn"
-      onClick={handleSignOut}
-      style={{
-        background: "#ff5252",
-        border: "none",
-        padding: "8px 16px",
-        borderRadius: "6px",
-        color: "#fff",
-        cursor: "pointer",
-        fontSize: "18px",
-        whiteSpace: "nowrap",
-   
-      }}
-    >
-      Sign Out
-    </button>
-  )}
-</div>
-</div>
-        <div className='row floor-container'>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Basement')}>
-            <div className="hexagon-container">
-              <FiHexagon className="floor-icon" />
-              <FiArrowDown className="arrow-down-icon" />
-            </div>
-            <p>Basement</p>
-          </div>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Ground Floor')}>
-            <TbHexagonNumber0 className="floor-icon" />
-            <p style={{ whiteSpace: "nowrap" }}>Ground Floor</p>
-          </div>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Floor 1')}>
-            <TbHexagonNumber1 className="floor-icon" />
-            <p>Floor 1</p>
-          </div>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Floor 2')}>
-            <TbHexagonNumber2 className="floor-icon" />
-            <p>Floor 2</p>
-          </div>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Floor 3')}>
-            <TbHexagonNumber3 className="floor-icon" />
-            <p>Floor 3</p>
-          </div>
-          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Others')}>
-            <TbHexagonPlus className="floor-icon" />
-            <p>Others</p>
+            {/* Sign Out button */}
+            {userRole && (
+              <button
+                className="header-btn signout-btn"
+                onClick={handleSignOut}
+                style={{
+                  background: "#ff5252",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Sign Out
+              </button>
+            )}
           </div>
         </div>
 
-        {showPanel && (
-          <div className="sliding-panel-container">
-            <div className="close-icon" onClick={handleClosePanel}><FaTimes /></div>
-            <h2 style={{ color: "#E1F7F5" }}>{currentFloor}</h2>
-            {currentIcons}
-          </div>
-        )}
+        {/* Select Module Screen */}
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "55vh",
+          width: "100%",
+          padding: "20px"
+        }}>
+          <div className="landing-panel-bg" style={{
+            borderRadius: "16px",
+            padding: "45px 50px",
+            maxWidth: "650px",
+            width: "100%",
+            textAlign: "center"
+          }}>
+            <h2 style={{ color: "#fff", fontWeight: "700", fontSize: "28px", marginBottom: "8px" }}>
+              Select Your Module
+            </h2>
+            <p style={{ color: "rgba(255, 255, 255, 0.5)", fontSize: "15px", marginBottom: "35px" }}>
+              Please select a module to view available sections.
+            </p>
 
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "24px",
+              flexWrap: "wrap"
+            }}>
+              {/* Option 1: Quality Indicators */}
+              <div
+                onClick={() => navigate('/QualityIndicators')}
+                style={{
+                  background: "rgba(15, 23, 42, 0.85)",
+                  border: "2px solid rgba(255, 255, 255, 0.25)",
+                  borderRadius: "12px",
+                  padding: "25px 20px",
+                  width: "230px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "15px"
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 23, 42, 0.95)";
+                  e.currentTarget.style.borderColor = "#00f0ff";
+                  e.currentTarget.style.boxShadow = "0 8px 30px rgba(0, 240, 255, 0.3)";
+                  e.currentTarget.style.transform = "scale(1.03)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 23, 42, 0.85)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.25)";
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                <FiBarChart2 style={{ fontSize: "38px", color: "#00f0ff" }} />
+                <span style={{ color: "#fff", fontWeight: "700", fontSize: "17px", textAlign: "center" }}>
+                  Quality Indicators
+                </span>
+              </div>
+
+              {/* Option 2: Incident Report & RCA */}
+              <div
+                onClick={() => navigate('/IncidentDashboard')}
+                style={{
+                  background: "rgba(15, 23, 42, 0.85)",
+                  border: "2px solid rgba(255, 255, 255, 0.25)",
+                  borderRadius: "12px",
+                  padding: "25px 20px",
+                  width: "230px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "15px"
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 23, 42, 0.95)";
+                  e.currentTarget.style.borderColor = "#00f0ff";
+                  e.currentTarget.style.boxShadow = "0 8px 30px rgba(0, 240, 255, 0.3)";
+                  e.currentTarget.style.transform = "scale(1.03)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "rgba(15, 23, 42, 0.85)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.25)";
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                <FiAlertTriangle style={{ fontSize: "38px", color: "#00f0ff" }} />
+                <span style={{ color: "#fff", fontWeight: "700", fontSize: "17px", textAlign: "center" }}>
+                  Incident Report 
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    
   );
 }
-        
 
 export default LandingPage;

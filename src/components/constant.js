@@ -55,4 +55,5 @@ export const RawDataOptions = [
   "EmergencyRoom Raw Data",
   "Chemo Ward Raw Data",
   "Recoveryward Raw Data",
+  "OPD Raw Data"
 ];

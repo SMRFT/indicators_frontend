@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import LandingPage from "./components/Homepage/LandingPage";
+import QualityIndicatorsLanding from "./components/Homepage/QualityIndicatorsLanding";
+import IncidentDashboard from "./components/Homepage/IncidentDashboard";
 import { AdminLogin, EmployeeLogin } from "./components/Auth/Login";
 import Availability from "./components/Report/Availability";
 import Formula from "./components/Report/Formula";
@@ -50,7 +52,12 @@ import TrainingFeedBack from "./components/TrainingFeedBack";
 import TrainingFeedbackReport from "./components/Report/TrainingFeedBackReport";
 import Pharmacy from "./components/Basement/Pharmacy";
 import Mockdrills from "./components/Others/Mockdrills";
-
+import OPDRawData from "./components/GroundFloor/OPDRawData";
+import IncidentReport from "./components/IncitendInvestForms/IncidentReport";
+import SupervisorInvestigation from "./components/IncitendInvestForms/SupervisorInvestigation";
+import IncidentReportReport from "./components/Report/IncidentReportReport";
+import SupervisorInvestigationReport from "./components/Report/SupervisorInvestigationReport";
+import IncidentClassificationManager from "./components/IncitendInvestForms/IncidentClassificationManager";
 
 function App() {
   const location = useLocation();
@@ -62,10 +69,10 @@ function App() {
 
   const showSidebar =
     userRole &&
-    !["/", "/Login", "/AdminLogin", "/EmployeeLogin"].includes(
+    !["/", "/Login", "/AdminLogin", "/EmployeeLogin", "/QualityIndicators", "/IncidentDashboard"].includes(
       location.pathname
     );
-  const showLogo = !showSidebar && location.pathname !== "/";
+  const showLogo = !showSidebar && !["/", "/QualityIndicators", "/IncidentDashboard"].includes(location.pathname);
   const hideMainContent = [
     "/",
     "/Login",
@@ -86,6 +93,9 @@ function App() {
     "/SICURawData",
     "/NICURawData",
     "/MICURawData",
+    "/OPDRawData",
+    "/QualityIndicators",
+    "/IncidentDashboard",
   ].includes(location.pathname);
 
 
@@ -105,6 +115,8 @@ function App() {
       <div className={hideMainContent ? "" : "main-content"}>
         <Routes >
           <Route path="/" element={<LandingPage />} />
+          <Route path="/QualityIndicators" element={<QualityIndicatorsLanding />} />
+          <Route path="/IncidentDashboard" element={<IncidentDashboard />} />
           <Route
             path="/EmployeeLogin"
             element={<EmployeeLogin setUserRole={setUserRole} />}
@@ -113,7 +125,7 @@ function App() {
             path="/AdminLogin"
             element={<AdminLogin setUserRole={setUserRole} />}
           />
-          {/* <Route path="/Register" element={<Register />} /> */}
+          <Route path="/Register" element={<Register />} />
           <Route path="/Availability" element={<Availability />} />
           <Route path="/Report" element={<Report />} />
           <Route path="/MasterDataReport" element={<MasterDataReport />} />
@@ -166,6 +178,12 @@ function App() {
             path="/TrainingFeedbackReport"
             element={<TrainingFeedbackReport />}
           />
+          <Route path="/OPDRawData" element={<OPDRawData />} />
+          <Route path="/IncidentReport" element={<IncidentReport />} />
+          <Route path="/SupervisorInvestigation" element={<SupervisorInvestigation />} />
+          <Route path="/IncidentReportReport" element={<IncidentReportReport />} />
+          <Route path="/SupervisorInvestigationReport" element={<SupervisorInvestigationReport />} />
+          <Route path="/IncidentClassification" element={<IncidentClassificationManager />} />
         </Routes>
       </div>
     </div>

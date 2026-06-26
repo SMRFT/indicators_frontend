@@ -96,6 +96,24 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feedback Report
                 </CDBSidebarMenuItem>
               </NavLink>
+              <NavLink
+                exact
+                to="/IncidentReportReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/SupervisorInvestigationReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supervisor Investigation Report
+                </CDBSidebarMenuItem>
+              </NavLink>
             </div>
           )}
         </div>
@@ -286,6 +304,17 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
     );
   }
 
+  const getHomeRoute = () => {
+    const path = location?.pathname || "";
+    if (
+      path.includes("Incident") ||
+      path.includes("SupervisorInvestigation")
+    ) {
+      return "/IncidentDashboard";
+    }
+    return "/QualityIndicators";
+  };
+
   return (
     <div className="sidebar-container">
       <CDBSidebar textColor="Black" backgroundColor="#ECF8F9">
@@ -298,7 +327,7 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
         </CDBSidebarHeader>
         <CDBSidebarContent className="sidebar-content">
           <CDBSidebarMenu>
-            <NavLink exact to="/" activeClassName="activeClicked">
+            <NavLink exact to={getHomeRoute()} activeClassName="activeClicked">
               <CDBSidebarMenuItem className="sidebar-menu-item">
                 <FaHome />
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home

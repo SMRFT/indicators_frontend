@@ -399,3 +399,22 @@
   }
   .header-btn { min-width: 90px; font-size: 14px; padding: 6px 10px; }
 }
+
+/* Incident/RCA Dashboard Card Hover Styling */
+.incident-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.incident-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+}
+
+/* DNA panel background class */
+.landing-panel-bg {
+  background-image: url('../images/background-panel-image.png');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
