@@ -172,7 +172,7 @@ function LandingPage() {
               >
                 <FiAlertTriangle style={{ fontSize: "38px", color: "#00f0ff" }} />
                 <span style={{ color: "#fff", fontWeight: "700", fontSize: "17px", textAlign: "center" }}>
-                  Incident Report 
+                  Incident Form
                 </span>
               </div>
             </div>

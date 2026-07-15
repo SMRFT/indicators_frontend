@@ -1,9 +1,194 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
-import { Row, Col, Modal, Button, Container, Form } from "react-bootstrap";
+import { Row, Col, Modal, Button, Container, Form, Spinner } from "react-bootstrap";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faPrint, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+
+const BackButton = styled.button`
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: auto;
+
+  &:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.3);
+  }
+`;
+
+const ActionButton = styled.button`
+  background: ${props => props.variant === "print" ? "#4e4376" : "#109b76"};
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.variant === "print" ? "0 4px 12px rgba(78, 67, 118, 0.2)" : "0 4px 12px rgba(16, 155, 118, 0.2)"};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: auto;
+
+  &:hover {
+    background: ${props => props.variant === "print" ? "#3a3258" : "#0c7a5d"};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.variant === "print" ? "0 6px 16px rgba(78, 67, 118, 0.3)" : "0 6px 16px rgba(16, 155, 118, 0.3)"};
+  }
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: white;
+  margin-bottom: 20px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf2f7;
+    color: #2d3748;
+    white-space: nowrap;
+  }
+
+  tr:hover {
+    background-color: #f8fafc;
+  }
+
+  /* Sticky columns styling for first four fields */
+  th:nth-child(1), td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+  }
+  th:nth-child(2), td:nth-child(2) {
+    position: sticky;
+    left: 120px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    position: sticky;
+    left: 230px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    position: sticky;
+    left: 330px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 4px 0 5px -2px rgba(0, 0, 0, 0.15);
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    border-right: 2px solid #cbd5e0;
+  }
+
+  th:nth-child(1), th:nth-child(2), th:nth-child(3), th:nth-child(4) {
+    z-index: 3;
+    background-color: #f8fafc !important;
+  }
+
+  tr:hover td:nth-child(1),
+  tr:hover td:nth-child(2),
+  tr:hover td:nth-child(3),
+  tr:hover td:nth-child(4) {
+    background-color: #f8fafc;
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+`;
+
+const PageButton = styled.button`
+  background: ${props => props.active ? "#4e4376" : "white"};
+  color: ${props => props.active ? "white" : "#4a5568"};
+  border: 1px solid #cbd5e0;
+  padding: 6px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.active ? "#4e4376" : "#edf2f7"};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const SpinnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  gap: 15px;
+`;
 
 const IncidentReportReport = () => {
   const navigate = useNavigate();
@@ -17,6 +202,8 @@ const IncidentReportReport = () => {
   const [showModal, setShowModal] = useState(false);
   const [investigations, setInvestigations] = useState([]);
   const tableRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
 
   useEffect(() => {
@@ -27,6 +214,11 @@ const IncidentReportReport = () => {
   }, []);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, fromDate, toDate]);
+
+  useEffect(() => {
+    setLoading(true);
     let incUrl = `${IndicatorBaseUrl}IncidentReport/`;
     let invUrl = `${IndicatorBaseUrl}SupervisorInvestigation/`;
     const params = [];
@@ -51,17 +243,76 @@ const IncidentReportReport = () => {
           "Content-Type": "application/json",
           Authorization: localStorage.getItem("access_token"),
         },
+      }),
+      fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
       })
     ])
-      .then(async ([incRes, invRes]) => {
-        if (!incRes.ok || !invRes.ok) throw new Error("Failed to fetch data");
+      .then(async ([incRes, invRes, classRes]) => {
+        if (!incRes.ok || !invRes.ok || !classRes.ok) throw new Error("Failed to fetch data");
         const incData = await incRes.json();
         const invData = await invRes.json();
-        setData(incData);
-        setFilteredData(incData);
+        const classData = await classRes.json();
+
+        // Helper to check assignment
+        const checkIsAssignedLocal = (inc) => {
+          if (!inc) return false;
+          const currentUserId = localStorage.getItem("userId") || "";
+          if (!currentUserId) return false;
+
+          let parsedClass = {};
+          if (inc.classifications) {
+            if (typeof inc.classifications === "string") {
+              try {
+                parsedClass = JSON.parse(inc.classifications);
+              } catch (e) {
+                parsedClass = {};
+              }
+            } else {
+              parsedClass = inc.classifications;
+            }
+          }
+
+          return Object.entries(parsedClass).some(([catTitle, items]) => {
+            if (!Array.isArray(items) || items.length === 0) return false;
+            const matchedClassObj = classData.find(c => c.category_key === catTitle || c.title === catTitle);
+            if (!matchedClassObj) return false;
+
+            // Check item-level first, fallback to category-level if item-level not assigned
+            const itemIncharges = matchedClassObj.item_incharges || {};
+            return items.some(item => {
+              const assignment = itemIncharges[item] || {};
+              if (assignment.incharge_id) {
+                return String(assignment.incharge_id) === String(currentUserId);
+              }
+              return matchedClassObj.incharge_id && String(matchedClassObj.incharge_id) === String(currentUserId);
+            });
+          });
+        };
+
+        const userRole = localStorage.getItem("userRole") || "";
+        const currentUserId = localStorage.getItem("userId") || "";
+
+        let filteredInc = incData;
+        if (userRole === "In-Charge") {
+          filteredInc = incData.filter(item => checkIsAssignedLocal(item));
+        } else if (userRole === "Employee") {
+          filteredInc = incData.filter(item => String(item.reportedByEmpId) === String(currentUserId));
+        }
+
+        setData(filteredInc);
+        setFilteredData(filteredInc);
         setInvestigations(invData);
+        setLoading(false);
       })
-      .catch((err) => setError(err.message));
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, [IndicatorBaseUrl, fromDate, toDate]);
 
   useEffect(() => {
@@ -107,21 +358,73 @@ const IncidentReportReport = () => {
   };
 
   const handlePrint = () => {
-    const printContent = tableRef.current;
+    const tableHeaders = [
+      "Incident No", "Date", "Time", "Location", "Person Involved Type",
+      "Patient Name", "Patient Age & Sex", "Patient UHID", "Patient Doctor",
+      "Employee Name", "Employee Age & Sex", "Employee Dept", "Designation",
+      "ID No", "MR No", "Instrument/Tools Details", "Others Details",
+      "Classifications", "Description of Incident", "Reported By",
+      "Reported By Designation", "Reported By Emp ID", "Witness Name",
+      "Immediate Correction", "Actioned By", "Actioned By Designation",
+      "Date & Time Actioned"
+    ];
+
+    const rowsHtml = filteredData.map(item => `
+      <tr>
+        <td>${item.incidentNo || "-"}</td>
+        <td>${item.incidentDate || "-"}</td>
+        <td>${item.incidentTime || "-"}</td>
+        <td>${item.incidentLocation || "-"}</td>
+        <td>${item.personInvolvedType || "-"}</td>
+        <td>${item.patientName || "-"}</td>
+        <td>${item.patientAgeSex || "-"}</td>
+        <td>${item.patientUhid || "-"}</td>
+        <td>${item.patientDoctor || "-"}</td>
+        <td>${item.employeeName || "-"}</td>
+        <td>${item.employeeAgeSex || "-"}</td>
+        <td>${item.employeeDept || "-"}</td>
+        <td>${item.designation || "-"}</td>
+        <td>${item.idNo || "-"}</td>
+        <td>${item.mrNo || "-"}</td>
+        <td>${item.instrumentToolsDetails || "-"}</td>
+        <td>${item.personInvolvedOthersDetails || "-"}</td>
+        <td>${formatClassifications(item.classifications) || "-"}</td>
+        <td>${item.descriptionOfIncident || "-"}</td>
+        <td>${item.reportedBy || "-"}</td>
+        <td>${item.reportedByDesignation || "-"}</td>
+        <td>${item.reportedByEmpId || "-"}</td>
+        <td>${item.witnessName || "-"}</td>
+        <td>${item.immediateCorrection || "-"}</td>
+        <td>${item.correctionName || "-"}</td>
+        <td>${item.correctionDesignation || "-"}</td>
+        <td>${item.correctionDateTime ? dayjs(item.correctionDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</td>
+      </tr>
+    `).join("");
+
     const WindowPrt = window.open("", "", "width=900,height=650");
     WindowPrt.document.write(`
       <html>
         <head>
-          <title>Incident Report</title>
+          <title>Incident Report Archive</title>
           <style>
-            table { width: 100%; border-collapse: collapse; font-family: Arial; font-size: 14px; }
-            th, td { border: 1px solid #999; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
+            table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px; }
+            th, td { border: 1px solid #999; padding: 6px; text-align: left; word-break: break-all; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            h2 { text-align: center; font-family: Arial, sans-serif; }
           </style>
         </head>
         <body>
-          <h2 style="text-align:center">Incident Report</h2>
-          ${printContent.innerHTML}
+          <h2>Incident Report Archive</h2>
+          <table>
+            <thead>
+              <tr>
+                ${tableHeaders.map(h => `<th>${h}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
         </body>
       </html>
     `);
@@ -162,27 +465,18 @@ const IncidentReportReport = () => {
     XLSX.writeFile(workbook, "Incident_Reports_Report.xlsx");
   };
 
+  const itemsPerPage = 10;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
   return (
     <div className="p-4">
       <div className="d-flex align-items-center mb-4">
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/IncidentDashboard")}
-          className="me-3"
-          style={{
-            background: "#6c757d",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "14px",
-            width: "auto",
-            height: "auto",
-          }}
-        >
-          ← Back
-        </Button>
+        <BackButton onClick={() => navigate("/IncidentDashboard")}>
+          <FontAwesomeIcon icon={faArrowLeft} /> Back
+        </BackButton>
         <h2 className="text-center m-0 flex-grow-1" style={{ fontSize: "24px", fontWeight: "bold" }}>
           Incident Report
         </h2>
@@ -225,85 +519,160 @@ const IncidentReportReport = () => {
           </Form.Group>
         </Col>
         <Col xs={12} md={2} className="text-end d-flex justify-content-end gap-2 align-items-center" style={{ marginTop: "15px" }}>
-          <i
-            className="fa fa-print"
-            title="Print"
-            onClick={handlePrint}
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-              marginRight: "15px",
-            }}
-          />
-          <i
-            className="fa fa-file-excel-o"
-            title="Download Excel"
-            onClick={handleDownloadButtonClick}
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-            }}
-          />
+          <ActionButton variant="print" onClick={handlePrint} title="Print Report">
+            <FontAwesomeIcon icon={faPrint} /> Print
+          </ActionButton>
+          <ActionButton variant="excel" onClick={handleDownloadButtonClick} title="Export Excel">
+            <FontAwesomeIcon icon={faFileExcel} /> Excel
+          </ActionButton>
         </Col>
       </Row>
 
       {error && <p className="text-danger">{error}</p>}
 
       {/* Table */}
-      {filteredData.length > 0 ? (
-        <div className="overflow-x-auto" ref={tableRef}>
-          <table className="w-full table-auto border border-gray-300">
-            <thead>
-              <tr style={{ backgroundColor: "#f2f2f2" }}>
-                <th className="border px-2 py-1">Incident No</th>
-                <th className="border px-2 py-1">Date</th>
-                <th className="border px-2 py-1">Time</th>
-                <th className="border px-2 py-1">Location</th>
-                <th className="border px-2 py-1">Involved Person</th>
-                <th className="border px-2 py-1">Classifications</th>
-                <th className="border px-2 py-1">Description</th>
-                <th className="border px-2 py-1">Reported By</th>
-                <th className="border px-2 py-1">Date & Time Reported</th>
-                <th className="border px-2 py-1">Immediate Correction</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item, idx) => (
-                <tr 
-                  key={idx}
-                  onClick={() => {
-                    setSelectedReport(item);
-                    setShowModal(true);
-                  }}
-                  style={{ cursor: "pointer" }}
-                  title="Click to view full details"
-                >
-                  <td className="border px-2 py-1">{item.incidentNo || "-"}</td>
-                  <td className="border px-2 py-1">{item.incidentDate}</td>
-                  <td className="border px-2 py-1">{item.incidentTime}</td>
-                  <td className="border px-2 py-1">{item.incidentLocation}</td>
-                  <td className="border px-2 py-1">
-                    {item.personInvolvedType}
-                    {item.patientName ? ` (Patient: ${item.patientName})` : item.employeeName ? ` (Employee: ${item.employeeName})` : ""}
-                  </td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={formatClassifications(item.classifications)}>
-                    {formatClassifications(item.classifications)}
-                  </td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.descriptionOfIncident}>
-                    {item.descriptionOfIncident}
-                  </td>
-                  <td className="border px-2 py-1">{item.reportedBy} ({item.reportedByDesignation || "-"})</td>
-                  <td className="border px-2 py-1">{dayjs(item.reportedByDateTime).format("DD/MM/YYYY hh:mm A")}</td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.immediateCorrection}>
-                    {item.immediateCorrection || "-"}
-                  </td>
+      {loading ? (
+        <SpinnerContainer>
+          <Spinner animation="border" role="status" style={{ width: "3rem", height: "3rem", color: "#4e4376" }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <div style={{ color: "#718096", fontSize: "16px", fontWeight: "500" }}>Fetching records...</div>
+        </SpinnerContainer>
+      ) : filteredData.length > 0 ? (
+        <>
+          <TableContainer ref={tableRef}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Incident No</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Location</th>
+                  <th>Person Involved Type</th>
+                  <th>Patient Name</th>
+                  <th>Patient Age & Sex</th>
+                  <th>Patient UHID</th>
+                  <th>Patient Doctor</th>
+                  <th>Employee Name</th>
+                  <th>Employee Age & Sex</th>
+                  <th>Employee Dept</th>
+                  <th>Designation</th>
+                  <th>ID No</th>
+                  <th>MR No</th>
+                  <th>Instrument/Tools Details</th>
+                  <th>Others Details</th>
+                  <th>Classifications</th>
+                  <th>Description</th>
+                  <th>Reported By</th>
+                  <th>Reported By Designation</th>
+                  <th>Reported By Emp ID</th>
+                  <th>Witness Name</th>
+                  <th>Immediate Correction</th>
+                  <th>Actioned By</th>
+                  <th>Actioned By Designation</th>
+                  <th>Date & Time Actioned</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {currentItems.map((item, idx) => (
+                  <tr 
+                    key={idx}
+                    onClick={() => {
+                      setSelectedReport(item);
+                      setShowModal(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                    title="Click to view full details"
+                  >
+                    <td>{item.incidentNo || "-"}</td>
+                    <td>{item.incidentDate}</td>
+                    <td>{item.incidentTime}</td>
+                    <td>{item.incidentLocation}</td>
+                    <td>{item.personInvolvedType}</td>
+                    <td>{item.patientName || "-"}</td>
+                    <td>{item.patientAgeSex || "-"}</td>
+                    <td>{item.patientUhid || "-"}</td>
+                    <td>{item.patientDoctor || "-"}</td>
+                    <td>{item.employeeName || "-"}</td>
+                    <td>{item.employeeAgeSex || "-"}</td>
+                    <td>{item.employeeDept || "-"}</td>
+                    <td>{item.designation || "-"}</td>
+                    <td>{item.idNo || "-"}</td>
+                    <td>{item.mrNo || "-"}</td>
+                    <td>{item.instrumentToolsDetails || "-"}</td>
+                    <td>{item.personInvolvedOthersDetails || "-"}</td>
+                    <td style={{ maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={formatClassifications(item.classifications)}>
+                      {formatClassifications(item.classifications)}
+                    </td>
+                    <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.descriptionOfIncident}>
+                      {item.descriptionOfIncident}
+                    </td>
+                    <td>{item.reportedBy}</td>
+                    <td>{item.reportedByDesignation || "-"}</td>
+                    <td>{item.reportedByEmpId || "-"}</td>
+                    <td>{item.witnessName || "-"}</td>
+                    <td style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.immediateCorrection}>
+                      {item.immediateCorrection || "-"}
+                    </td>
+                    <td>{item.correctionName || "-"}</td>
+                    <td>{item.correctionDesignation || "-"}</td>
+                    <td>{item.correctionDateTime ? dayjs(item.correctionDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableContainer>
+
+          {filteredData.length > 0 && (
+            <PaginationContainer>
+              <div style={{ color: "#718096", fontSize: "14px" }}>
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} records
+              </div>
+              <div style={{ display: "flex", gap: "2px" }}>
+                <PageButton 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                >
+                  First
+                </PageButton>
+                <PageButton 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </PageButton>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                  if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
+                    return (
+                      <PageButton
+                        key={page}
+                        active={currentPage === page}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </PageButton>
+                    );
+                  } else if (page === currentPage - 3 || page === currentPage + 3) {
+                    return <span key={page} style={{ padding: "6px 8px", color: "#a0aec0" }}>...</span>;
+                  }
+                  return null;
+                })}
+                <PageButton 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </PageButton>
+                <PageButton 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                >
+                  Last
+                </PageButton>
+              </div>
+            </PaginationContainer>
+          )}
+        </>
       ) : (
         <p className="text-center text-muted mt-4">
           No data available for selected dates.

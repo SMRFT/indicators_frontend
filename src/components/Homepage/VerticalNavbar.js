@@ -193,6 +193,24 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feedback Report
                 </CDBSidebarMenuItem>
               </NavLink>
+              <NavLink
+                exact
+                to="/IncidentReportReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/SupervisorInvestigationReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supervisor Investigation Report
+                </CDBSidebarMenuItem>
+              </NavLink>
             </div>
           )}
         </div>
@@ -295,6 +313,15 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
               >
                 <CDBSidebarMenuItem className="sidebar-menu-item">
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data Report
+                </CDBSidebarMenuItem>
+              </NavLink>
+              <NavLink
+                exact
+                to="/IncidentReportReport"
+                activeClassName="activeClicked"
+              >
+                <CDBSidebarMenuItem className="sidebar-menu-item">
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
                 </CDBSidebarMenuItem>
               </NavLink>
             </div>
