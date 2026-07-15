@@ -53,15 +53,18 @@ const StyledButton = styled.button`
   background: #109b76;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(16, 155, 118, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
   width: auto;
-  height: auto;
 
   &:hover {
     background: #0c7a5d;
@@ -81,15 +84,18 @@ const BackButton = styled.button`
   background: #6c757d;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
   width: auto;
-  height: auto;
 
   &:hover {
     background: #5a6268;
@@ -164,6 +170,12 @@ const IncidentReport = () => {
     const name = localStorage.getItem("userName") || "";
     const userRole = localStorage.getItem("userRole") || "";
     
+    if (userRole === "In-Charge") {
+      alert("In-Charge users are not authorized to fill Incident Reports.");
+      navigate("/IncidentDashboard");
+      return;
+    }
+    
     setFormData((prev) => ({
       ...prev,
       reportedBy: name,
@@ -171,7 +183,7 @@ const IncidentReport = () => {
       reportedByDesignation: userRole,
       reportedByDateTime: new Date().toLocaleString()
     }));
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const fetchNextIncidentNo = async () => {
@@ -295,7 +307,7 @@ const IncidentReport = () => {
       const resData = await response.json();
       const nextNo = resData.incidentNo || resData.id || "";
       setSubmittedIncidentId(nextNo);
-      message.success(`Incident Report submitted successfully! Incident No: ${nextNo}`);
+      message.success(`Incident Form submitted successfully! Incident No: ${nextNo}`);
       setFormSubmitted(true);
       setTimeout(() => {
         navigate("/IncidentDashboard");
@@ -311,12 +323,12 @@ const IncidentReport = () => {
   return (
     <StyledContainer>
       <div className="d-flex justify-content-start mb-3">
-        <BackButton type="button" onClick={() => navigate("/IncidentDashboard")} style={{ padding: "8px 16px", fontSize: "14px" }}>
+        <BackButton type="button" onClick={() => navigate("/IncidentDashboard")}>
           ← Back
         </BackButton>
       </div>
       <FormHeader>
-        <h2>INCIDENT REPORT</h2>
+        <h2>INCIDENT FORM</h2>
         <span>CONFIDENTIAL • Shanmuga Hospital Quality Department</span>
       </FormHeader>
 
@@ -739,12 +751,12 @@ const IncidentReport = () => {
             Back
           </BackButton>
           <StyledButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Submit Incident Report"}
+            {isSubmitting ? "Saving..." : "Submit Incident Form"}
           </StyledButton>
         </div>
 
         <Alert variant="success" show={formSubmitted} className="mt-3">
-          Incident Report submitted successfully! Generated Incident ID: <strong>{submittedIncidentId}</strong>. Redirecting to dashboard...
+          Incident Form submitted successfully! Generated Incident ID: <strong>{submittedIncidentId}</strong>. Redirecting to dashboard...
         </Alert>
 
         <Alert variant="danger" show={error !== ""} className="mt-3">

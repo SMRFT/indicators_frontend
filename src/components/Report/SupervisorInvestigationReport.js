@@ -1,9 +1,205 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
-import { Row, Col, Modal, Button, Badge, Container, Form } from "react-bootstrap";
+import { Row, Col, Modal, Button, Badge, Container, Form, Spinner } from "react-bootstrap";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faPrint, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+
+const BackButton = styled.button`
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: auto;
+
+  &:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.3);
+  }
+`;
+
+const ActionButton = styled.button`
+  background: ${props => props.variant === "print" ? "#4e4376" : "#109b76"};
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: ${props => props.variant === "print" ? "0 4px 12px rgba(78, 67, 118, 0.2)" : "0 4px 12px rgba(16, 155, 118, 0.2)"};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  width: auto;
+
+  &:hover {
+    background: ${props => props.variant === "print" ? "#3a3258" : "#0c7a5d"};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.variant === "print" ? "0 6px 16px rgba(78, 67, 118, 0.3)" : "0 6px 16px rgba(16, 155, 118, 0.3)"};
+  }
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: white;
+  margin-bottom: 20px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf2f7;
+    color: #2d3748;
+    white-space: nowrap;
+  }
+
+  tr:hover {
+    background-color: #f8fafc;
+  }
+
+  /* Sticky columns styling for first five fields */
+  th:nth-child(1), td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+  }
+  th:nth-child(2), td:nth-child(2) {
+    position: sticky;
+    left: 80px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    position: sticky;
+    left: 200px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    position: sticky;
+    left: 310px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+  }
+  th:nth-child(5), td:nth-child(5) {
+    position: sticky;
+    left: 410px;
+    z-index: 2;
+    background-color: white;
+    box-shadow: 4px 0 5px -2px rgba(0, 0, 0, 0.15);
+    width: 150px;
+    min-width: 150px;
+    max-width: 150px;
+    border-right: 2px solid #cbd5e0;
+  }
+
+  th:nth-child(1), th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) {
+    z-index: 3;
+    background-color: #f8fafc !important;
+  }
+
+  tr:hover td:nth-child(1),
+  tr:hover td:nth-child(2),
+  tr:hover td:nth-child(3),
+  tr:hover td:nth-child(4),
+  tr:hover td:nth-child(5) {
+    background-color: #f8fafc;
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+`;
+
+const PageButton = styled.button`
+  background: ${props => props.active ? "#4e4376" : "white"};
+  color: ${props => props.active ? "white" : "#4a5568"};
+  border: 1px solid #cbd5e0;
+  padding: 6px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.active ? "#4e4376" : "#edf2f7"};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const SpinnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  gap: 15px;
+`;
 
 const SupervisorInvestigationReport = () => {
   const navigate = useNavigate();
@@ -17,6 +213,8 @@ const SupervisorInvestigationReport = () => {
   const [showModal, setShowModal] = useState(false);
   const [incidents, setIncidents] = useState([]);
   const tableRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const IndicatorBaseUrl = process.env.REACT_APP_BACKEND_INDICATORS_BASE_URL;
 
   useEffect(() => {
@@ -27,6 +225,11 @@ const SupervisorInvestigationReport = () => {
   }, []);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, fromDate, toDate]);
+
+  useEffect(() => {
+    setLoading(true);
     let invUrl = `${IndicatorBaseUrl}SupervisorInvestigation/`;
     let incUrl = `${IndicatorBaseUrl}IncidentReport/`;
     const params = [];
@@ -51,17 +254,76 @@ const SupervisorInvestigationReport = () => {
           "Content-Type": "application/json",
           Authorization: localStorage.getItem("access_token"),
         },
+      }),
+      fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: localStorage.getItem("access_token"),
+        },
       })
     ])
-      .then(async ([invRes, incRes]) => {
-        if (!invRes.ok || !incRes.ok) throw new Error("Failed to fetch data");
+      .then(async ([invRes, incRes, classRes]) => {
+        if (!invRes.ok || !incRes.ok || !classRes.ok) throw new Error("Failed to fetch data");
         const invData = await invRes.json();
         const incData = await incRes.json();
-        setData(invData);
-        setFilteredData(invData);
+        const classData = await classRes.json();
         setIncidents(incData);
+
+        // Helper to check assignment
+        const checkIsAssignedLocal = (inc) => {
+          if (!inc) return false;
+          const currentUserId = localStorage.getItem("userId") || "";
+          if (!currentUserId) return false;
+
+          let parsedClass = {};
+          if (inc.classifications) {
+            if (typeof inc.classifications === "string") {
+              try {
+                parsedClass = JSON.parse(inc.classifications);
+              } catch (e) {
+                parsedClass = {};
+              }
+            } else {
+              parsedClass = inc.classifications;
+            }
+          }
+
+          return Object.entries(parsedClass).some(([catTitle, items]) => {
+            if (!Array.isArray(items) || items.length === 0) return false;
+            const matchedClassObj = classData.find(c => c.category_key === catTitle || c.title === catTitle);
+            if (!matchedClassObj) return false;
+
+            // Check item-level first, fallback to category-level if item-level not assigned
+            const itemIncharges = matchedClassObj.item_incharges || {};
+            return items.some(item => {
+              const assignment = itemIncharges[item] || {};
+              if (assignment.incharge_id) {
+                return String(assignment.incharge_id) === String(currentUserId);
+              }
+              return matchedClassObj.incharge_id && String(matchedClassObj.incharge_id) === String(currentUserId);
+            });
+          });
+        };
+
+        const userRole = localStorage.getItem("userRole") || "";
+        if (userRole === "In-Charge") {
+          const filteredInv = invData.filter(item => {
+            const inc = incData.find(i => String(i.incidentNo) === String(item.incidentId) || String(i.id) === String(item.incidentId));
+            return checkIsAssignedLocal(inc);
+          });
+          setData(filteredInv);
+          setFilteredData(filteredInv);
+        } else {
+          setData(invData);
+          setFilteredData(invData);
+        }
+        setLoading(false);
       })
-      .catch((err) => setError(err.message));
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, [IndicatorBaseUrl, fromDate, toDate]);
 
   useEffect(() => {
@@ -90,22 +352,103 @@ const SupervisorInvestigationReport = () => {
     }
   }, [searchTerm, data]);
 
+  const formatClassifications = (classMap) => {
+    if (!classMap) return "";
+    let parsed = classMap;
+    if (typeof classMap === "string") {
+      try {
+        parsed = JSON.parse(classMap);
+      } catch (e) {
+        return classMap;
+      }
+    }
+    return Object.entries(parsed)
+      .filter(([_, items]) => Array.isArray(items) && items.length > 0)
+      .map(([category, items]) => `${category}: ${items.join(", ")}`)
+      .join(" | ");
+  };
+
   const handlePrint = () => {
-    const printContent = tableRef.current;
+    const tableHeaders = [
+      "ID", "Incident ID", "Incident Date", "Incident Time", "Incident Location",
+      "Person Involved", "Classifications", "Incident Description", "Investigation Date",
+      "RCA (Why 1)", "Corrective Action", "Preventive Action", "Investigator Name",
+      "Investigator Emp ID", "Investigator Dept/Designation", "Corrective Name",
+      "Corrective Emp ID", "Corrective Dept/Designation", "Preventive Name",
+      "Preventive Emp ID", "Preventive Dept/Designation", "Quality Received By",
+      "Quality Received Dept/Designation", "Quality Received Emp ID",
+      "Quality Received Date & Time", "Quality Classification", "Quality Remarks",
+      "Quality Verified By Head", "Quality Verified Date & Time"
+    ];
+
+    const rowsHtml = filteredData.map(item => {
+      const matchedInc = incidents.find(inc => String(inc.incidentNo || inc.id) === String(item.incidentNo || item.incidentId));
+      const incDate = matchedInc?.incidentDate || "-";
+      const incTime = matchedInc?.incidentTime || "-";
+      const incLocation = matchedInc?.incidentLocation || "-";
+      const incDescription = matchedInc?.descriptionOfIncident || "-";
+      const incClassifications = matchedInc ? formatClassifications(matchedInc.classifications) : "-";
+      const incPerson = matchedInc ? `${matchedInc.personInvolvedType}${matchedInc.patientName ? ` (Patient: ${matchedInc.patientName})` : matchedInc.employeeName ? ` (Employee: ${matchedInc.employeeName})` : ""}` : "-";
+
+      return `
+        <tr>
+          <td>${item.id || "-"}</td>
+          <td>${item.incidentNo || item.incidentId || "-"}</td>
+          <td>${incDate}</td>
+          <td>${incTime}</td>
+          <td>${incLocation}</td>
+          <td>${incPerson}</td>
+          <td>${incClassifications}</td>
+          <td>${incDescription}</td>
+          <td>${item.investigationDateTime ? dayjs(item.investigationDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</td>
+          <td>${item.why1 || "-"}</td>
+          <td>${item.correctiveAction || "-"}</td>
+          <td>${item.preventiveAction || "-"}</td>
+          <td>${item.investigationName || "-"}</td>
+          <td>${item.investigationSignatureEmpId || "-"}</td>
+          <td>${item.investigationDeptDesignation || "-"}</td>
+          <td>${item.correctiveName || "-"}</td>
+          <td>${item.correctiveSignatureEmpId || "-"}</td>
+          <td>${item.correctiveDeptDesignation || "-"}</td>
+          <td>${item.preventiveName || "-"}</td>
+          <td>${item.preventiveSignatureEmpId || "-"}</td>
+          <td>${item.preventiveDeptDesignation || "-"}</td>
+          <td>${item.qualityReceivedBy || "-"}</td>
+          <td>${item.qualityReceivedDeptDesignation || "-"}</td>
+          <td>${item.qualityReceivedSignatureEmpId || "-"}</td>
+          <td>${item.qualityReceivedDateTime ? dayjs(item.qualityReceivedDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</td>
+          <td>${item.qualityClassification || "-"}</td>
+          <td>${item.qualityRemarks || "-"}</td>
+          <td>${item.qualityVerifiedByHead || "-"}</td>
+          <td>${item.qualityVerifiedDateTime ? dayjs(item.qualityVerifiedDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</td>
+        </tr>
+      `;
+    }).join("");
+
     const WindowPrt = window.open("", "", "width=900,height=650");
     WindowPrt.document.write(`
       <html>
         <head>
           <title>Supervisor Investigation & RCA Report</title>
           <style>
-            table { width: 100%; border-collapse: collapse; font-family: Arial; font-size: 14px; }
-            th, td { border: 1px solid #999; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
+            table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 10px; }
+            th, td { border: 1px solid #999; padding: 6px; text-align: left; word-break: break-all; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            h2 { text-align: center; font-family: Arial, sans-serif; }
           </style>
         </head>
         <body>
-          <h2 style="text-align:center">Supervisor Investigation & Root Cause Analysis Report</h2>
-          ${printContent.innerHTML}
+          <h2>Supervisor Investigation & Root Cause Analysis Report</h2>
+          <table>
+            <thead>
+              <tr>
+                ${tableHeaders.map(h => `<th>${h}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
         </body>
       </html>
     `);
@@ -116,18 +459,40 @@ const SupervisorInvestigationReport = () => {
   };
 
   const handleDownloadButtonClick = () => {
-    const flattenedData = filteredData.map((item) => ({
-      "Investigation ID": item.id,
-      "Incident ID": item.incidentNo || item.incidentId,
-      "Root Cause Analysis (RCA)": item.why1,
-      "Date & Time Investigated": item.investigationDateTime,
-      "Corrective Action": item.correctiveAction,
-      "Preventive Action": item.preventiveAction,
-      "Quality Classification": item.qualityClassification,
-      "Quality Remarks": item.qualityRemarks,
-      "Quality Verified By": item.qualityVerifiedByHead,
-      "Verification Date": item.qualityVerifiedDateTime,
-    }));
+    const flattenedData = filteredData.map((item) => {
+      const matchedInc = incidents.find(inc => String(inc.incidentNo || inc.id) === String(item.incidentNo || item.incidentId));
+      return {
+        "Investigation ID": item.id,
+        "Incident ID": item.incidentNo || item.incidentId,
+        "Incident Date": matchedInc?.incidentDate || "-",
+        "Incident Time": matchedInc?.incidentTime || "-",
+        "Incident Location": matchedInc?.incidentLocation || "-",
+        "Person Involved": matchedInc ? `${matchedInc.personInvolvedType}${matchedInc.patientName ? ` (Patient: ${matchedInc.patientName})` : matchedInc.employeeName ? ` (Employee: ${matchedInc.employeeName})` : ""}` : "-",
+        "Classifications": matchedInc ? formatClassifications(matchedInc.classifications) : "-",
+        "Incident Description": matchedInc?.descriptionOfIncident || "-",
+        "Investigation Date": item.investigationDateTime ? dayjs(item.investigationDateTime).format("DD/MM/YYYY hh:mm A") : "-",
+        "RCA (Why 1)": item.why1 || "-",
+        "Corrective Action": item.correctiveAction || "-",
+        "Preventive Action": item.preventiveAction || "-",
+        "Investigator Name": item.investigationName || "-",
+        "Investigator Emp ID": item.investigationSignatureEmpId || "-",
+        "Investigator Dept/Designation": item.investigationDeptDesignation || "-",
+        "Corrective Name": item.correctiveName || "-",
+        "Corrective Emp ID": item.correctiveSignatureEmpId || "-",
+        "Corrective Dept/Designation": item.correctiveDeptDesignation || "-",
+        "Preventive Name": item.preventiveName || "-",
+        "Preventive Emp ID": item.preventiveSignatureEmpId || "-",
+        "Preventive Dept/Designation": item.preventiveDeptDesignation || "-",
+        "Quality Received By": item.qualityReceivedBy || "-",
+        "Quality Received Dept/Designation": item.qualityReceivedDeptDesignation || "-",
+        "Quality Received Emp ID": item.qualityReceivedSignatureEmpId || "-",
+        "Quality Received Date & Time": item.qualityReceivedDateTime ? dayjs(item.qualityReceivedDateTime).format("DD/MM/YYYY hh:mm A") : "-",
+        "Quality Classification": item.qualityClassification || "-",
+        "Quality Remarks": item.qualityRemarks || "-",
+        "Quality Verified By Head": item.qualityVerifiedByHead || "-",
+        "Quality Verified Date & Time": item.qualityVerifiedDateTime ? dayjs(item.qualityVerifiedDateTime).format("DD/MM/YYYY hh:mm A") : "-",
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(flattenedData);
     const workbook = XLSX.utils.book_new();
@@ -135,27 +500,18 @@ const SupervisorInvestigationReport = () => {
     XLSX.writeFile(workbook, "Supervisor_Investigations_Report.xlsx");
   };
 
+  const itemsPerPage = 10;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
   return (
     <div className="p-4">
       <div className="d-flex align-items-center mb-4">
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/IncidentDashboard")}
-          className="me-3"
-          style={{
-            background: "#6c757d",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "14px",
-            width: "auto",
-            height: "auto",
-          }}
-        >
-          ← Back
-        </Button>
+        <BackButton onClick={() => navigate("/IncidentDashboard")}>
+          <FontAwesomeIcon icon={faArrowLeft} /> Back
+        </BackButton>
         <h2 className="text-center m-0 flex-grow-1" style={{ fontSize: "24px", fontWeight: "bold" }}>
           Supervisor's Investigation & RCA Report
         </h2>
@@ -198,80 +554,179 @@ const SupervisorInvestigationReport = () => {
           </Form.Group>
         </Col>
         <Col xs={12} md={2} className="text-end d-flex justify-content-end gap-2 align-items-center" style={{ marginTop: "15px" }}>
-          <i
-            className="fa fa-print"
-            title="Print"
-            onClick={handlePrint}
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-              marginRight: "15px",
-            }}
-          />
-          <i
-            className="fa fa-file-excel-o"
-            title="Download Excel"
-            onClick={handleDownloadButtonClick}
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-            }}
-          />
+          <ActionButton variant="print" onClick={handlePrint} title="Print Report">
+            <FontAwesomeIcon icon={faPrint} /> Print
+          </ActionButton>
+          <ActionButton variant="excel" onClick={handleDownloadButtonClick} title="Export Excel">
+            <FontAwesomeIcon icon={faFileExcel} /> Excel
+          </ActionButton>
         </Col>
       </Row>
 
       {error && <p className="text-danger">{error}</p>}
 
       {/* Table */}
-      {filteredData.length > 0 ? (
-        <div className="overflow-x-auto" ref={tableRef}>
-          <table className="w-full table-auto border border-gray-300">
-            <thead>
-              <tr style={{ backgroundColor: "#f2f2f2" }}>
-                <th className="border px-2 py-1">ID</th>
-                <th className="border px-2 py-1">Incident ID</th>
-                <th className="border px-2 py-1">Investigation Date</th>
-                <th className="border px-2 py-1">Root Cause Analysis (RCA)</th>
-                <th className="border px-2 py-1">Corrective Action</th>
-                <th className="border px-2 py-1">Preventive Action</th>
-                <th className="border px-2 py-1">Classification</th>
-                <th className="border px-2 py-1">Verified By</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item, idx) => (
-                <tr 
-                  key={idx}
-                  onClick={() => {
-                    setSelectedInv(item);
-                    setShowModal(true);
-                  }}
-                  style={{ cursor: "pointer" }}
-                  title="Click to view full details"
-                >
-                  <td className="border px-2 py-1">{item.id}</td>
-                  <td className="border px-2 py-1">{item.incidentNo || item.incidentId}</td>
-                  <td className="border px-2 py-1">
-                    {item.investigationDateTime ? dayjs(item.investigationDateTime).format("DD/MM/YYYY hh:mm A") : "-"}
-                  </td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.why1}>
-                    {item.why1 || "-"}
-                  </td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.correctiveAction}>
-                    {item.correctiveAction}
-                  </td>
-                  <td className="border px-2 py-1" style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.preventiveAction}>
-                    {item.preventiveAction}
-                  </td>
-                  <td className="border px-2 py-1">{item.qualityClassification}</td>
-                  <td className="border px-2 py-1">{item.qualityVerifiedByHead || "-"}</td>
+      {loading ? (
+        <SpinnerContainer>
+          <Spinner animation="border" role="status" style={{ width: "3rem", height: "3rem", color: "#4e4376" }}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <div style={{ color: "#718096", fontSize: "16px", fontWeight: "500" }}>Fetching records...</div>
+        </SpinnerContainer>
+      ) : filteredData.length > 0 ? (
+        <>
+          <TableContainer ref={tableRef}>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Incident ID</th>
+                  <th>Incident Date</th>
+                  <th>Incident Time</th>
+                  <th>Incident Location</th>
+                  <th>Person Involved</th>
+                  <th>Classifications</th>
+                  <th>Incident Description</th>
+                  <th>Investigation Date</th>
+                  <th>RCA (Why 1)</th>
+                  <th>Corrective Action</th>
+                  <th>Preventive Action</th>
+                  <th>Investigator Name</th>
+                  <th>Investigator Emp ID</th>
+                  <th>Investigator Dept/Designation</th>
+                  <th>Corrective Name</th>
+                  <th>Corrective Emp ID</th>
+                  <th>Corrective Dept/Designation</th>
+                  <th>Preventive Name</th>
+                  <th>Preventive Emp ID</th>
+                  <th>Preventive Dept/Designation</th>
+                  <th>Quality Received By</th>
+                  <th>Quality Received Dept/Designation</th>
+                  <th>Quality Received Emp ID</th>
+                  <th>Quality Received Date & Time</th>
+                  <th>Quality Classification</th>
+                  <th>Quality Remarks</th>
+                  <th>Quality Verified By Head</th>
+                  <th>Quality Verified Date & Time</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {currentItems.map((item, idx) => {
+                  const matchedInc = incidents.find(inc => String(inc.incidentNo || inc.id) === String(item.incidentNo || item.incidentId));
+                  return (
+                    <tr 
+                      key={idx}
+                      onClick={() => {
+                        setSelectedInv(item);
+                        setShowModal(true);
+                      }}
+                      style={{ cursor: "pointer" }}
+                      title="Click to view full details"
+                    >
+                      <td>{item.id}</td>
+                      <td>{item.incidentNo || item.incidentId || "-"}</td>
+                      <td>{matchedInc?.incidentDate || "-"}</td>
+                      <td>{matchedInc?.incidentTime || "-"}</td>
+                      <td>{matchedInc?.incidentLocation || "-"}</td>
+                      <td>{matchedInc ? `${matchedInc.personInvolvedType}${matchedInc.patientName ? ` (Patient: ${matchedInc.patientName})` : matchedInc.employeeName ? ` (Employee: ${matchedInc.employeeName})` : ""}` : "-"}</td>
+                      <td style={{ maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={matchedInc ? formatClassifications(matchedInc.classifications) : ""}>
+                        {matchedInc ? formatClassifications(matchedInc.classifications) : "-"}
+                      </td>
+                      <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={matchedInc?.descriptionOfIncident || ""}>
+                        {matchedInc?.descriptionOfIncident || "-"}
+                      </td>
+                      <td>
+                        {item.investigationDateTime ? dayjs(item.investigationDateTime).format("DD/MM/YYYY hh:mm A") : "-"}
+                      </td>
+                      <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.why1}>
+                        {item.why1 || "-"}
+                      </td>
+                      <td style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.correctiveAction}>
+                        {item.correctiveAction || "-"}
+                      </td>
+                      <td style={{ maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.preventiveAction}>
+                        {item.preventiveAction || "-"}
+                      </td>
+                      <td>{item.investigationName || "-"}</td>
+                      <td>{item.investigationSignatureEmpId || "-"}</td>
+                      <td>{item.investigationDeptDesignation || "-"}</td>
+                      <td>{item.correctiveName || "-"}</td>
+                      <td>{item.correctiveSignatureEmpId || "-"}</td>
+                      <td>{item.correctiveDeptDesignation || "-"}</td>
+                      <td>{item.preventiveName || "-"}</td>
+                      <td>{item.preventiveSignatureEmpId || "-"}</td>
+                      <td>{item.preventiveDeptDesignation || "-"}</td>
+                      <td>{item.qualityReceivedBy || "-"}</td>
+                      <td>{item.qualityReceivedDeptDesignation || "-"}</td>
+                      <td>{item.qualityReceivedSignatureEmpId || "-"}</td>
+                      <td>
+                        {item.qualityReceivedDateTime ? dayjs(item.qualityReceivedDateTime).format("DD/MM/YYYY hh:mm A") : "-"}
+                      </td>
+                      <td>{item.qualityClassification || "-"}</td>
+                      <td style={{ maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={item.qualityRemarks}>
+                        {item.qualityRemarks || "-"}
+                      </td>
+                      <td>{item.qualityVerifiedByHead || "-"}</td>
+                      <td>
+                        {item.qualityVerifiedDateTime ? dayjs(item.qualityVerifiedDateTime).format("DD/MM/YYYY hh:mm A") : "-"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </TableContainer>
+
+          {filteredData.length > 0 && (
+            <PaginationContainer>
+              <div style={{ color: "#718096", fontSize: "14px" }}>
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} records
+              </div>
+              <div style={{ display: "flex", gap: "2px" }}>
+                <PageButton 
+                  onClick={() => setCurrentPage(1)} 
+                  disabled={currentPage === 1}
+                >
+                  First
+                </PageButton>
+                <PageButton 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </PageButton>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                  if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
+                    return (
+                      <PageButton
+                        key={page}
+                        active={currentPage === page}
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </PageButton>
+                    );
+                  } else if (page === currentPage - 3 || page === currentPage + 3) {
+                    return <span key={page} style={{ padding: "6px 8px", color: "#a0aec0" }}>...</span>;
+                  }
+                  return null;
+                })}
+                <PageButton 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </PageButton>
+                <PageButton 
+                  onClick={() => setCurrentPage(totalPages)} 
+                  disabled={currentPage === totalPages}
+                >
+                  Last
+                </PageButton>
+              </div>
+            </PaginationContainer>
+          )}
+        </>
       ) : (
         <p className="text-center text-muted mt-4">
           No data available for selected dates or search criteria.

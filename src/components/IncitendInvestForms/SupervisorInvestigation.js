@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert, Card, Badge, Table, Button } from "react-bootstrap";
+import { Row, Form, Col, Alert, Card, Badge, Table, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,6 +8,15 @@ import styled from "styled-components";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { message } from "antd";
+
+const SpinnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 250px;
+  gap: 15px;
+`;
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -53,15 +62,18 @@ const StyledButton = styled.button`
   background: #4e4376;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(78, 67, 118, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
   width: auto;
-  height: auto;
 
   &:hover {
     background: #3a3258;
@@ -91,6 +103,9 @@ const ActionButton = styled.button`
   align-items: center;
   gap: 6px;
   margin-right: 8px;
+  width: auto;
+  height: auto;
+  white-space: normal;
 
   &:hover {
     background: ${props => props.variant === "view" ? "#3a3258" : "#0c7a5d"};
@@ -102,21 +117,179 @@ const BackButton = styled.button`
   background: #6c757d;
   color: white;
   border: none;
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
   width: auto;
-  height: auto;
 
   &:hover {
     background: #5a6268;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(108, 117, 125, 0.3);
   }
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  background: white;
+  margin-bottom: 20px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+
+  th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf2f7;
+    color: #2d3748;
+    white-space: nowrap;
+  }
+
+  tr:hover {
+    background-color: #f8fafc;
+  }
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 0;
+`;
+
+const PageButton = styled.button`
+  background: ${props => props.active ? "#4e4376" : "white"};
+  color: ${props => props.active ? "white" : "#4a5568"};
+  border: 1px solid #cbd5e0;
+  padding: 6px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.active ? "#4e4376" : "#edf2f7"};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const FormCard = styled(Card)`
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  margin-bottom: 24px;
+  background: white;
+  border-top: 4px solid #4e4376;
+  
+  .card-body {
+    padding: 24px;
+  }
+`;
+
+const FormCardQuality = styled(FormCard)`
+  border-top: 4px solid #109b76;
+`;
+
+const FormFieldLabel = styled(Form.Label)`
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14.5px;
+  margin-bottom: 8px;
+`;
+
+const StyledFormControl = styled(Form.Control)`
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 10px 14px !important;
+  font-size: 14.5px !important;
+  transition: all 0.2s ease-in-out !important;
+  width: 100% !important;
+  height: auto !important;
+
+  &:focus {
+    border-color: #4e4376 !important;
+    box-shadow: 0 0 0 3px rgba(78, 67, 118, 0.15) !important;
+  }
+
+  &:disabled {
+    background-color: #f8fafc !important;
+    color: #64748b !important;
+  }
+`;
+
+const StyledFormSelect = styled(Form.Select)`
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 10px 14px !important;
+  font-size: 14.5px !important;
+  transition: all 0.2s ease-in-out !important;
+  width: 100% !important;
+  height: auto !important;
+
+  &:focus {
+    border-color: #4e4376 !important;
+    box-shadow: 0 0 0 3px rgba(78, 67, 118, 0.15) !important;
+  }
+
+  &:disabled {
+    background-color: #f8fafc !important;
+    color: #64748b !important;
+  }
+`;
+
+const LockBanner = styled.div`
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #64748b;
+  border-radius: 8px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14.5px;
+  color: #334155;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+`;
+
+const WarningBanner = styled(LockBanner)`
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 5px solid #d97706;
+  color: #92400e;
 `;
 
 const InfoCard = styled(Card)`
@@ -193,8 +366,46 @@ const SupervisorInvestigation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const checkIsAssigned = (inc) => {
+    if (!inc) return false;
+    const currentUserId = localStorage.getItem("userId") || "";
+    if (!currentUserId) return false;
+
+    let parsedClass = {};
+    if (inc.classifications) {
+      if (typeof inc.classifications === "string") {
+        try {
+          parsedClass = JSON.parse(inc.classifications);
+        } catch (e) {
+          parsedClass = {};
+        }
+      } else {
+        parsedClass = inc.classifications;
+      }
+    }
+
+    return Object.entries(parsedClass).some(([catTitle, items]) => {
+      if (!Array.isArray(items) || items.length === 0) return false;
+      const matchedClassObj = classificationsList.find(c => c.category_key === catTitle || c.title === catTitle);
+      if (!matchedClassObj) return false;
+
+      // Check item-level first, fallback to category-level if item-level not assigned
+      const itemIncharges = matchedClassObj.item_incharges || {};
+      return items.some(item => {
+        const assignment = itemIncharges[item] || {};
+        if (assignment.incharge_id) {
+          return String(assignment.incharge_id) === String(currentUserId);
+        }
+        return matchedClassObj.incharge_id && String(matchedClassObj.incharge_id) === String(currentUserId);
+      });
+    });
+  };
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const headers = {
         Authorization: localStorage.getItem("access_token"),
@@ -226,6 +437,8 @@ const SupervisorInvestigation = () => {
       }
     } catch (err) {
       console.error("Error fetching data:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -236,6 +449,10 @@ const SupervisorInvestigation = () => {
     }
     fetchData();
   }, [IndicatorBaseUrl, fromDate, toDate, userRole]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, fromDate, toDate]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -260,6 +477,7 @@ const SupervisorInvestigation = () => {
     const uRole = localStorage.getItem("userRole") || "";
     const uName = localStorage.getItem("userName") || "";
     const uId = localStorage.getItem("userId") || "";
+    const isAssigned = checkIsAssigned(incident);
 
     if (existing) {
       setFormData({
@@ -270,14 +488,14 @@ const SupervisorInvestigation = () => {
         why5: "",
         correctiveAction: existing.correctiveAction || "",
         preventiveAction: existing.preventiveAction || "",
-        investigationName: existing.investigationName || uName,
-        investigationSignatureEmpId: existing.investigationSignatureEmpId || uId,
+        investigationName: existing.investigationName || (isAssigned ? uName : ""),
+        investigationSignatureEmpId: existing.investigationSignatureEmpId || (isAssigned ? uId : ""),
         investigationDeptDesignation: existing.investigationDeptDesignation || "",
-        correctiveName: existing.correctiveName || uName,
-        correctiveSignatureEmpId: existing.correctiveSignatureEmpId || uId,
+        correctiveName: existing.correctiveName || (isAssigned ? uName : ""),
+        correctiveSignatureEmpId: existing.correctiveSignatureEmpId || (isAssigned ? uId : ""),
         correctiveDeptDesignation: existing.correctiveDeptDesignation || "",
-        preventiveName: existing.preventiveName || uName,
-        preventiveSignatureEmpId: existing.preventiveSignatureEmpId || uId,
+        preventiveName: existing.preventiveName || (isAssigned ? uName : ""),
+        preventiveSignatureEmpId: existing.preventiveSignatureEmpId || (isAssigned ? uId : ""),
         preventiveDeptDesignation: existing.preventiveDeptDesignation || "",
         qualityReceivedBy: existing.qualityReceivedBy || (uRole === "Admin" ? uName : ""),
         qualityReceivedDeptDesignation: existing.qualityReceivedDeptDesignation || "",
@@ -287,9 +505,9 @@ const SupervisorInvestigation = () => {
         rcaImage: existing.rcaImage || "",
         qualityReceivedSignatureEmpId: existing.qualityReceivedSignatureEmpId || (uRole === "Admin" ? uId : "")
       });
-      setInvestigationDate(existing.investigationDateTime ? new Date(existing.investigationDateTime) : new Date());
-      setReceivedDate(existing.qualityReceivedDateTime ? new Date(existing.qualityReceivedDateTime) : new Date());
-      setVerifiedDate(existing.qualityVerifiedDateTime ? new Date(existing.qualityVerifiedDateTime) : new Date());
+      setInvestigationDate(existing.investigationDateTime ? new Date(existing.investigationDateTime) : (isAssigned ? new Date() : null));
+      setReceivedDate(existing.qualityReceivedDateTime ? new Date(existing.qualityReceivedDateTime) : (uRole === "Admin" ? new Date() : null));
+      setVerifiedDate(existing.qualityVerifiedDateTime ? new Date(existing.qualityVerifiedDateTime) : (uRole === "Admin" ? new Date() : null));
     } else {
       setFormData({
         why1: "",
@@ -299,14 +517,14 @@ const SupervisorInvestigation = () => {
         why5: "",
         correctiveAction: "",
         preventiveAction: "",
-        investigationName: uName,
-        investigationSignatureEmpId: uId,
+        investigationName: isAssigned ? uName : "",
+        investigationSignatureEmpId: isAssigned ? uId : "",
         investigationDeptDesignation: "",
-        correctiveName: uName,
-        correctiveSignatureEmpId: uId,
+        correctiveName: isAssigned ? uName : "",
+        correctiveSignatureEmpId: isAssigned ? uId : "",
         correctiveDeptDesignation: "",
-        preventiveName: uName,
-        preventiveSignatureEmpId: uId,
+        preventiveName: isAssigned ? uName : "",
+        preventiveSignatureEmpId: isAssigned ? uId : "",
         preventiveDeptDesignation: "",
         qualityReceivedBy: uRole === "Admin" ? uName : "",
         qualityReceivedDeptDesignation: "",
@@ -316,9 +534,9 @@ const SupervisorInvestigation = () => {
         rcaImage: "",
         qualityReceivedSignatureEmpId: uRole === "Admin" ? uId : ""
       });
-      setInvestigationDate(new Date());
-      setReceivedDate(new Date());
-      setVerifiedDate(new Date());
+      setInvestigationDate(isAssigned ? new Date() : null);
+      setReceivedDate(uRole === "Admin" ? new Date() : null);
+      setVerifiedDate(uRole === "Admin" ? new Date() : null);
     }
     setValidated(false);
     setError("");
@@ -400,30 +618,7 @@ const SupervisorInvestigation = () => {
   const filteredIncidents = incidents.filter(inc => {
     // Filter incidents by allocated in-charge role
     if (userRole === "In-Charge") {
-      const incClassifications = inc.classifications;
-      let parsedClass = {};
-      if (incClassifications) {
-        if (typeof incClassifications === "string") {
-          try {
-            parsedClass = JSON.parse(incClassifications);
-          } catch (e) {
-            parsedClass = {};
-          }
-        } else {
-          parsedClass = incClassifications;
-        }
-      }
-      
-      const incCategories = Object.keys(parsedClass).filter(
-        cat => Array.isArray(parsedClass[cat]) && parsedClass[cat].length > 0
-      );
-      
-      const isAssigned = incCategories.some(catTitle => {
-        const matchedClassObj = classificationsList.find(c => c.category_key === catTitle || c.title === catTitle);
-        return matchedClassObj && String(matchedClassObj.incharge_id) === String(localStorage.getItem("userId"));
-      });
-      
-      if (!isAssigned) return false;
+      if (!checkIsAssigned(inc)) return false;
     }
 
     const searchLower = searchTerm.toLowerCase();
@@ -436,6 +631,12 @@ const SupervisorInvestigation = () => {
       patientName.includes(searchLower) ||
       employeeName.includes(searchLower);
   });
+
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentIncidents = filteredIncidents.slice(indexOfFirstItem, indexOfLastItem);
 
   const getInvolvedPersonText = (inc) => {
     if (inc.personInvolvedType === "Patient") {
@@ -550,24 +751,12 @@ const SupervisorInvestigation = () => {
       {viewMode === "list" && (
         <>
           <div className="d-flex align-items-center mb-4">
-            <Button
-              variant="secondary"
+            <BackButton
               onClick={() => navigate("/IncidentDashboard")}
               className="me-3"
-              style={{
-                background: "#6c757d",
-                color: "white",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-                width: "auto",
-                height: "auto",
-              }}
             >
               ← Back
-            </Button>
+            </BackButton>
             <h2 className="text-center m-0 flex-grow-1" style={{ fontSize: "24px", fontWeight: "bold" }}>
               Supervisor's Investigation & Root Cause Analysis
             </h2>
@@ -615,56 +804,141 @@ const SupervisorInvestigation = () => {
             <FontAwesomeIcon icon={faSearch} /> Incident Reports list
           </SectionTitle>
 
-          <div className="table-responsive">
-            <Table hover striped bordered className="align-middle">
-              <thead>
-                <tr style={{ backgroundColor: "#f2f2f2" }}>
-                  <th>Incident No</th>
-                  <th>Date / Time</th>
-                  <th>Location</th>
-                  <th>Involved Person</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredIncidents.length > 0 ? (
-                  filteredIncidents.map((inc, idx) => {
-                    const inv = getInvestigationForIncident(inc);
-                    return (
-                      <tr key={inc.incidentNo || inc.id || idx}>
-                        <td>{inc.incidentNo || "-"}</td>
-                        <td>{inc.incidentDate} {inc.incidentTime}</td>
-                        <td>{inc.incidentLocation}</td>
-                        <td>{getInvolvedPersonText(inc)}</td>
-                        <td>
-                          {inv ? (
-                            <Badge bg="success">Investigated</Badge>
-                          ) : (
-                            <Badge bg="warning" text="dark">Pending RCA</Badge>
-                          )}
-                        </td>
-                        <td>
-                          <ActionButton variant="view" onClick={() => handleView(inc)}>
-                            <FontAwesomeIcon icon={faEye} /> View
-                          </ActionButton>
-                          <ActionButton variant="edit" onClick={() => handleEdit(inc)}>
-                            <FontAwesomeIcon icon={faEdit} /> Edit
-                          </ActionButton>
+          {loading ? (
+            <SpinnerContainer>
+              <Spinner animation="border" role="status" style={{ width: "3rem", height: "3rem", color: "#2b5876" }}>
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <div style={{ color: "#718096", fontSize: "16px", fontWeight: "500" }}>Fetching incident records...</div>
+            </SpinnerContainer>
+          ) : (
+            <>
+              <TableContainer>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Incident No</th>
+                      <th>Date / Time</th>
+                      <th>Location</th>
+                      <th>Involved Person</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentIncidents.length > 0 ? (
+                      currentIncidents.map((inc, idx) => {
+                        const inv = getInvestigationForIncident(inc);
+                        return (
+                          <tr key={inc.incidentNo || inc.id || idx}>
+                            <td><strong>{inc.incidentNo || "-"}</strong></td>
+                            <td>{inc.incidentDate} {inc.incidentTime}</td>
+                            <td>{inc.incidentLocation}</td>
+                            <td>{getInvolvedPersonText(inc)}</td>
+                            <td>
+                              {(() => {
+                                if (!inv) {
+                                    return (
+                                      <Badge bg="warning" text="dark" style={{ fontSize: "12px", padding: "5px 10px" }}>
+                                        ⏳ Pending
+                                      </Badge>
+                                    );
+                                }
+                                const isVerified = inv.qualityReceivedBy || (inv.qualityClassification && inv.qualityClassification !== "No harm");
+                                if (isVerified) {
+                                  return (
+                                    <Badge bg="success" style={{ fontSize: "12px", padding: "5px 10px" }}>
+                                      ✔ Verified
+                                    </Badge>
+                                  );
+                                }
+                                if (inv.why1) {
+                                  return (
+                                    <Badge style={{ fontSize: "12px", padding: "5px 10px", background: "#4e4376", color: "white" }}>
+                                      🔍 Investigated
+                                    </Badge>
+                                  );
+                                }
+                                return (
+                                  <Badge bg="warning" text="dark" style={{ fontSize: "12px", padding: "5px 10px" }}>
+                                    ⏳ Pending
+                                  </Badge>
+                                );
+                              })()}
+                            </td>
+                            <td>
+                              <ActionButton variant="view" onClick={() => handleView(inc)}>
+                                <FontAwesomeIcon icon={faEye} /> View
+                              </ActionButton>
+                              <ActionButton variant="edit" onClick={() => handleEdit(inc)}>
+                                <FontAwesomeIcon icon={faEdit} /> Update Investigation
+                              </ActionButton>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center text-muted py-4">
+                          No incidents found.
                         </td>
                       </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center text-muted py-4">
-                      No incidents found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
+                    )}
+                  </tbody>
+                </table>
+              </TableContainer>
+
+              {filteredIncidents.length > 0 && (
+                <PaginationContainer>
+                  <div style={{ color: "#718096", fontSize: "14px" }}>
+                    Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredIncidents.length)} of {filteredIncidents.length} records
+                  </div>
+                  <div style={{ display: "flex", gap: "2px" }}>
+                    <PageButton 
+                      onClick={() => setCurrentPage(1)} 
+                      disabled={currentPage === 1}
+                    >
+                      First
+                    </PageButton>
+                    <PageButton 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                      disabled={currentPage === 1}
+                    >
+                      Prev
+                    </PageButton>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
+                        return (
+                          <PageButton
+                            key={page}
+                            active={currentPage === page}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </PageButton>
+                        );
+                      } else if (page === currentPage - 3 || page === currentPage + 3) {
+                        return <span key={page} style={{ padding: "6px 8px", color: "#a0aec0" }}>...</span>;
+                      }
+                      return null;
+                    })}
+                    <PageButton 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} 
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </PageButton>
+                    <PageButton 
+                      onClick={() => setCurrentPage(totalPages)} 
+                      disabled={currentPage === totalPages}
+                    >
+                      Last
+                    </PageButton>
+                  </div>
+                </PaginationContainer>
+              )}
+            </>
+          )}
         </>
       )}
 
@@ -754,7 +1028,7 @@ const SupervisorInvestigation = () => {
           )}
 
           <div className="text-center">
-            <StyledButton onClick={() => setViewMode("list")}>Back to List</StyledButton>
+            <BackButton onClick={() => setViewMode("list")}>Back to List</BackButton>
           </div>
         </>
       )}
@@ -779,229 +1053,268 @@ const SupervisorInvestigation = () => {
           {renderAllIncidentDetails(selectedIncident)}
 
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-            {/* Root Cause Analysis Field */}
-            <SectionTitle>
-              <FontAwesomeIcon icon={faQuestionCircle} /> Root Cause Analysis (RCA)
-            </SectionTitle>
-            <Form.Group className="mb-4" controlId="why1">
-              <Form.Label>Identify the root cause of the incident:</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                name="why1"
-                value={formData.why1}
-                onChange={handleInputChange}
-                required={userRole === "In-Charge"}
-                disabled={userRole !== "In-Charge"}
-                placeholder="Describe the root cause analysis..."
-              />
-            </Form.Group>
+            {/* Notice for non-assigned users */}
+            {!checkIsAssigned(selectedIncident) && (
+              <LockBanner>
+                <span style={{ fontSize: "18px" }}>🔒</span>
+                <span>
+                  You are not the assigned In-charge for this incident's Classification Item.
+                  The Root Cause Analysis (RCA) section is read-only.
+                </span>
+              </LockBanner>
+            )}
 
-            <Row className="mb-4">
-              <Col md={3}>
-                <Form.Group controlId="investigationName">
-                  <Form.Label>Investigator Name:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="investigationName"
-                    value={formData.investigationName}
+            {/* Root Cause Analysis Section Card */}
+            <FormCard>
+              <Card.Body>
+                <SectionTitle style={{ marginTop: 0 }}>
+                  <FontAwesomeIcon icon={faQuestionCircle} /> Root Cause Analysis (RCA)
+                </SectionTitle>
+                <Form.Group className="mb-4" controlId="why1">
+                  <FormFieldLabel>Identify the root cause of the incident:</FormFieldLabel>
+                  <StyledFormControl
+                    as="textarea"
+                    rows={4}
+                    name="why1"
+                    value={formData.why1}
                     onChange={handleInputChange}
-                    required={userRole === "In-Charge"}
-                    disabled={userRole !== "In-Charge"}
+                    required={checkIsAssigned(selectedIncident)}
+                    disabled={!checkIsAssigned(selectedIncident)}
+                    placeholder="Describe the root cause analysis..."
                   />
                 </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="investigationSignatureEmpId">
-                  <Form.Label>Investigator Emp ID:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="investigationSignatureEmpId"
-                    value={formData.investigationSignatureEmpId}
+
+                <Row>
+                  <Col md={3}>
+                    <Form.Group controlId="investigationName">
+                      <FormFieldLabel>Investigator Name:</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="investigationName"
+                        value={formData.investigationName}
+                        onChange={handleInputChange}
+                        required={checkIsAssigned(selectedIncident)}
+                        disabled={!checkIsAssigned(selectedIncident)}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="investigationSignatureEmpId">
+                      <FormFieldLabel>Investigator Emp ID:</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="investigationSignatureEmpId"
+                        value={formData.investigationSignatureEmpId}
+                        onChange={handleInputChange}
+                        required={checkIsAssigned(selectedIncident)}
+                        disabled={!checkIsAssigned(selectedIncident)}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="investigationDeptDesignation">
+                      <FormFieldLabel>Investigator Dept/Designation:</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="investigationDeptDesignation"
+                        value={formData.investigationDeptDesignation}
+                        onChange={handleInputChange}
+                        disabled={!checkIsAssigned(selectedIncident)}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="investigationDate">
+                      <FormFieldLabel className="d-block">Date & Time Received:</FormFieldLabel>
+                      <DatePicker
+                        selected={investigationDate}
+                        onChange={(date) => setInvestigationDate(date)}
+                        className="form-control"
+                        showTimeSelect
+                        dateFormat="dd/MM/yyyy h:mm aa"
+                        disabled={!checkIsAssigned(selectedIncident)}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </FormCard>
+
+            {/* Corrective Action Card */}
+            <FormCard>
+              <Card.Body>
+                <SectionTitle style={{ marginTop: 0 }}>
+                  <FontAwesomeIcon icon={faFileMedical} /> Corrective Action By Department Incharge
+                </SectionTitle>
+                <Form.Group controlId="correctiveAction">
+                  <FormFieldLabel>Corrective Action taken:</FormFieldLabel>
+                  <StyledFormControl
+                    as="textarea"
+                    rows={3}
+                    name="correctiveAction"
+                    value={formData.correctiveAction}
                     onChange={handleInputChange}
-                    required={userRole === "In-Charge"}
-                    disabled={userRole !== "In-Charge"}
+                    required={checkIsAssigned(selectedIncident)}
+                    disabled={!checkIsAssigned(selectedIncident)}
+                    placeholder="Immediate fixes applied..."
                   />
                 </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="investigationDeptDesignation">
-                  <Form.Label>Investigator Dept/Designation:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="investigationDeptDesignation"
-                    value={formData.investigationDeptDesignation}
+              </Card.Body>
+            </FormCard>
+
+            {/* Preventive Action Card */}
+            <FormCard>
+              <Card.Body>
+                <SectionTitle style={{ marginTop: 0 }}>
+                  <FontAwesomeIcon icon={faUserTie} /> Preventive Action By Head of the Department
+                </SectionTitle>
+                <Form.Group controlId="preventiveAction">
+                  <FormFieldLabel>Preventive Action plan:</FormFieldLabel>
+                  <StyledFormControl
+                    as="textarea"
+                    rows={3}
+                    name="preventiveAction"
+                    value={formData.preventiveAction}
                     onChange={handleInputChange}
-                    disabled={userRole !== "In-Charge"}
+                    required={checkIsAssigned(selectedIncident)}
+                    disabled={!checkIsAssigned(selectedIncident)}
+                    placeholder="Procedures implemented to prevent recurrence..."
                   />
                 </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="investigationDate">
-                  <Form.Label className="d-block">Date & Time Received:</Form.Label>
-                  <DatePicker
-                    selected={investigationDate}
-                    onChange={(date) => setInvestigationDate(date)}
-                    className="form-control"
-                    showTimeSelect
-                    dateFormat="dd/MM/yyyy h:mm aa"
-                    disabled={userRole !== "In-Charge"}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+              </Card.Body>
+            </FormCard>
 
-            {/* Corrective Action Section */}
-            <SectionTitle>
-              <FontAwesomeIcon icon={faFileMedical} /> Corrective Action By Department Incharge
-            </SectionTitle>
-            <Form.Group className="mb-4" controlId="correctiveAction">
-              <Form.Label>Corrective Action taken:</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="correctiveAction"
-                value={formData.correctiveAction}
-                onChange={handleInputChange}
-                required={userRole === "In-Charge"}
-                disabled={userRole !== "In-Charge"}
-                placeholder="Immediate fixes applied..."
-              />
-            </Form.Group>
+            {/* Quality Department Card */}
+            <FormCardQuality>
+              <Card.Body>
+                <SectionTitle style={{ marginTop: 0, color: "#109b76" }}>
+                  <FontAwesomeIcon icon={faCheckDouble} /> To Be Filled By Quality Department
+                </SectionTitle>
 
-            {/* Preventive Action Section */}
-            <SectionTitle>
-              <FontAwesomeIcon icon={faUserTie} /> Preventive Action By Head of the Department
-            </SectionTitle>
-            <Form.Group className="mb-4" controlId="preventiveAction">
-              <Form.Label>Preventive Action plan:</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="preventiveAction"
-                value={formData.preventiveAction}
-                onChange={handleInputChange}
-                required={userRole === "In-Charge"}
-                disabled={userRole !== "In-Charge"}
-                placeholder="Procedures implemented to prevent recurrence..."
-              />
-            </Form.Group>
+                {/* Notice for In-Charge users */}
+                {userRole === "In-Charge" && (
+                  <WarningBanner>
+                    <span style={{ fontSize: "18px" }}>🔒</span>
+                    <span>
+                      This section is reserved for the <strong>Quality Department (Admin)</strong> only.
+                      Your investigation input above has been submitted — no action required here.
+                    </span>
+                  </WarningBanner>
+                )}
 
-            {/* Quality Department Section */}
-            <SectionTitle>
-              <FontAwesomeIcon icon={faCheckDouble} /> To Be Filled By Quality Department
-            </SectionTitle>
-            <Row className="mb-3">
-              <Col md={3}>
-                <Form.Group controlId="qualityReceivedBy">
-                  <Form.Label>Received By (Name):</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="qualityReceivedBy"
-                    value={formData.qualityReceivedBy}
+                <Row className="mb-3">
+                  <Col md={3}>
+                    <Form.Group controlId="qualityReceivedBy">
+                      <FormFieldLabel>Received By (Name):</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="qualityReceivedBy"
+                        value={formData.qualityReceivedBy}
+                        onChange={handleInputChange}
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="qualityReceivedSignatureEmpId">
+                      <FormFieldLabel>Employee ID:</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="qualityReceivedSignatureEmpId"
+                        value={formData.qualityReceivedSignatureEmpId}
+                        onChange={handleInputChange}
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="qualityReceivedDeptDesignation">
+                      <FormFieldLabel>Dept & Designation:</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="qualityReceivedDeptDesignation"
+                        value={formData.qualityReceivedDeptDesignation}
+                        onChange={handleInputChange}
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group controlId="receivedDate">
+                      <FormFieldLabel className="d-block">Date & Time Received:</FormFieldLabel>
+                      <DatePicker
+                        selected={receivedDate}
+                        onChange={(date) => setReceivedDate(date)}
+                        className="form-control"
+                        showTimeSelect
+                        dateFormat="dd/MM/yyyy h:mm aa"
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group controlId="qualityClassification">
+                      <FormFieldLabel>Classification of Incident:</FormFieldLabel>
+                      <StyledFormSelect
+                        name="qualityClassification"
+                        value={formData.qualityClassification}
+                        onChange={handleInputChange}
+                        disabled={userRole !== "Admin"}
+                      >
+                        <option value="No harm">No harm</option>
+                        <option value="Near Miss">Near Miss</option>
+                        <option value="Adverse Event">Adverse Event</option>
+                        <option value="Sentinel Event">Sentinel Event</option>
+                      </StyledFormSelect>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group controlId="qualityVerifiedByHead">
+                      <FormFieldLabel>Verified By Quality Head (Name):</FormFieldLabel>
+                      <StyledFormControl
+                        type="text"
+                        name="qualityVerifiedByHead"
+                        value={formData.qualityVerifiedByHead}
+                        onChange={handleInputChange}
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3" controlId="qualityRemarks">
+                  <FormFieldLabel>Remarks (if any):</FormFieldLabel>
+                  <StyledFormControl
+                    as="textarea"
+                    rows={2}
+                    name="qualityRemarks"
+                    value={formData.qualityRemarks}
                     onChange={handleInputChange}
+                    placeholder="Add quality department review comments..."
                     disabled={userRole !== "Admin"}
                   />
                 </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="qualityReceivedSignatureEmpId">
-                  <Form.Label>Employee ID:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="qualityReceivedSignatureEmpId"
-                    value={formData.qualityReceivedSignatureEmpId}
-                    onChange={handleInputChange}
-                    disabled={userRole !== "Admin"}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="qualityReceivedDeptDesignation">
-                  <Form.Label>Dept & Designation:</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="qualityReceivedDeptDesignation"
-                    value={formData.qualityReceivedDeptDesignation}
-                    onChange={handleInputChange}
-                    disabled={userRole !== "Admin"}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group controlId="receivedDate">
-                  <Form.Label className="d-block">Date & Time Received:</Form.Label>
-                  <DatePicker
-                    selected={receivedDate}
-                    onChange={(date) => setReceivedDate(date)}
-                    className="form-control"
-                    showTimeSelect
-                    dateFormat="dd/MM/yyyy h:mm aa"
-                    disabled={userRole !== "Admin"}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
 
-            <Row className="mb-3">
-              <Col md={6}>
-                <Form.Group controlId="qualityClassification">
-                  <Form.Label>Classification of Incident:</Form.Label>
-                  <Form.Select
-                    name="qualityClassification"
-                    value={formData.qualityClassification}
-                    onChange={handleInputChange}
-                    disabled={userRole !== "Admin"}
-                  >
-                    <option value="No harm">No harm</option>
-                    <option value="Near Miss">Near Miss</option>
-                    <option value="Adverse Event">Adverse Event</option>
-                    <option value="Sentinel Event">Sentinel Event</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="qualityVerifiedByHead">
-                  <Form.Label>Verified By Quality Head (Name):</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="qualityVerifiedByHead"
-                    value={formData.qualityVerifiedByHead}
-                    onChange={handleInputChange}
-                    disabled={userRole !== "Admin"}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-3" controlId="qualityRemarks">
-              <Form.Label>Remarks (if any):</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={2}
-                name="qualityRemarks"
-                value={formData.qualityRemarks}
-                onChange={handleInputChange}
-                placeholder="Add quality department review comments..."
-                disabled={userRole !== "Admin"}
-              />
-            </Form.Group>
-
-            <Row className="mb-4">
-              <Col md={4}>
-                <Form.Group controlId="verifiedDate">
-                  <Form.Label className="d-block">Verification Date & Time:</Form.Label>
-                  <DatePicker
-                    selected={verifiedDate}
-                    onChange={(date) => setVerifiedDate(date)}
-                    className="form-control"
-                    showTimeSelect
-                    dateFormat="dd/MM/yyyy h:mm aa"
-                    disabled={userRole !== "Admin"}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+                <Row>
+                  <Col md={4}>
+                    <Form.Group controlId="verifiedDate">
+                      <FormFieldLabel className="d-block">Verification Date & Time:</FormFieldLabel>
+                      <DatePicker
+                        selected={verifiedDate}
+                        onChange={(date) => setVerifiedDate(date)}
+                        className="form-control"
+                        showTimeSelect
+                        dateFormat="dd/MM/yyyy h:mm aa"
+                        disabled={userRole !== "Admin"}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </FormCardQuality>
 
             <div className="text-center mt-4 d-flex justify-content-center gap-3">
               <BackButton type="button" onClick={() => setViewMode("list")}>
