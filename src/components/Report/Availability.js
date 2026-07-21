@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Row, Form, Col, Dropdown, Table } from 'react-bootstrap';
+import { Row, Form, Col, Table } from 'react-bootstrap';
 import './Availability.css';
 import { bedOptions } from '../constant';
 import apiRequest from '../apiRequest';
+import { SelectField } from '../Common/fields';
 
 function Availability() {
   const [selectedWard, setSelectedWard] = useState('');
@@ -34,36 +35,39 @@ function Availability() {
           <Row className="justify-content-center align-items-center mb-2">
             <Col xs="auto" className="d-flex align-items-center">
               <Form.Label className="mb-0 mr-3" style={{whiteSpace:"nowrap"}}><b>Ward</b></Form.Label>
-              <Dropdown onSelect={handleWardChange} className="m-3">
-                <Dropdown.Toggle variant="light" id="dropdown-basic" style={{ minWidth:"220px", backgroundColor:"white", color:"black", border:"1px solid rgb(251,240,236)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{selectedWard || 'Select Ward'}</span>
-                  <span className="caret"></span>
-                </Dropdown.Toggle>
-                <Dropdown.Menu style={{ minWidth: '220px', textAlign:"center", maxHeight: '250px', overflowY: 'auto', scrollbarWidth:"thin" }}>
-                  {bedOptions.map((ward, index) => (
-                    <Dropdown.Item key={index} eventKey={ward}>
-                      {ward}
-                    </Dropdown.Item>
-                  ))}
-                </Dropdown.Menu>
-              </Dropdown>
-              <Form.Control.Feedback type="invalid">
-                Ward is required.
-              </Form.Control.Feedback>
+              <SelectField
+                style={{ minWidth: "220px", margin: "0 1rem" }}
+                value={selectedWard}
+                onChange={(e) => handleWardChange(e.target.value)}
+              >
+                <option value="">Select Ward</option>
+                {bedOptions.map((ward, index) => (
+                  <option key={index} value={ward}>
+                    {ward}
+                  </option>
+                ))}
+              </SelectField>
             </Col>
           </Row>
           <br/>
-          <Table bordered>
+          <Table
+            bordered
+            style={{
+              backgroundColor: 'var(--color-surface-inset)',
+              color: 'var(--color-text-primary)',
+              borderColor: 'var(--color-border)',
+            }}
+          >
             <thead>
               <tr>
-                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>No of Occupied</th>
-                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>No of availability</th>
+                <th style={{ backgroundColor: 'var(--color-surface-raised)', borderBottom: '2px solid var(--color-accent)' }}>No of Occupied</th>
+                <th style={{ backgroundColor: 'var(--color-surface-raised)', borderBottom: '2px solid var(--color-accent)' }}>No of availability</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ color: 'black' }}>{numberOfBedsOccupied}</td>
-                <td style={{ color: 'black' }}>{numberOfBedsAvailable}</td>
+                <td>{numberOfBedsOccupied}</td>
+                <td>{numberOfBedsAvailable}</td>
               </tr>
             </tbody>
           </Table>

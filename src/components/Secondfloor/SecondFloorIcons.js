@@ -1,46 +1,26 @@
 import React from 'react';
+import DeptIcon from '../Common/DeptIcon';
 import SecondFloorImage from './Secondflooriconimages/SecondFloor.png';
 import SecondSuitImage from './Secondflooriconimages/SecondSuit.png';
 import SICUImage from './Secondflooriconimages/SICU.png';
-const SecondFloorIcons = ({ handleIconClick }) => {
-  return (
-    <div style={{ display: 'flex' }} className='floor-icons'>
 
-      <div style={{ width: '100px', height: '100px' }}>
-        <div className="image-container" onClick={() => handleIconClick('SecondFloor')}>
-          <img
-            style={{ width: "150%", height: "120%", marginLeft: "-20px", marginTop: "-10px" }}
-            src={SecondFloorImage}
-            alt="Second Floor"
-          />
-          <p className="image-text" style={{ marginTop: "-5px" }}>Second Floor</p>
-        </div>
-      </div>
+const ICONS = [
+  { img: SecondFloorImage, label: 'Second Floor', key: 'SecondFloor' },
+  { img: SecondSuitImage, label: 'Second Suit', key: 'SecondSuit' },
+  { img: SICUImage, label: 'SICU Form', key: 'SICUForm' },
+];
 
-      <div style={{ width: '100px', height: '100px' }}>
-        <div className="image-container" onClick={() => handleIconClick('SecondSuit')}>
-          <img
-            style={{ width: "150%", height: "100%", marginLeft: "10px" }}
-            src={SecondSuitImage}
-            alt="Second Suit"
-          />
-          <p className="image-text" style={{ marginLeft: "35px" }}>Second Suit</p>
-        </div>
-      </div>
-
-      <div style={{ width: '100px', height: '100px' }}>
-        <div className="image-container" onClick={() => handleIconClick('SICUForm')}>
-          <img
-            style={{ width: "150%", height: "120%", marginLeft: "50px", marginTop: "-20px" }}
-            src={SICUImage}
-            alt="SICU"
-          />
-          <p className="image-text" style={{ marginLeft: "80px" }}>SICU Form</p>
-        </div>
-      </div>
-
-    </div>
-  );
-};
+const SecondFloorIcons = ({ handleIconClick }) => (
+  <div className="floor-icons">
+    {ICONS.map((icon) => (
+      <DeptIcon
+        key={icon.key}
+        img={icon.img}
+        label={icon.label}
+        onClick={() => handleIconClick(icon.key)}
+      />
+    ))}
+  </div>
+);
 
 export default SecondFloorIcons;

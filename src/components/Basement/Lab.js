@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import styled from "styled-components";
+import { Row, Form, Col } from "react-bootstrap";
 import apiRequest from "../apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  TextAreaField,
+  DateField,
+  SubmitButton,
+  FormAlert,
+} from "../Common/fields";
 
 const Lab = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -117,7 +115,7 @@ const Lab = () => {
   };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">Lab</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div><b>ID: </b>{formData.id}</div>
@@ -127,27 +125,12 @@ const Lab = () => {
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
           <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            />
-            <DatePicker
+            <DateField
               id="datePicker"
               selected={selectedDate}
               onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
               placeholderText="Select Date"
             />
-            {selectedDate && (
-              <div
-                className="position-absolute top-100 start-0 translate-middle-y"
-                style={{ marginLeft: "50px", marginTop: "-15px" }}
-              >
-                {selectedDate.toLocaleDateString("en-GB")}
-              </div>
-            )}
           </div>
         </Form.Group>
 
@@ -163,7 +146,7 @@ const Lab = () => {
 
             <Form.Group controlId="numberOfRegistrations">
               <Form.Label>Number of Registrations</Form.Label>
-              <Form.Control
+              <TextField
                 required
                 type="text"
                 value={formData.numberOfRegistrations}
@@ -177,9 +160,8 @@ const Lab = () => {
           {/* <Col sm="4">
             <Form.Group controlId="numberOfReportingErrorsRemarks">
               <Form.Label>Remarks</Form.Label>
-              <Form.Control
+              <TextAreaField
                 required
-                as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfReportingErrorsRemarks}
                 onChange={handleChange}
@@ -199,7 +181,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfTestsPerformed">
             <Form.Label>Number of Tests Performed</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfTestsPerformed}
@@ -214,7 +196,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfIncidentOrAccidentOccur">
             <Form.Label>Number of Incidant/Accident Occurs</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfIncidentOrAccidentOccur}
@@ -229,7 +211,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfSampleRejections">
             <Form.Label>Number of Sample Rejections</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfSampleRejections}
@@ -246,7 +228,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfRepeats">
             <Form.Label>Number of Repeats (or redos)</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfRepeats}
@@ -261,7 +243,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfEquipmentDownTime">
             <Form.Label>Number of Equipment Down Time</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfEquipmentDownTime}
@@ -276,7 +258,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfPerformanceInILC">
             <Form.Label>Number of Performance in ILC</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfPerformanceInILC}
@@ -293,7 +275,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="customerFeedBack">
             <Form.Label>Customer Feed Back</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.customerFeedBack}
@@ -308,7 +290,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfTurnAroundTimeAndShortTurnAroundCriticalReporting">
             <Form.Label>Number of Turn Around Time & Short Turn Around Critical reporting</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfTurnAroundTimeAndShortTurnAroundCriticalReporting}
@@ -324,7 +306,7 @@ const Lab = () => {
           <Col sm="8">
             <Form.Group controlId="numberOfReportingErrors">
               <Form.Label>Number of Reporting Errors</Form.Label>
-              <Form.Control
+              <TextField
                 // required
                 type="text"
                 value={formData.numberOfReportingErrors}
@@ -338,9 +320,8 @@ const Lab = () => {
           <Col sm="4">
             <Form.Group controlId="numberOfReportingErrorsRemarks">
               <Form.Label>Remarks</Form.Label>
-              <Form.Control
+              <TextAreaField
                 // required
-                as="textarea"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfReportingErrorsRemarks}
                 onChange={handleChange}
@@ -360,8 +341,8 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfCriticalReporting">
             <Form.Label>Number of Critical reporting</Form.Label>
-            <Form.Control
-              // required  
+            <TextField
+              // required
               type="text"
               value={formData.numberOfCriticalReporting}
               onChange={handleChange}
@@ -377,7 +358,7 @@ const Lab = () => {
             <Form.Label>
               Number of Staff Adhering to Safety Precautions
             </Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfStaffAdheringToSafety}
@@ -392,7 +373,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfStaffAudited">
             <Form.Label>Number of Staff Audited</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfStaffAudited}
@@ -407,7 +388,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="waitingTimeForDiagnostics">
             <Form.Label>Waiting time for Diagnostics</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.waitingTimeForDiagnostics}
@@ -422,7 +403,7 @@ const Lab = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfPatientsReportedInDiagnostics">
             <Form.Label>Number of patients reported in Diagnostics</Form.Label>
-            <Form.Control
+            <TextField
               // required
               type="text"
               value={formData.numberOfPatientsReportedInDiagnostics}
@@ -435,24 +416,23 @@ const Lab = () => {
         </Row>
 
 
-        <button
-          variant="primary"
+        <SubmitButton
           type="submit"
           className="mb-3"
           disabled={isSubmitting} // ✅ disable when submitting
         >
           {isSubmitting ? "Saving..." : "Save"}
-        </button>
+        </SubmitButton>
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""}>
+        <FormAlert variant="danger" show={error !== ""}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

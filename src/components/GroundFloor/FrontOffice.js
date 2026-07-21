@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Button, Alert } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import Container from 'react-bootstrap/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import styled from 'styled-components';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import apiRequest from '../apiRequest';
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import { FormCard, TextField, DateField, SubmitButton, FormAlert } from '../Common/fields';
 
 function FrontOffice() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -141,7 +132,7 @@ function FrontOffice() {
   };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h1 className="text-center mb-4">Front Office</h1>
       <div style={{ float: "right" }} className='mt-3'>
         <div><b>ID: </b>{formData.id}</div>
@@ -149,27 +140,13 @@ function FrontOffice() {
       </div>
 
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
-              onClick={() => document.getElementById('datePicker').click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div className="position-absolute top-100 start-0 translate-middle-y" style={{ marginLeft: '50px', marginTop: '-15px' }}>
-                {selectedDate.toLocaleDateString('en-GB')}
-              </div>
-            )}
-          </div>
+        <Form.Group className="mb-3" controlId="selectedDate">
+          <DateField
+            id="datePicker"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            placeholderText="Select Date"
+          />
         </Form.Group>
 
         {/* All your other form groups remain the same */}
@@ -177,7 +154,7 @@ function FrontOffice() {
         <br />
         <Form.Group className="mb-3" controlId="sumTotalPatientInTimeForConsultation">
           <Form.Label>Sum total Patient - in time for Consultation</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.sumTotalPatientInTimeForConsultation}
@@ -190,7 +167,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="NumberOfOutPatients">
           <Form.Label>Number of OP Patients</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.NumberOfOutPatients}
@@ -204,7 +181,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="OutPatientECHS">
           <Form.Label>ECHS</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.OutPatientECHS}
@@ -216,7 +193,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="OutPatientESI">
           <Form.Label>ESI</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.OutPatientESI}
@@ -228,7 +205,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="OutPatientRailway">
           <Form.Label>Railway</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.OutPatientRailway}
@@ -240,7 +217,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="OutPatientTNCM">
           <Form.Label>TNCM</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.OutPatientTNCM}
@@ -252,7 +229,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="OutPatientPAY">
           <Form.Label>PAY</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.OutPatientPAY}
@@ -264,7 +241,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="totalNumberOfOutPatients">
           <Form.Label>Total Number of Out Patients</Form.Label>
-          <Form.Control
+          <TextField
             type="text"
             value={formData.totalNumberOfOutPatients}
             readOnly />
@@ -274,7 +251,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="InPatientECHS">
           <Form.Label>ECHS</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.InPatientECHS}
@@ -286,7 +263,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="InPatientESI">
           <Form.Label>ESI</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.InPatientESI}
@@ -298,7 +275,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="InPatientRailway">
           <Form.Label>Railway</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.InPatientRailway}
@@ -310,7 +287,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="InPatientTNCM">
           <Form.Label>TNCM</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.InPatientTNCM}
@@ -322,7 +299,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="InPatientPAY">
           <Form.Label>PAY</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.InPatientPAY}
@@ -334,7 +311,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="totalNumberOfInPatients">
           <Form.Label>Total Number of In Patients</Form.Label>
-          <Form.Control
+          <TextField
             type="text"
             value={formData.totalNumberOfInPatients}
             readOnly />
@@ -344,7 +321,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="MRI">
           <Form.Label>MRI</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.MRI}
@@ -356,7 +333,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="CT">
           <Form.Label>CT</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.CT}
@@ -368,7 +345,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="USG">
           <Form.Label>USG</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.USG}
@@ -380,7 +357,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="ECHO">
           <Form.Label>ECHO</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.ECHO}
@@ -392,7 +369,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="LAB">
           <Form.Label>LAB</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.LAB}
@@ -404,7 +381,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="Xray">
           <Form.Label>Xray</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.Xray}
@@ -416,7 +393,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="sumOfTotalPatientReportingtime">
           <Form.Label>Sum of total patients reporting time</Form.Label>
-          <Form.Control
+          <TextField
             type="text"
             value={formData.sumOfTotalPatientReportingtime}
             readOnly />
@@ -426,7 +403,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="DialysisInsurance">
           <Form.Label>Insurance</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.DialysisInsurance}
@@ -438,7 +415,7 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="DialysisPay">
           <Form.Label>PAY</Form.Label>
-          <Form.Control
+          <TextField
             required
             type="text"
             value={formData.DialysisPay}
@@ -450,20 +427,20 @@ function FrontOffice() {
 
         <Form.Group className="mb-3" controlId="DialysisTotal">
           <Form.Label>Dialysis Total</Form.Label>
-          <Form.Control
+          <TextField
             type="text"
             value={formData.DialysisTotal}
             readOnly />
         </Form.Group>
 
-        <button variant="primary" type="submit" disabled={isSubmitting}>
+        <SubmitButton type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : 'Save'}
-        </button>
+        </SubmitButton>
       </Form>
 
-      {formSubmitted && <Alert variant="success" className="mt-3">Form submitted successfully!</Alert>}
-      {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
-    </StyledContainer>
+      {formSubmitted && <FormAlert variant="success" className="mt-3">Form submitted successfully!</FormAlert>}
+      {error && <FormAlert variant="danger" className="mt-3">{error}</FormAlert>}
+    </FormCard>
   );
 }
 

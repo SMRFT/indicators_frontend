@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Row, Form, Button, Alert, Col } from "react-bootstrap";
-import Dropdown from "react-bootstrap/Dropdown";
+import { Row, Form, Col } from "react-bootstrap";
 import styled from "styled-components";
 import "./Register.css";
 // Import the department options and role from constants.js
 import { role, wardOptions } from "../constant";
+import { TextField, SelectField, SubmitButton, FormAlert } from "../Common/fields";
 const Register = () => {
   const [validated, setValidated] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -86,7 +86,7 @@ const Register = () => {
             <Col>
               <Form.Group controlId="id">
                 <Form.Label>ID</Form.Label>
-                <Form.Control
+                <TextField
                   required
                   type="text"
                   value={formData.id}
@@ -99,7 +99,6 @@ const Register = () => {
                     (touchedFields.id && !formData.id) ||
                     (formData.id && !/^[a-zA-Z0-9]+$/.test(formData.id))
                   }
-                  style={{ border: "1px solid rgb(251,240,236)" }}
                 />
                 <Form.Control.Feedback type="invalid">
                   {formData.id && !/^[a-zA-Z0-9]+$/.test(formData.id)
@@ -111,7 +110,7 @@ const Register = () => {
             <Col>
               <Form.Group controlId="name">
                 <Form.Label>Name</Form.Label>
-                <Form.Control
+                <TextField
                   required
                   type="text"
                   value={formData.name}
@@ -124,7 +123,6 @@ const Register = () => {
                     (touchedFields.name && !formData.name) ||
                     (formData.name && !/^[A-Za-z\s]+$/.test(formData.name))
                   }
-                  style={{ border: "1px solid rgb(251,240,236)" }}
                 />
                 <Form.Control.Feedback type="invalid">
                   {formData.name && !/^[A-Za-z\s]+$/.test(formData.name)
@@ -138,46 +136,21 @@ const Register = () => {
             <Col>
               <Form.Group controlId="department">
                 <Form.Label>Department</Form.Label>
-                <Dropdown
+                <SelectField
                   id="departmentSelect"
-                  onSelect={(value) =>
-                    setFormData({ ...formData, department: value })
+                  required
+                  value={formData.department}
+                  onChange={(e) =>
+                    setFormData({ ...formData, department: e.target.value })
                   }
-                  className="custom-dropdown"
                 >
-                  <Dropdown.Toggle
-                    variant="light"
-                    id="dropdown-basic"
-                    style={{
-                      minWidth: "220px",
-                      backgroundColor: "white",
-                      color: "black",
-                      border: "1px solid rgb(251,240,236)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span>{formData.department || "Select Department"}</span>
-                    <span className="caret"></span>{" "}
-                    {/* Bootstrap's built-in caret icon */}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu
-                    style={{
-                      minWidth: "220px",
-                      textAlign: "center",
-                      maxHeight: "250px",
-                      overflowY: "auto",
-                      scrollbarWidth: "thin",
-                    }}
-                  >
-                    {wardOptions.map((department, index) => (
-                      <Dropdown.Item key={index} eventKey={department}>
-                        {department}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
+                  <option value="">Select Department</option>
+                  {wardOptions.map((department, index) => (
+                    <option key={index} value={department}>
+                      {department}
+                    </option>
+                  ))}
+                </SelectField>
                 <Form.Control.Feedback type="invalid">
                   Department is required.
                 </Form.Control.Feedback>
@@ -186,46 +159,21 @@ const Register = () => {
             <Col>
               <Form.Group controlId="role">
                 <Form.Label>Role</Form.Label>
-                <Dropdown
+                <SelectField
                   id="roleselect"
-                  onSelect={(value) =>
-                    setFormData({ ...formData, role: value })
+                  required
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
                   }
-                  className="custom-dropdown"
                 >
-                  <Dropdown.Toggle
-                    variant="light"
-                    id="dropdown-basic"
-                    style={{
-                      minWidth: "220px",
-                      backgroundColor: "white",
-                      color: "black",
-                      border: "1px solid rgb(251,240,236)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span>{formData.role || "Select Role"}</span>
-                    <span className="caret"></span>{" "}
-                    {/* Bootstrap's built-in caret icon */}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu
-                    style={{
-                      minWidth: "220px",
-                      textAlign: "center",
-                      maxHeight: "250px",
-                      overflowY: "auto",
-                      scrollbarWidth: "thin",
-                    }}
-                  >
-                    {role.map((role, index) => (
-                      <Dropdown.Item key={index} eventKey={role}>
-                        {role}
-                      </Dropdown.Item>
-                    ))}
-                  </Dropdown.Menu>
-                </Dropdown>
+                  <option value="">Select Role</option>
+                  {role.map((roleOption, index) => (
+                    <option key={index} value={roleOption}>
+                      {roleOption}
+                    </option>
+                  ))}
+                </SelectField>
                 <Form.Control.Feedback type="invalid">
                   Role is required.
                 </Form.Control.Feedback>
@@ -236,7 +184,7 @@ const Register = () => {
             <Col>
               <Form.Group controlId="password">
                 <Form.Label>Password</Form.Label>
-                <Form.Control
+                <TextField
                   required
                   type="password"
                   value={formData.password}
@@ -246,7 +194,6 @@ const Register = () => {
                   }}
                   // isInvalid={(touchedFields.password && !formData.password) || (formData.password && !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password))}
                   autoComplete="new-password" // Prevent browser autocomplete and generate a new password
-                  style={{ border: "1px solid rgb(251,240,236)" }}
                 />
                 <Form.Control.Feedback type="invalid">
                   Password is required
@@ -255,14 +202,14 @@ const Register = () => {
             </Col>
           </Row>
           <center>
-            <button type="submit" className="mb-3">
+            <SubmitButton type="submit" className="mb-3">
               Save
-            </button>
+            </SubmitButton>
           </center>
           {/* Combined Error Alert */}
-          {error && <Alert variant="danger">{error}</Alert>}
+          {error && <FormAlert variant="danger">{error}</FormAlert>}
           {/* Success Message Alert */}
-          {successMessage && <Alert variant="success">{successMessage}</Alert>}
+          {successMessage && <FormAlert variant="success">{successMessage}</FormAlert>}
         </Form>
       </StyledContainer>
     </div>

@@ -1,22 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert, Card, Accordion } from "react-bootstrap";
+import { Row, Form, Col, Card, Accordion } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt, faClock, faExclamationTriangle, faFileAlt, faUserShield, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { faClock, faExclamationTriangle, faFileAlt, faUserShield, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import { message } from "antd";
 import apiRequest from "../apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 30px;
-  max-width: 1200px;
-  background: #fdfdfd;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-`;
+import { FormCard, TextField, TextAreaField, SelectField, DateField, SubmitButton, FormAlert } from "../Common/fields";
 
 const FormHeader = styled.div`
   background: linear-gradient(135deg, #109b76, #0c7a5d);
@@ -48,37 +38,6 @@ const SectionTitle = styled.h4`
   display: flex;
   align-items: center;
   gap: 10px;
-`;
-
-const StyledButton = styled.button`
-  background: #109b76;
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 155, 118, 0.2);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 42px;
-  width: auto;
-
-  &:hover {
-    background: #0c7a5d;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 155, 118, 0.3);
-  }
-
-  &:disabled {
-    background: #a5d3c7;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
 `;
 
 const BackButton = styled.button`
@@ -305,7 +264,7 @@ const IncidentReport = () => {
   };
 
   return (
-    <StyledContainer>
+    <FormCard>
       <div className="d-flex justify-content-start mb-3">
         <BackButton type="button" onClick={() => navigate("/IncidentDashboard")}>
           ← Back
@@ -326,8 +285,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="incidentNo">
               <Form.Label>Incident No:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="incidentNo"
                 value={formData.incidentNo || "Auto-generated"}
                 disabled
@@ -338,10 +296,9 @@ const IncidentReport = () => {
             <Form.Group controlId="incidentDate">
               <Form.Label className="d-block">Incident Date:</Form.Label>
               <div className="d-flex align-items-center">
-                <DatePicker
+                <DateField
                   selected={incidentDate}
                   onChange={(date) => setIncidentDate(date)}
-                  className="form-control"
                   dateFormat="dd/MM/yyyy"
                   required
                 />
@@ -351,8 +308,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="incidentTime">
               <Form.Label>Incident Time:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="incidentTime"
                 value={formData.incidentTime}
                 onChange={handleInputChange}
@@ -364,8 +320,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="incidentLocation">
               <Form.Label>Incident Location/Dept:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="incidentLocation"
                 value={formData.incidentLocation}
                 onChange={handleInputChange}
@@ -384,7 +339,7 @@ const IncidentReport = () => {
           <Col md={12}>
             <Form.Group controlId="personInvolvedType">
               <Form.Label>Person Involved Type:</Form.Label>
-              <Form.Select
+              <SelectField
                 name="personInvolvedType"
                 value={formData.personInvolvedType}
                 onChange={handleInputChange}
@@ -393,7 +348,7 @@ const IncidentReport = () => {
                 <option value="Employee">Employee</option>
                 <option value="Materials/Equipment">Materials/Equipment</option>
                 <option value="Others">Others</option>
-              </Form.Select>
+              </SelectField>
             </Form.Group>
           </Col>
         </Row>
@@ -403,8 +358,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="patientName">
                 <Form.Label>Patient Name:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="patientName"
                   value={formData.patientName}
                   onChange={handleInputChange}
@@ -415,8 +369,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="patientAgeSex">
                 <Form.Label>Age / Sex:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="patientAgeSex"
                   value={formData.patientAgeSex}
                   onChange={handleInputChange}
@@ -427,8 +380,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="patientUhid">
                 <Form.Label>UHID:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="patientUhid"
                   value={formData.patientUhid}
                   onChange={handleInputChange}
@@ -439,8 +391,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="patientDoctor">
                 <Form.Label>Doctor:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="patientDoctor"
                   value={formData.patientDoctor}
                   onChange={handleInputChange}
@@ -456,8 +407,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="employeeName">
                 <Form.Label>Employee Name:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="employeeName"
                   value={formData.employeeName}
                   onChange={handleInputChange}
@@ -468,8 +418,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="employeeAgeSex">
                 <Form.Label>Age / Sex:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="employeeAgeSex"
                   value={formData.employeeAgeSex}
                   onChange={handleInputChange}
@@ -480,8 +429,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="idNo">
                 <Form.Label>Employee ID:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="idNo"
                   value={formData.idNo}
                   onChange={handleInputChange}
@@ -492,8 +440,7 @@ const IncidentReport = () => {
             <Col md={3}>
               <Form.Group controlId="employeeDept">
                 <Form.Label>Department:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="employeeDept"
                   value={formData.employeeDept}
                   onChange={handleInputChange}
@@ -509,8 +456,7 @@ const IncidentReport = () => {
             <Col md={12}>
               <Form.Group controlId="instrumentToolsDetails">
                 <Form.Label>Instrument/Tools Details:</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="instrumentToolsDetails"
                   value={formData.instrumentToolsDetails}
                   onChange={handleInputChange}
@@ -526,8 +472,7 @@ const IncidentReport = () => {
             <Col md={12}>
               <Form.Group controlId="personInvolvedOthersDetails">
                 <Form.Label>Specify Details (if Others):</Form.Label>
-                <Form.Control
-                  type="text"
+                <TextField
                   name="personInvolvedOthersDetails"
                   value={formData.personInvolvedOthersDetails}
                   onChange={handleInputChange}
@@ -566,8 +511,7 @@ const IncidentReport = () => {
                   </CheckboxGrid>
                   <Form.Group className="mt-3" controlId={`others-${cls.id}`}>
                     <Form.Label>Others (Specify):</Form.Label>
-                    <Form.Control
-                      type="text"
+                    <TextField
                       value={othersText[key] || ""}
                       onChange={(e) => handleOthersTextChange(key, e.target.value)}
                       placeholder="Add any other details..."
@@ -585,8 +529,7 @@ const IncidentReport = () => {
         </SectionTitle>
         <Form.Group className="mb-3" controlId="descriptionOfIncident">
           <Form.Label>Provide detailed description of what occurred:</Form.Label>
-          <Form.Control
-            as="textarea"
+          <TextAreaField
             rows={4}
             name="descriptionOfIncident"
             value={formData.descriptionOfIncident}
@@ -601,8 +544,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="reportedBy">
               <Form.Label>Reported By (Name):</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="reportedBy"
                 value={formData.reportedBy}
                 onChange={handleInputChange}
@@ -614,8 +556,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="reportedByDesignation">
               <Form.Label>Designation/Dept:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="reportedByDesignation"
                 value={formData.reportedByDesignation}
                 onChange={handleInputChange}
@@ -625,8 +566,7 @@ const IncidentReport = () => {
           <Col md={2}>
             <Form.Group controlId="reportedByEmpId">
               <Form.Label>EMP ID:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="reportedByEmpId"
                 value={formData.reportedByEmpId}
                 onChange={handleInputChange}
@@ -637,10 +577,9 @@ const IncidentReport = () => {
           <Col md={4}>
             <Form.Group controlId="reportedByDateTime">
               <Form.Label className="d-block">Date & Time Reported:</Form.Label>
-              <DatePicker
+              <DateField
                 selected={reportedDate}
                 onChange={(date) => setReportedDate(date)}
-                className="form-control"
                 showTimeSelect
                 dateFormat="dd/MM/yyyy h:mm aa"
                 required
@@ -654,8 +593,7 @@ const IncidentReport = () => {
           <Col md={12}>
             <Form.Group controlId="witnessName">
               <Form.Label>Witness Name(s) (if any):</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="witnessName"
                 value={formData.witnessName}
                 onChange={handleInputChange}
@@ -671,8 +609,7 @@ const IncidentReport = () => {
         </SectionTitle>
         <Form.Group className="mb-3" controlId="immediateCorrection">
           <Form.Label>Action taken immediately to correct or control the incident:</Form.Label>
-          <Form.Control
-            as="textarea"
+          <TextAreaField
             rows={3}
             name="immediateCorrection"
             value={formData.immediateCorrection}
@@ -685,8 +622,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="correctionName">
               <Form.Label>Action Taken By (Name):</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="correctionName"
                 value={formData.correctionName}
                 onChange={handleInputChange}
@@ -696,8 +632,7 @@ const IncidentReport = () => {
           <Col md={3}>
             <Form.Group controlId="correctionDesignation">
               <Form.Label>Designation/Dept:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="correctionDesignation"
                 value={formData.correctionDesignation}
                 onChange={handleInputChange}
@@ -707,8 +642,7 @@ const IncidentReport = () => {
           <Col md={2}>
             <Form.Group controlId="correctionEmpId">
               <Form.Label>EMP ID:</Form.Label>
-              <Form.Control
-                type="text"
+              <TextField
                 name="correctionEmpId"
                 value={formData.correctionEmpId}
                 onChange={handleInputChange}
@@ -718,13 +652,11 @@ const IncidentReport = () => {
           <Col md={4}>
             <Form.Group controlId="correctionDateTime">
               <Form.Label className="d-block">Date & Time Actioned:</Form.Label>
-              <DatePicker
+              <DateField
                 selected={correctionDate}
                 onChange={(date) => setCorrectionDate(date)}
-                className="form-control"
                 showTimeSelect
                 dateFormat="dd/MM/yyyy h:mm aa"
-                
               />
             </Form.Group>
           </Col>
@@ -734,20 +666,20 @@ const IncidentReport = () => {
           <BackButton type="button" onClick={() => navigate("/IncidentDashboard")}>
             Back
           </BackButton>
-          <StyledButton type="submit" disabled={isSubmitting}>
+          <SubmitButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Submit Incident Form"}
-          </StyledButton>
+          </SubmitButton>
         </div>
 
-        <Alert variant="success" show={formSubmitted} className="mt-3">
+        <FormAlert variant="success" show={formSubmitted} className="mt-3">
           Incident Form submitted successfully! Generated Incident ID: <strong>{submittedIncidentId}</strong>. Redirecting to dashboard...
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""} className="mt-3">
+        <FormAlert variant="danger" show={error !== ""} className="mt-3">
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

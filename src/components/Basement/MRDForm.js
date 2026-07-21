@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Form, Button, Alert, Container } from "react-bootstrap";
+import { Row, Col, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import styled from "styled-components";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import apiRequest from "../apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import { FormCard, TextField, TextAreaField, SubmitButton, FormAlert, DateField } from "../Common/fields";
 
 function MRDForm() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -115,7 +106,7 @@ function MRDForm() {
 
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">MRD</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -132,33 +123,12 @@ function MRDForm() {
         <Row className="mb-3">
           <Col sm="12">
             <Form.Group className="position-relative" controlId="selectedDate">
-              <div className="position-relative">
-                <FontAwesomeIcon
-                  icon={faCalendarAlt}
-                  style={{
-                    cursor: "pointer",
-                    color: "#EBB099",
-                    fontSize: "25px",
-                  }}
-                  onClick={() => document.getElementById("datePicker").click()}
-                />
-                <DatePicker
-                  id="datePicker"
-                  selected={selectedDate}
-                  onChange={handleDateChange}
-                  className="position-absolute top-100 start-0 d-none"
-                  calendarClassName="position-absolute top-100 start-0"
-                  placeholderText="Select Date"
-                />
-                {selectedDate && (
-                  <div
-                    className="position-absolute top-100 start-0 translate-middle-y"
-                    style={{ marginLeft: "50px", marginTop: "-15px" }}
-                  >
-                    {selectedDate.toLocaleDateString("en-GB")}
-                  </div>
-                )}
-              </div>
+              <DateField
+                id="datePicker"
+                selected={selectedDate}
+                onChange={handleDateChange}
+                placeholderText="Select Date"
+              />
             </Form.Group>
           </Col>
         </Row>
@@ -170,9 +140,8 @@ function MRDForm() {
                 Number of Medical Records having Incomplete and /or Improper
                 Consent{" "}
               </Form.Label>
-              <Form.Control
+              <TextField
                 required
-                type="text"
                 value={formData.numberOfMedicalRecords}
                 onChange={handleChange}
               />
@@ -185,8 +154,7 @@ function MRDForm() {
           <Col sm="4">
             <Form.Group controlId="numberOfMedicalRecordsRemarks">
               <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                as="textarea"
+              <TextAreaField
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfMedicalRecordsRemarks}
                 onChange={handleChange}
@@ -207,9 +175,8 @@ function MRDForm() {
           <Col sm="8">
             <Form.Group controlId="numberOfDischarge">
               <Form.Label>Number of discharge</Form.Label>
-              <Form.Control
+              <TextField
                 required
-                type="text"
                 value={formData.numberOfDischarge}
                 onChange={handleChange}
               />
@@ -224,9 +191,8 @@ function MRDForm() {
           <Col sm="8">
             <Form.Group controlId="numberOfDeath">
               <Form.Label>Number of death</Form.Label>
-              <Form.Control
+              <TextField
                 required
-                type="text"
                 value={formData.numberOfDeath}
                 onChange={handleChange}
               />
@@ -239,8 +205,7 @@ function MRDForm() {
           <Col sm="4">
             <Form.Group controlId="numberOfDeathRemarks">
               <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                as="textarea"
+              <TextAreaField
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfDeathRemarks}
                 onChange={handleChange}
@@ -259,27 +224,26 @@ function MRDForm() {
 
         <Row className="mb-3">
           <Col sm="12">
-            <button
-              variant="primary"
+            <SubmitButton
               type="submit"
               className="mb-3"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Saving..." : "Save"}
-            </button>
+            </SubmitButton>
           </Col>
         </Row>
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""}>
+        <FormAlert variant="danger" show={error !== ""}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 }
 

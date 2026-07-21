@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Form, Alert, Button } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import styled from "styled-components";
+import { Row, Col, Form } from "react-bootstrap";
 import apiRequest from "../apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  TextAreaField,
+  NumberField,
+  SelectField,
+  DateField,
+  SubmitButton,
+  FormAlert,
+} from "./fields";
 
 const MAX_CHAR_LIMIT = 5000;
 
@@ -205,7 +205,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
   };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">{title}</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -219,31 +219,15 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
 
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{
-                position: "absolute",
-                left: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                zIndex: 10,
-                color: "#6c757d",
-              }}
-            />
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              className="form-control"
-              placeholderText="Select Date"
-              style={{ paddingLeft: "35px" }}
-              required
-            />
-          </div>
+          <DateField
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
+            required
+          />
         </Form.Group>
 
-        {error && <Alert variant="danger">{error}</Alert>}
-        {formSubmitted && <Alert variant="success">Submitted successfully!</Alert>}
+        {error && <FormAlert variant="danger">{error}</FormAlert>}
+        {formSubmitted && <FormAlert variant="success">Submitted successfully!</FormAlert>}
 
         {fields.map((field) => {
           // 1. Dynamic Table - Restraint Patients
@@ -254,8 +238,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                   <Col md={4}>
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
-                      <Form.Control
-                        type="number"
+                      <NumberField
                         min="0"
                         value={formData[field.id]}
                         onChange={handleRestraintNumberChange}
@@ -271,7 +254,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Col md={6}>
                       <Form.Group controlId={`restrainedPatientType-${key}`}>
                         <Form.Label>Type of Restraint</Form.Label>
-                        <Form.Select
+                        <SelectField
                           value={detail.type || ""}
                           onChange={(e) => handleRestraintDetailChange(key, "type", e.target.value)}
                           required
@@ -279,14 +262,13 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                           <option value="">Select Type</option>
                           <option value="chemical">Chemical</option>
                           <option value="physical">Physical</option>
-                        </Form.Select>
+                        </SelectField>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
                       <Form.Group controlId={`restrainedPatientRemark-${key}`}>
                         <Form.Label>Remark</Form.Label>
-                        <Form.Control
-                          as="textarea"
+                        <TextAreaField
                           rows={1}
                           value={detail.remark || ""}
                           onChange={(e) => handleRestraintDetailChange(key, "remark", e.target.value)}
@@ -309,7 +291,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                   <Col>
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
-                      <Form.Control
+                      <TextField
                         type="text"
                         value={formData[field.id]}
                         onChange={handleChange}
@@ -324,9 +306,8 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Col>
                       <Form.Group controlId={`transfused-${index}`}>
                         <Form.Label>{`Units Transfused ${index + 1}`}</Form.Label>
-                        <Form.Control
+                        <TextAreaField
                           required
-                          as="textarea"
                           rows={1}
                           value={formData.numberOfUnitsTransfusedRemarks[`transfused-${index}`] || ""}
                           onChange={handleChange}
@@ -340,9 +321,8 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Col>
                       <Form.Group controlId={`transfused-remarks-${index}`}>
                         <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
-                        <Form.Control
+                        <TextAreaField
                           required
-                          as="textarea"
                           rows={1}
                           value={formData.numberOfUnitsTransfusedRemarks[`transfused-remarks-${index}`] || ""}
                           onChange={handleChange}
@@ -367,8 +347,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                   <Col md={6}>
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
-                      <Form.Control
-                        type="number"
+                      <NumberField
                         min="0"
                         value={formData[field.id]}
                         onChange={handleivlineChange}
@@ -383,7 +362,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Col md={6}>
                       <Form.Group controlId={`ExtravasationVIPScore-${index}`}>
                         <Form.Label>{`Extravasation VIP Score ${index + 1}`}</Form.Label>
-                        <Form.Select
+                        <SelectField
                           required
                           value={formData.ivLineChangeRemarks[`ExtravasationVIPScore-${index}`] || ""}
                           onChange={handleivlineChange}
@@ -394,14 +373,13 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                           <option value="3">C (3)</option>
                           <option value="4">D (4)</option>
                           <option value="5">E (5)</option>
-                        </Form.Select>
+                        </SelectField>
                       </Form.Group>
                     </Col>
                     <Col md={6}>
                       <Form.Group controlId={`ExtravasationVIPScoreRemarks-${index}`}>
                         <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
-                        <Form.Control
-                          as="textarea"
+                        <TextAreaField
                           rows={1}
                           required
                           maxLength={MAX_CHAR_LIMIT}
@@ -426,7 +404,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                 <Col>
                   <Form.Group controlId={field.id}>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control
+                    <TextField
                       type="text"
                       value={formData[field.id]}
                       onChange={handleChange}
@@ -437,9 +415,8 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                 <Col>
                   <Form.Group controlId={field.remarksId}>
                     <Form.Label>Remarks</Form.Label>
-                    <Form.Control
+                    <TextAreaField
                       required
-                      as="textarea"
                       rows={1}
                       value={formData[field.remarksId]}
                       onChange={handleChange}
@@ -459,7 +436,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
               <Col>
                 <Form.Group controlId={field.id}>
                   <Form.Label>{field.label}</Form.Label>
-                  <Form.Control
+                  <TextField
                     type="text"
                     value={formData[field.id]}
                     onChange={handleChange}
@@ -472,12 +449,12 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
         })}
 
         <div className="text-center">
-          <Button type="submit" disabled={isSubmitting}>
+          <SubmitButton type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit"}
-          </Button>
+          </SubmitButton>
         </div>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

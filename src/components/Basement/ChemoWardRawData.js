@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Alert, Col, Table, Button } from 'react-bootstrap';
+import { Row, Form, Col, Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import styled from 'styled-components';
 import apiRequest from "../apiRequest";
-const Container = styled.div`
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  SubmitButton,
+  FormAlert,
+  DateField,
+} from "../Common/fields";
 
 const ChemoWardRawData = ({ showHeading = true }) => {
     const [noOfPatients, setNoOfPatients] = useState('1');
@@ -160,7 +159,7 @@ const ChemoWardRawData = ({ showHeading = true }) => {
     };
     
     return (
-        <Container className="RawData">
+        <FormCard className="RawData">
             <div>
                 {showHeading && <h2 className="text-center">ChemoWard RawData</h2>}
                 <div style={{ float: "right" }} className='mt-3'>
@@ -169,30 +168,13 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                 </div>
                 <br/>
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Group className="position-relative" controlId="selectedDate">
-                        <div className="position-relative">
-                            <FontAwesomeIcon
-                                icon={faCalendarAlt}
-                                style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
-                                onClick={() => document.getElementById('datePicker').click()}
-                            />
-                            <DatePicker
-                                id="datePicker"
-                                selected={selectedDate}
-                                onChange={handleDateChange}
-                                className="position-absolute top-100 start-0 d-none"
-                                calendarClassName="position-absolute top-100 start-0"
-                                placeholderText="Select Date"
-                            />
-                            {selectedDate && (
-                                <div
-                                    className="position-absolute top-100 start-0 translate-middle-y"
-                                    style={{ marginLeft: '50px', marginTop: '-15px' }}
-                                >
-                                    {selectedDate.toLocaleDateString('en-GB')}
-                                </div>
-                            )}
-                        </div>
+                    <Form.Group controlId="selectedDate">
+                        <DateField
+                            id="datePicker"
+                            selected={selectedDate}
+                            onChange={handleDateChange}
+                            placeholderText="Select Date"
+                        />
                     </Form.Group>
                     <br />
                     <Row>
@@ -200,9 +182,8 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                             <Form.Label htmlFor="noOfPatients" style={{ fontWeight: "bold" }}>No of Patients</Form.Label>
                         </Col>
                         <Col xs="1" style={{ marginLeft: "-6%", marginTop: "-0.5%" }}>
-                            <Form.Control
+                            <TextField
                                 required
-                                type="text"
                                 id="noOfPatients"
                                 value={noOfPatients}
                                 onChange={handlePatientCountChange}
@@ -228,9 +209,8 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                                     <td style={{ textAlign: 'left' }}>{label}</td>
                                     {formData.map((patient, patientIndex) => (
                                         <td key={patientIndex} style={{ textAlign: 'left' }}>
-                                            <Form.Control
+                                            <TextField
                                                 style={{ border: "white" }}
-                                                type="text"
                                                 value={patient[key]}
                                                 onChange={(e) => handlePatientDataChange(patientIndex, key, e.target.value)}
                                             />
@@ -240,12 +220,12 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                             ))}
                         </tbody>
                     </Table>
-                    <button type="submit">Save</button>
-                    {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
-                    {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
+                    <SubmitButton type="submit">Save</SubmitButton>
+                    {formSubmitted && <FormAlert variant="success" className="mt-2">Form submitted successfully!</FormAlert>}
+                    {error && <FormAlert variant="danger" className="mt-2">{error}</FormAlert>}
                 </Form>
             </div>
-        </Container>
+        </FormCard>
     );
 };
 

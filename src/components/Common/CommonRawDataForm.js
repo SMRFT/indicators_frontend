@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Alert, Col, Table } from 'react-bootstrap';
+import { Row, Form, Col, Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import styled from 'styled-components';
 import apiRequest from '../apiRequest';
-
-const Container = styled.div`
-  padding: 20px;
-`;
+import { FormCard, TextField, DateField, SubmitButton, FormAlert } from './fields';
 
 const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
     const [noOfPatients, setNoOfPatients] = useState('1');
@@ -157,7 +149,7 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
     };
 
     return (
-        <Container className="RawData">
+        <FormCard className="RawData">
             <div>
                 {showHeading && <h2 className="text-center">{title} RawData</h2>}
                 <div style={{ float: "right" }} className='mt-3'>
@@ -166,30 +158,12 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
                 </div>
                 <br/>
                 <Form noValidate validated={validated} onSubmit={handleSubmit}>
-                    <Form.Group className="position-relative" controlId="selectedDate">
-                        <div className="position-relative">
-                            <FontAwesomeIcon
-                                icon={faCalendarAlt}
-                                style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
-                                onClick={() => document.getElementById('datePicker').click()}
-                            />
-                            <DatePicker
-                                id="datePicker"
-                                selected={selectedDate}
-                                onChange={handleDateChange}
-                                className="position-absolute top-100 start-0 d-none"
-                                calendarClassName="position-absolute top-100 start-0"
-                                placeholderText="Select Date"
-                            />
-                            {selectedDate && (
-                                <div
-                                    className="position-absolute top-100 start-0 translate-middle-y"
-                                    style={{ marginLeft: '50px', marginTop: '-15px' }}
-                                >
-                                    {selectedDate.toLocaleDateString('en-GB')}
-                                </div>
-                            )}
-                        </div>
+                    <Form.Group className="position-relative mb-3" controlId="selectedDate">
+                        <DateField
+                            selected={selectedDate}
+                            onChange={handleDateChange}
+                            required
+                        />
                     </Form.Group>
                     <br />
                     <Row>
@@ -197,7 +171,7 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
                             <Form.Label htmlFor="noOfPatients" style={{ fontWeight: "bold" }}>No of Patients</Form.Label>
                         </Col>
                         <Col xs="1" style={{ marginLeft: "-6%", marginTop: "-0.5%" }}>
-                            <Form.Control
+                            <TextField
                                 required
                                 type="text"
                                 id="noOfPatients"
@@ -208,14 +182,22 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
                             <Form.Control.Feedback type="invalid">Please fill out this field</Form.Control.Feedback>
                         </Col>
                     </Row>
-    
-                    <Table bordered className="align-middle mt-2">
+
+                    <Table
+                        bordered
+                        className="align-middle mt-2"
+                        style={{
+                            backgroundColor: 'var(--color-surface-inset)',
+                            color: 'var(--color-text-primary)',
+                            borderColor: 'var(--color-border)',
+                        }}
+                    >
                         <thead>
                             <tr>
-                                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Field</th>
-                                <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }}>Patient 1</th>
+                                <th style={{ backgroundColor: 'var(--color-surface-raised)', borderBottom: '2px solid var(--color-accent)' }}>Field</th>
+                                <th style={{ backgroundColor: 'var(--color-surface-raised)', borderBottom: '2px solid var(--color-accent)' }}>Patient 1</th>
                                 {[...Array(parseInt(noOfPatients) - 1 || 0)].map((_, index) => (
-                                    <th style={{ backgroundColor: 'rgb(149,188,176)', color: '#FFFFFF' }} key={index + 2}>Patient {index + 2}</th>
+                                    <th style={{ backgroundColor: 'var(--color-surface-raised)', borderBottom: '2px solid var(--color-accent)' }} key={index + 2}>Patient {index + 2}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -225,8 +207,7 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
                                     <td style={{ textAlign: 'left' }}>{label}</td>
                                     {formData.map((patient, patientIndex) => (
                                         <td key={patientIndex} style={{ textAlign: 'left' }}>
-                                            <Form.Control
-                                                style={{ border: "white" }}
+                                            <TextField
                                                 type="text"
                                                 value={patient[key] || ""}
                                                 onChange={(e) => handlePatientDataChange(patientIndex, key, e.target.value)}
@@ -237,15 +218,15 @@ const CommonRawDataForm = ({ title, endpoint, showHeading = true }) => {
                             ))}
                         </tbody>
                     </Table>
-                    <button type="submit" disabled={isSubmitting}>
+                    <SubmitButton type="submit" disabled={isSubmitting}>
                         {isSubmitting ? 'Saving...' : 'Save'}
-                    </button>
+                    </SubmitButton>
 
-                    {formSubmitted && <Alert variant="success" className="mt-2">Form submitted successfully!</Alert>}
-                    {error && <Alert variant="danger" className="mt-2">{error}</Alert>}
+                    {formSubmitted && <FormAlert variant="success" className="mt-2">Form submitted successfully!</FormAlert>}
+                    {error && <FormAlert variant="danger" className="mt-2">{error}</FormAlert>}
                 </Form>
             </div>
-        </Container>
+        </FormCard>
     );
 };
 

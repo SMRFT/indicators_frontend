@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import { CSVLink } from "react-csv";
+import { FormCard, DateField, SubmitButton } from "../Common/fields";
 import "./Formula.css";
 
 const EmergencyRoomData = () => {
@@ -328,45 +327,36 @@ const EmergencyRoomData = () => {
 
   return (
     <div className="container1">
-      <h1 className="text-center">Patient Assessment Data</h1>
-      <br />
-      <div className="picker-container1">
-        <label>Select Month and Year:</label>
-      </div>
-      <div className="input-container">
-        <div className="date-picker-wrapper">
-          <i
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              marginRight: "5px",
-            }}
-            className="fa fa-calendar"
-          ></i>
-          <DatePicker
+      <FormCard style={{ maxWidth: "700px" }}>
+        <h1 className="text-center">Patient Assessment Data</h1>
+        <br />
+        <div className="picker-container1">
+          <label>Select Month and Year:</label>
+        </div>
+        <div className="input-container">
+          <DateField
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
             dateFormat="MM/yyyy"
             showMonthYearPicker
-            className="form-control"
           />
+          <SubmitButton type="button" onClick={handleFetchData}>
+            Fetch Data
+          </SubmitButton>
+          {data && data.totalRecords > 0 && (
+            <CSVLink
+              data={csvData}
+              filename={`initial_assessment_data_${format(
+                selectedDate,
+                "MM_yyyy"
+              )}.csv`}
+              className="csv-button1"
+            >
+              Export CSV
+            </CSVLink>
+          )}
         </div>
-        <button onClick={handleFetchData} className="fetch-button1">
-          Fetch Data
-        </button>
-        {data && data.totalRecords > 0 && (
-          <CSVLink
-            data={csvData}
-            filename={`initial_assessment_data_${format(
-              selectedDate,
-              "MM_yyyy"
-            )}.csv`}
-            className="csv-button1"
-          >
-            Export CSV
-          </CSVLink>
-        )}
-      </div>
+      </FormCard>
       {loading && <p className="loading-message">Loading data...</p>}
       {error && <p className="error-message">{error}</p>}
       {noDataFound && (

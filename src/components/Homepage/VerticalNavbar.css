@@ -1,12 +1,14 @@
 .sidebar-container {
   position: fixed;
-  top: 30px;
+  top: var(--header-height);
   left: 0;
-  height: 100vh;
-  width: 220px; /* Adjust the width of the sidebar as needed */
-  z-index: 1000; /* Ensure the sidebar is above other content */
+  height: calc(100vh - var(--header-height));
+  width: 250px; /* Adjust the width of the sidebar as needed */
+  z-index: 25; /* Sit below the sticky header, above page content */
   overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden;
   scrollbar-width: thin;
+  border-right: 1px solid var(--color-border);
 }
 
 .sidebar-content {
@@ -14,17 +16,64 @@
 }
 
 .sidebar-content .sidebar-menu-item {
-  font-size: 16px; /* Set the default font size */
+  font-size: 14.5px; /* Set the default font size */
+  border-radius: var(--radius-sm);
+  margin: 2px 8px;
+  padding: 10px 12px;
+  height: auto;
+  color: var(--color-text-primary) !important;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-menu-item-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.sidebar-menu-item-icon {
+  flex: none;
+  margin-top: 1px;
+}
+
+.sidebar-menu-item-label {
+  flex: 1;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+.sidebar-menu-item-sub .sidebar-menu-item-label {
+  font-size: 13.5px;
+}
+
+.sidebar-content .sidebar-menu-item svg {
+  color: var(--color-text-primary) !important;
+  stroke: var(--color-text-primary) !important;
+}
+
+.sidebar-content .sidebar-menu-item:hover,
+.sidebar-content .sidebar-menu-item:hover svg {
+  color: var(--color-accent) !important; /* Highlight in accent on hover */
+  stroke: var(--color-accent) !important;
 }
 
 .sidebar-content .sidebar-menu-item:hover {
-  color: rgb(105, 105, 105); /* Change text color to gray on hover */
-  font-weight: bold; /* Make text bold on hover */
-  font-size: 18px; /* Increase font size on hover */
+  background: var(--color-hover-overlay);
+  font-weight: 600;
 }
 
-.logo{
-  max-width: 50px;
+.sidebar-link.active .sidebar-menu-item,
+.sidebar-link.active .sidebar-menu-item svg {
+  color: var(--color-accent) !important;
+  stroke: var(--color-accent) !important;
+}
+
+.sidebar-link.active .sidebar-menu-item {
+  background: var(--color-active-overlay);
+  font-weight: 600;
+  border-left: 3px solid var(--color-accent);
 }
 
 .sidebar-dropdown {
@@ -34,43 +83,49 @@
 .sidebar-dropdown-content {
   display: flex;
   flex-direction: column;
-  margin-left: 20px;
+  margin-left: 16px;
 }
 
-
-/* Styles for tablets (screens between 576px and 768px) */
-@media screen and (min-width: 576px) and (max-width: 768px) {
-  .sidebar-container {
-    width: 180px; /* Adjust the width as needed for tablets */
-  }
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 24;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* Styles for mobile devices (screens smaller than 576px) */
-@media screen and (max-width: 575px) {
+/* Styles for tablets and mobile */
+@media screen and (max-width: 768px) {
   .sidebar-container {
-    width: 150px; /* Adjust the width as needed for mobile */
+    width: 250px; /* Keep full width for readable menu items */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    top: 0;
+    height: 100vh;
   }
 
-  .sidebar-content .sidebar-menu-item {
-    font-size: 14px; /* Adjust the font size for mobile */
+  .sidebar-container.open {
+    transform: translateX(0);
   }
 
-  .sidebar-content .sidebar-menu-item:hover {
-    font-size: 16px; /* Adjust the hover font size for mobile */
+  .sidebar-backdrop.open {
+    display: block;
+    opacity: 1;
   }
 
-  .logo {
-    max-width: 40px; /* Adjust logo size for mobile */
+  .sidebar-content {
+    padding-top: var(--header-height, 60px); 
   }
 }
 
 /* Additional adjustments for larger screens (1024px and above) */
 @media screen and (min-width: 1024px) {
   .sidebar-container {
-    width: 220px; /* Adjust the width as needed for larger screens */
-  }
-
-  .logo {
-    max-width: 60px; /* Adjust logo size for larger screens */
+    width: 250px; 
   }
 }

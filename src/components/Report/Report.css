@@ -1,0 +1,250 @@
+.report-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 4px 40px;
+}
+
+.report-title {
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.report-field {
+  flex: 1 1 220px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.report-dropdown-toggle.dropdown-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 1.5px solid var(--color-border-strong) !important;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.report-dropdown-toggle.dropdown-toggle:focus,
+.report-dropdown-toggle.dropdown-toggle:hover {
+  border-color: var(--color-accent) !important;
+}
+
+.report-dropdown-menu {
+  min-width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.report-dropdown-menu .dropdown-item {
+  color: var(--color-text-primary);
+}
+
+.report-dropdown-menu .dropdown-item:hover,
+.report-dropdown-menu .dropdown-item:focus {
+  background: var(--color-hover-overlay);
+  color: var(--color-accent-dark);
+}
+
+.report-date-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  padding: 0 10px;
+}
+
+.report-date-input:focus-within {
+  border-color: var(--color-accent);
+}
+
+.report-date-input svg {
+  flex: none;
+  color: var(--color-accent-dark);
+}
+
+.report-date-input .form-control {
+  border: none !important;
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+  padding: 10px 8px 10px 0 !important;
+  width: 100%;
+}
+
+.report-date-input .form-control::placeholder {
+  color: var(--color-text-muted);
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.report-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: #3b82f6 !important; /* Default to Blue for Edit/Save */
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.report-action-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  background: #2563eb !important;
+}
+
+.report-action-btn.accent {
+  background: var(--color-accent) !important;
+}
+.report-action-btn.accent:hover {
+  background: var(--color-accent-dark) !important;
+}
+
+.report-action-btn.danger {
+  background: #ef4444 !important;
+}
+.report-action-btn.danger:hover {
+  background: #dc2626 !important;
+}
+
+.report-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 65vh;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.report-table {
+  border-collapse: collapse;
+  min-width: 600px;
+  width: 100%;
+}
+
+.report-table th {
+  border: 1px solid var(--color-border);
+  padding: 10px;
+  background: var(--color-accent-dark);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.report-table th:last-child {
+  right: 0;
+}
+
+.report-table td {
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  color: var(--color-text-primary);
+}
+
+.report-table tbody tr:nth-child(odd) {
+  background: var(--color-surface);
+}
+
+.report-table tbody tr:nth-child(even) {
+  background: var(--color-hover-overlay);
+}
+
+.report-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  font-weight: 600;
+  text-align: left;
+  background: var(--color-accent-dark);
+  color: #fff;
+}
+
+.report-table td:last-child {
+  position: sticky;
+  right: 0;
+  font-weight: 700;
+  background: var(--color-active-overlay);
+}
+
+.report-table input,
+.report-table textarea {
+  width: 100%;
+  background: var(--color-surface-inset);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.report-empty-state {
+  text-align: center;
+  margin-top: 60px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* Keep bootstrap Modal readable in dark mode */
+.modal-content {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* Ensure the datepicker popup appears above sticky table headers */
+.react-datepicker-popper {
+  z-index: 1050 !important;
+}
+
+@media (max-width: 767px) {
+  .report-actions {
+    justify-content: flex-start;
+  }
+
+  .report-action-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .report-table-wrap {
+    max-height: 55vh;
+  }
+}
