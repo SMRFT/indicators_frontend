@@ -7,6 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import apiRequest from '../apiRequest';
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -116,21 +117,13 @@ function FrontOffice() {
         const name = localStorage.getItem('userName');
         const formDataWithUser = { ...formData, id, name };
 
-        const response = await fetch(`${IndicatorBaseUrl}FrontOffice/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: localStorage.getItem("access_token"),
-          },
-          body: JSON.stringify(formDataWithUser),
-        });
+        const response = await apiRequest(`${IndicatorBaseUrl}FrontOffice/`, 'POST', formDataWithUser);
 
-        if (response.status === 400) {
-          const errorText = await response.json();
-          if (errorText.error === 'Data already exists for this date.') {
+        if (!response.success) {
+          if (response.status === 400 && response.data?.error === 'Data already exists for this date.') {
             setError('Data already exists for this date.');
           } else {
-            throw new Error(errorText.error || 'Failed to submit data');
+            throw new Error(response.error || 'Failed to submit data');
           }
         } else {
           setFormSubmitted(true);

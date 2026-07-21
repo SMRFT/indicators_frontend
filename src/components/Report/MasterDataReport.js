@@ -6,9 +6,10 @@ import Col from "react-bootstrap/Col";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { RawDataOptions } from "../constant";
-import * as XLSX from "xlsx";
 import Alert from "react-bootstrap/Alert";
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
+import { getTransposedData, exportToExcel } from "./reportUtils";
+import apiRequest from "../apiRequest";
 
 function MasterDataReport() {
   const [selectedWard, setSelectedWard] = useState("First Floor Raw Data");
@@ -31,7 +32,7 @@ function MasterDataReport() {
     fetchExportData();
   }, [selectedWard, selectedDate, selectedMonth]);
 
-const fetchExportData = () => {
+const fetchExportData = async () => {
   let apiUrl = `${IndicatorBaseUrl}get_export_rawdata/?ward=${selectedWard}`;
 
   if (
@@ -49,26 +50,22 @@ const fetchExportData = () => {
     apiUrl += `&year=${year}&month=${month}`;
   }
 
-  const token = localStorage.getItem("access_token");
-
-  fetch(apiUrl, {
-    headers: {
-      Authorization: token, // or just token if Bearer is not needed
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
+  try {
+    const response = await apiRequest(apiUrl);
+    if (response.success) {
+      const data = response.data;
       if (Array.isArray(data)) {
         const sortedData = data.sort(
           (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
         );
         setExportData(sortedData);
-      } else {
-        console.error("Error fetching data:", data);
       }
-    })
-    .catch((error) => console.error("Error fetching data:", error));
+    } else {
+      console.error("Error fetching data:", response.error);
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 };
 
 
@@ -83,36 +80,7 @@ const fetchExportData = () => {
       return;
     }
 
-    // Initialize transposed structure
-    const transposedData = {};
-
-exportData.forEach((item) => {
-  Object.entries(item).forEach(([key, value]) => {
-    const excludedFields = [
-
-      "_id", 
-      "created_by", 
-      "created_date", 
-      "lasstmodified_by", 
-      "lastmodified_date"
-    ];
-
-    if (!excludedFields.includes(key)) {
-      if (!transposedData[key]) transposedData[key] = [];
-
-          if (key === "raw_data" && Array.isArray(value)) {
-            value.forEach((entry) => {
-              Object.entries(entry).forEach(([subKey, subValue]) => {
-                if (!transposedData[subKey]) transposedData[subKey] = [];
-                transposedData[subKey].push(subValue);
-              });
-            });
-          } else {
-            transposedData[key].push(value);
-          }
-        }
-      });
-    });
+    const transposedData = getTransposedData(exportData, true);
 
     // Create headers: 'Indicators' + corresponding date
     const headers = ["Indicators", formatDate(exportData[0].selectedDate)];
@@ -125,14 +93,7 @@ exportData.forEach((item) => {
       ]
     );
 
-    // Combine headers and data
-    const excelData = [headers, ...worksheetData];
-
-    // Create and export the Excel file
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    XLSX.utils.book_append_sheet(wb, ws, "ExportData");
-    XLSX.writeFile(wb, "Indicator_masterReport.xlsx");
+    exportToExcel(headers, worksheetData, "Indicator_masterReport.xlsx");
   };
 
   const handleEditClick = () => {
@@ -146,23 +107,15 @@ exportData.forEach((item) => {
       _id: item._id ? { $oid: item._id } : undefined,
     }));
 
-    fetch(`${IndicatorBaseUrl}update-export_rawdata/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("access_token"),
-      },
-      body: JSON.stringify(updatedData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
+    apiRequest(`${IndicatorBaseUrl}update-export_rawdata/`, "PUT", updatedData)
+      .then((response) => {
+        if (response.success) {
           fetchExportData();
           setIsEditing(false);
           setShowSuccessAlert(true);
           setTimeout(() => setShowSuccessAlert(false), 5000);
         } else {
-          console.error("Error updating data:", data);
+          console.error("Error updating data:", response.error);
           setShowErrorAlert(true);
           setTimeout(() => setShowErrorAlert(false), 5000);
         }
@@ -181,21 +134,19 @@ exportData.forEach((item) => {
     }
 
     try {
-      const response = await fetch(
+      const response = await apiRequest(
         `${IndicatorBaseUrl}delete_export_rawdata/?date=${selectedDate}&ward=${selectedWard}`,
-        {
-          method: "DELETE",
-        }
+        "DELETE"
       );
 
-      if (response.ok) {
+      if (response.success) {
         alert("Data deleted successfully!");
         setShowDeleteModal(false);
         setExportData(
           exportData.filter((item) => item.selectedDate !== selectedDate)
         );
       } else {
-        alert("Error deleting data.");
+        alert("Failed to delete data: " + (response.error || "Unknown error"));
       }
     } catch (error) {
       console.error("Delete error:", error);

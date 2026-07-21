@@ -8,6 +8,7 @@ import styled from "styled-components";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { message } from "antd";
+import apiRequest from "../apiRequest";
 
 const SpinnerContainer = styled.div`
   display: flex;
@@ -422,18 +423,15 @@ const SupervisorInvestigation = () => {
       }
       
       const [incRes, invRes, classRes] = await Promise.all([
-        fetch(incUrl, { headers }),
-        fetch(invUrl, { headers }),
-        fetch(`${IndicatorBaseUrl}IncidentClassification/`, { headers })
+        apiRequest(incUrl),
+        apiRequest(invUrl),
+        apiRequest(`${IndicatorBaseUrl}IncidentClassification/`)
       ]);
 
-      if (incRes.ok && invRes.ok && classRes.ok) {
-        const incData = await incRes.json();
-        const invData = await invRes.json();
-        const classData = await classRes.json();
-        setIncidents(incData);
-        setInvestigations(invData);
-        setClassificationsList(classData);
+      if (incRes.success && invRes.success && classRes.success) {
+        setIncidents(incRes.data);
+        setInvestigations(invRes.data);
+        setClassificationsList(classRes.data);
       }
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -585,18 +583,10 @@ const SupervisorInvestigation = () => {
         "auth-user-id": localStorage.getItem("userId")
       };
 
-      const response = await fetch(`${IndicatorBaseUrl}SupervisorInvestigation/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token")
-        },
-        body: JSON.stringify(submissionData)
-      });
+      const response = await apiRequest(`${IndicatorBaseUrl}SupervisorInvestigation/`, "POST", submissionData);
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to save Supervisor Investigation");
+      if (!response.success) {
+        throw new Error(response.error || "Failed to save Supervisor Investigation");
       }
 
       message.success("Investigation & RCA saved successfully!");
