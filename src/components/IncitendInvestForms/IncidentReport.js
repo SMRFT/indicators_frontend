@@ -7,6 +7,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
 import { message } from "antd";
+import apiRequest from "../apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -188,16 +189,11 @@ const IncidentReport = () => {
   useEffect(() => {
     const fetchNextIncidentNo = async () => {
       try {
-        const response = await fetch(`${IndicatorBaseUrl}get-next-incident-no/`, {
-          headers: {
-            Authorization: localStorage.getItem("access_token")
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
+        const response = await apiRequest(`${IndicatorBaseUrl}get-next-incident-no/`);
+        if (response.success) {
           setFormData((prev) => ({
             ...prev,
-            incidentNo: data.nextIncidentNo
+            incidentNo: response.data.nextIncidentNo
           }));
         }
       } catch (err) {
@@ -210,13 +206,9 @@ const IncidentReport = () => {
   useEffect(() => {
     const fetchClassifications = async () => {
       try {
-        const response = await fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
-          headers: {
-            Authorization: localStorage.getItem("access_token")
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
+        const response = await apiRequest(`${IndicatorBaseUrl}IncidentClassification/`);
+        if (response.success) {
+          const data = response.data;
           setClassificationOptions(data);
           const initialChecked = {};
           const initialOthers = {};
@@ -290,21 +282,13 @@ const IncidentReport = () => {
         "auth-user-id": localStorage.getItem("userId")
       };
 
-      const response = await fetch(`${IndicatorBaseUrl}IncidentReport/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token")
-        },
-        body: JSON.stringify(submissionData)
-      });
+      const response = await apiRequest(`${IndicatorBaseUrl}IncidentReport/`, "POST", submissionData);
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to submit Incident Report");
+      if (!response.success) {
+        throw new Error(response.error || "Failed to submit Incident Report");
       }
 
-      const resData = await response.json();
+      const resData = response.data;
       const nextNo = resData.incidentNo || resData.id || "";
       setSubmittedIncidentId(nextNo);
       message.success(`Incident Form submitted successfully! Incident No: ${nextNo}`);

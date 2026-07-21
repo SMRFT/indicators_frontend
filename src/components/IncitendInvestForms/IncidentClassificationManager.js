@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faEdit, faUserShield, faFileAlt, faArrowLeft, faSave, faUserCheck } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import { message } from "antd";
+import apiRequest from "../apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -381,21 +382,17 @@ const IncidentClassificationManager = () => {
     setLoading(true);
     setError("");
     try {
-      const headers = {
-        Authorization: localStorage.getItem("access_token"),
-      };
-      
       const [classRes, inchargesRes] = await Promise.all([
-        fetch(`${IndicatorBaseUrl}IncidentClassification/`, { headers }),
-        fetch(`${IndicatorBaseUrl}get_incharges/`, { headers })
+        apiRequest(`${IndicatorBaseUrl}IncidentClassification/`),
+        apiRequest(`${IndicatorBaseUrl}get_incharges/`)
       ]);
-
-      if (!classRes.ok || !inchargesRes.ok) {
-        throw new Error("Failed to fetch classification or in-charge data");
+ 
+      if (!classRes.success || !inchargesRes.success) {
+        throw new Error(classRes.error || inchargesRes.error || "Failed to fetch classification or in-charge data");
       }
-
-      const classData = await classRes.json();
-      const inchData = await inchargesRes.json();
+ 
+      const classData = classRes.data;
+      const inchData = inchargesRes.data;
       
       setClassifications(classData);
       setIncharges(inchData);
@@ -463,18 +460,10 @@ const IncidentClassificationManager = () => {
         payload.id = editingId;
       }
 
-      const response = await fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token")
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to save classification");
+      const response = await apiRequest(`${IndicatorBaseUrl}IncidentClassification/`, "POST", payload);
+ 
+      if (!response.success) {
+        throw new Error(response.error || "Failed to save classification");
       }
 
       const msg = editingId ? "Classification updated successfully!" : "Classification created successfully!";
@@ -498,16 +487,10 @@ const IncidentClassificationManager = () => {
     setSuccessMsg("");
 
     try {
-      const response = await fetch(`${IndicatorBaseUrl}IncidentClassification/?id=${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: localStorage.getItem("access_token")
-        }
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to delete classification");
+      const response = await apiRequest(`${IndicatorBaseUrl}IncidentClassification/?id=${id}`, "DELETE");
+ 
+      if (!response.success) {
+        throw new Error(response.error || "Failed to delete classification");
       }
 
       message.success("Classification deleted successfully!");
@@ -547,18 +530,10 @@ const IncidentClassificationManager = () => {
         "auth-user-id": userId
       };
 
-      const response = await fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token")
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Failed to allocate In-charge");
+      const response = await apiRequest(`${IndicatorBaseUrl}IncidentClassification/`, "POST", payload);
+ 
+      if (!response.success) {
+        throw new Error(response.error || "Failed to allocate In-charge");
       }
 
       message.success(`In-charge allocated to "${itemText}" successfully!`);

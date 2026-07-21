@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Row, Form, Col, Dropdown, Table } from 'react-bootstrap';
 import './Availability.css';
 import { bedOptions } from '../constant';
+import apiRequest from '../apiRequest';
 
 function Availability() {
   const [selectedWard, setSelectedWard] = useState('');
@@ -12,12 +13,13 @@ function Availability() {
     setSelectedWard(value);
     // Fetch data from backend API based on selected ward
     try {
-      const response = await fetch(`${IndicatorBaseUrl}availabilityofroomsandbeds/${value}/`);
-      const data = await response.json();
-      setNumberOfBedsOccupied(data.numberOfBedsOccupied);
-      console.log('numberOfBedsOccupied:', data.numberOfBedsOccupied);
-      setNumberOfBedsAvailable(data.numberOfBedsAvailable);
-      console.log('numberOfBedsAvailable:', data.numberOfBedsAvailable);
+      const response = await apiRequest(`${IndicatorBaseUrl}availabilityofroomsandbeds/${value}/`);
+      if (response.success) {
+        setNumberOfBedsOccupied(response.data.numberOfBedsOccupied);
+        console.log('numberOfBedsOccupied:', response.data.numberOfBedsOccupied);
+        setNumberOfBedsAvailable(response.data.numberOfBedsAvailable);
+        console.log('numberOfBedsAvailable:', response.data.numberOfBedsAvailable);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }

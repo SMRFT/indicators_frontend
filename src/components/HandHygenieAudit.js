@@ -5,6 +5,7 @@ import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
+import apiRequest from "./apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -94,21 +95,13 @@ const handleSubmit = async (e) => {
         auditBy,
         fiveMoments: JSON.stringify(formData.fiveMoments),
       };
-      const response = await fetch(`${IndicatorBaseUrl}HandHygenieAudit/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-           Authorization: localStorage.getItem("access_token"),
-        },
-        body: JSON.stringify(formDataWithUser),
-      });
+      const response = await apiRequest(`${IndicatorBaseUrl}HandHygenieAudit/`, "POST", formDataWithUser);
 
-      if (response.status === 400) {
-        const errorText = await response.json();
-        if (errorText.error === "Failed to Submit.") {
+      if (!response.success) {
+        if (response.status === 400 && response.data?.error === "Failed to Submit.") {
           setError("Failed to Submit.");
         } else {
-          throw new Error(errorText.error || "Failed to Submit.");
+          throw new Error(response.error || "Failed to Submit.");
         }
         setIsSubmitting(false);
       } else {

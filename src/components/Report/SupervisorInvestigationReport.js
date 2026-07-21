@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faPrint, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import apiRequest from "../apiRequest";
 
 const BackButton = styled.button`
   background: #6c757d;
@@ -241,33 +242,17 @@ const SupervisorInvestigationReport = () => {
     }
 
     Promise.all([
-      fetch(invUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token"),
-        },
-      }),
-      fetch(incUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token"),
-        },
-      }),
-      fetch(`${IndicatorBaseUrl}IncidentClassification/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token"),
-        },
-      })
+      apiRequest(invUrl),
+      apiRequest(incUrl),
+      apiRequest(`${IndicatorBaseUrl}IncidentClassification/`)
     ])
-      .then(async ([invRes, incRes, classRes]) => {
-        if (!invRes.ok || !incRes.ok || !classRes.ok) throw new Error("Failed to fetch data");
-        const invData = await invRes.json();
-        const incData = await incRes.json();
-        const classData = await classRes.json();
+      .then(([invRes, incRes, classRes]) => {
+        if (!invRes.success || !incRes.success || !classRes.success) {
+          throw new Error(invRes.error || incRes.error || classRes.error || "Failed to fetch data");
+        }
+        const invData = invRes.data;
+        const incData = incRes.data;
+        const classData = classRes.data;
         setIncidents(incData);
 
         // Helper to check assignment

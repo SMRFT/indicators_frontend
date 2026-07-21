@@ -10,98 +10,10 @@ import * as XLSX from "xlsx";
 import Alert from "react-bootstrap/Alert";
 import apiRequest from "../apiRequest"; // Import the API helper
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
+import { getTransposedData, exportToExcel } from "./reportUtils";
 
 
-function getTransposedData(dataArray) {
-  const transposedData = {};
-  // Standardizing the excluded fields list (matching your database keys)
-  const excludedFields = ["created_by", "created_date", "lastmodified_by", "lastmodified_date", "selectedDate", "ward"];
 
-  dataArray.forEach((data) => {
-    Object.keys(data).forEach((key) => {
-      // 1. Skip if the key is in the excluded list
-      if (excludedFields.includes(key)) return;
-
-      // Format the display key
-      let formattedKey;
-      if (key.endsWith("Insurance")) {
-        formattedKey = key.replace(/Insurance$/, "").trim() + " ( Insurance )";
-      } else if (key.endsWith("Pay")) {
-        formattedKey = key.replace(/Pay$/, "").trim() + " ( Pay )";
-      } else {
-        formattedKey = key;
-      }
-
-      formattedKey = formattedKey
-        .split(/(?=[A-Z])/)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-
-      if (!transposedData[formattedKey]) {
-        transposedData[formattedKey] = [];
-      }
-
-      let formattedValue;
-      
-      // Special handling for numberOfUnitsTransfusedRemarks field
-      if (key === "numberOfUnitsTransfusedRemarks") {
-        let transfusionInfo = "";
-        
-        try {
-          // Handle the JSON string correctly
-          const remarksStr = data[key] || "{}";
-          // Replace single quotes with double quotes for proper JSON parsing
-          const parsedRemarks = JSON.parse(remarksStr.replace(/'/g, '"'));
-          
-          // Get all transfusion entries
-          const transfusionEntries = [];
-          
-          // Loop through all keys to find transfused-X patterns
-          const transfusedKeys = Object.keys(parsedRemarks).filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
-          
-          transfusedKeys.forEach(transfusedKey => {
-            const index = transfusedKey.split('-')[1];
-            const units = parsedRemarks[transfusedKey] || "";
-            const remarks = parsedRemarks[`remarks-${index}`] || "";
-            
-            transfusionEntries.push(`${parseInt(index) + 1} - ${units} units: ${remarks}`);
-          });
-          
-          transfusionInfo = transfusionEntries.join('\n');
-          
-          // If no entries were found but we have a simple structure
-          if (transfusionEntries.length === 0) {
-            // Try to handle the format in your example
-            if (parsedRemarks['transfused-0']) {
-              const units = parsedRemarks['transfused-0'];
-              const remarks = parsedRemarks['remarks-0'] || "";
-              transfusionInfo = `1 - ${units} units: ${remarks}`;
-            }
-          }
-        } catch (error) {
-          console.error("Error parsing transfusion remarks:", error);
-          transfusionInfo = String(data[key]); // Fallback to original value
-        }
-        
-        formattedValue = transfusionInfo || "No transfusion data";
-      } else {
-        // Format other fields
-        formattedValue =
-          typeof data[key] === "string"
-            ? data[key]
-                .split(" ")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")
-            : String(data[key]).charAt(0).toUpperCase() +
-              String(data[key]).slice(1);
-      }
-
-      transposedData[formattedKey].push(formattedValue);
-    });
-  });
-
-  return transposedData;
-}
 
 function Report() {
   const [selectedWard, setSelectedWard] = useState("First Floor"); // Default value set to "First Floor"
@@ -202,14 +114,12 @@ const fetchExportData = async () => {
 
     const transposedData = getTransposedData(exportData);
 
-    // Ensure 'Total' is included in the headers
     const headers = [
       "Indicators",
       ...exportData.map((item) => formatDate(item.selectedDate)),
       "Total",
     ];
 
-    // Extract total values (Ensure each item in exportData has a 'total' field)
     const worksheetData = Object.entries(transposedData).map(
       ([field, values]) => {
         const total = values.reduce(
@@ -220,12 +130,7 @@ const fetchExportData = async () => {
       }
     );
 
-    const excelData = [headers, ...worksheetData];
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    XLSX.utils.book_append_sheet(wb, ws, "ExportData");
-    XLSX.writeFile(wb, "Indicator_Report.xlsx");
+    exportToExcel(headers, worksheetData, "Indicator_Report.xlsx");
   };
 
   const handleEditClick = () => {
@@ -253,22 +158,15 @@ const fetchExportData = async () => {
         selectedDate: new Date(item.selectedDate).toISOString(),
       }));
 
-    fetch(`${IndicatorBaseUrl}update-export-data/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
+    apiRequest(`${IndicatorBaseUrl}update-export-data/`, "PUT", updatedData)
+      .then((response) => {
+        if (response.success) {
           fetchExportData();
           setIsEditing(false);
           setShowSuccessAlert(true);
           setTimeout(() => setShowSuccessAlert(false), 5000);
         } else {
-          console.error("Error updating data:", data);
+          console.error("Error updating data:", response.error);
           setShowErrorAlert(true);
           setTimeout(() => setShowErrorAlert(false), 5000);
         }
@@ -289,21 +187,15 @@ const fetchExportData = async () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await apiRequest(
         `${IndicatorBaseUrl}delete_data/?date=${selectedDate}&ward=${selectedWard}`,
-        {
-          method: "DELETE",
-        }
+        "DELETE"
       );
 
-      if (response.ok) {
+      if (response.success) {
         alert("Data deleted successfully!");
-        setShowDeleteModal(false);
-        setExportData(
-          exportData.filter((item) => item.selectedDate !== selectedDate)
-        );
+        fetchExportData();
       } else {
-        alert("Error deleting data.");
       }
     } catch (error) {
       console.error("Delete error:", error);

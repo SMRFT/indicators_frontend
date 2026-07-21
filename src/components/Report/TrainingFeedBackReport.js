@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { Row, Col } from "react-bootstrap";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
+import apiRequest from "../apiRequest";
 
 const TrainingFeedbackReport = () => {
   const [data, setData] = useState([]);
@@ -22,27 +23,21 @@ const TrainingFeedbackReport = () => {
   }, []);
 
   useEffect(() => {
-    fetch(`${IndicatorBaseUrl}TrainingFeedBackReport/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: localStorage.getItem("access_token"),
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch data");
-        return res.json();
-      })
-      .then((data) => {
-        const parsedData = data.map((item) => ({
+    const fetchFeedback = async () => {
+      const response = await apiRequest(`${IndicatorBaseUrl}TrainingFeedBackReport/`);
+      if (response.success) {
+        const parsedData = response.data.map((item) => ({
           ...item,
           detailsOfTrainingTopic: JSON.parse(item.detailsOfTrainingTopic),
           trainer: JSON.parse(item.trainer),
         }));
         setData(parsedData);
-        setFilteredData(parsedData); // Optional - filtering is handled below
-      })
-      .catch((err) => setError(err.message));
+        setFilteredData(parsedData);
+      } else {
+        setError(response.error || "Failed to fetch data");
+      }
+    };
+    fetchFeedback();
   }, []);
 
   useEffect(() => {

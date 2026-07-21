@@ -5,6 +5,7 @@ import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
+import apiRequest from "./apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -62,20 +63,13 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
       e.stopPropagation();
     } else {
       try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+        const response = await apiRequest(apiUrl, "POST", formData);
 
-        if (response.ok) {
+        if (response.success) {
           console.log("Data submitted successfully");
           setFormSubmitted(true);
         } else {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to submit data");
+          throw new Error(response.error || "Failed to submit data");
         }
       } catch (error) {
         console.error("Error:", error.message);

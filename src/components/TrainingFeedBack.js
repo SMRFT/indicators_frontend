@@ -5,6 +5,7 @@ import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
+import apiRequest from "./apiRequest";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -140,21 +141,13 @@ const handleSubmit = async (e) => {
         }),
       };
 
-      const response = await fetch(`${IndicatorBaseUrl}TrainingFeedBack/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("access_token"),
-        },
-        body: JSON.stringify(formDataWithUser),
-      });
+      const response = await apiRequest(`${IndicatorBaseUrl}TrainingFeedBack/`, "POST", formDataWithUser);
 
-      if (response.status === 400) {
-        const errorText = await response.json();
-        if (errorText.error === "Data already exists for this date.") {
+      if (!response.success) {
+        if (response.error === "Data already exists for this date.") {
           setError("Data already exists for this date.");
         } else {
-          throw new Error(errorText.error || "Failed to submit data");
+          throw new Error(response.error || "Failed to submit data");
         }
         setIsSubmitting(false);
       } else {

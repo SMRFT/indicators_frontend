@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { Row, Col } from "react-bootstrap";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
+import apiRequest from "../apiRequest";
 
 const HandHygieneReport = () => {
   const [data, setData] = useState([]);
@@ -24,25 +25,18 @@ const HandHygieneReport = () => {
     setToDate(today);
   }, []);
 
-    useEffect(() => {
-      const token = localStorage.getItem("access_token");
-
-      fetch(`${IndicatorBaseUrl}HandHygieneReport/`, {
-        headers: {
-          Authorization: token, // Add "Bearer " if your backend expects it
-          "Content-Type": "application/json", // Optional but good practice
-        },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch data");
-          return res.json();
-        })
-        .then((data) => {
-          setData(data);
-          setFilteredData(data);
-        })
-        .catch((err) => setError(err.message));
-    }, []);
+  useEffect(() => {
+    const fetchReport = async () => {
+      const response = await apiRequest(`${IndicatorBaseUrl}HandHygieneReport/`);
+      if (response.success) {
+        setData(response.data);
+        setFilteredData(response.data);
+      } else {
+        setError(response.error || "Failed to fetch data");
+      }
+    };
+    fetchReport();
+  }, []);
 
 
   useEffect(() => {
