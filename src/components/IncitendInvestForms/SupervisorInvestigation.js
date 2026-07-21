@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert, Card, Badge, Table, Button, Spinner } from "react-bootstrap";
+import { Row, Form, Col, Card, Badge, Table, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faQuestionCircle, faFileMedical, faUserTie, faCheckDouble, faEye, faEdit, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { message } from "antd";
 import apiRequest from "../apiRequest";
+import { TextField, TextAreaField, SelectField, DateField, FormAlert } from "../Common/fields";
 
 const SpinnerContainer = styled.div`
   display: flex;
@@ -228,46 +227,6 @@ const FormFieldLabel = styled(Form.Label)`
   color: #4a5568;
   font-size: 14.5px;
   margin-bottom: 8px;
-`;
-
-const StyledFormControl = styled(Form.Control)`
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 6px !important;
-  padding: 10px 14px !important;
-  font-size: 14.5px !important;
-  transition: all 0.2s ease-in-out !important;
-  width: 100% !important;
-  height: auto !important;
-
-  &:focus {
-    border-color: #4e4376 !important;
-    box-shadow: 0 0 0 3px rgba(78, 67, 118, 0.15) !important;
-  }
-
-  &:disabled {
-    background-color: #f8fafc !important;
-    color: #64748b !important;
-  }
-`;
-
-const StyledFormSelect = styled(Form.Select)`
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 6px !important;
-  padding: 10px 14px !important;
-  font-size: 14.5px !important;
-  transition: all 0.2s ease-in-out !important;
-  width: 100% !important;
-  height: auto !important;
-
-  &:focus {
-    border-color: #4e4376 !important;
-    box-shadow: 0 0 0 3px rgba(78, 67, 118, 0.15) !important;
-  }
-
-  &:disabled {
-    background-color: #f8fafc !important;
-    color: #64748b !important;
-  }
 `;
 
 const LockBanner = styled.div`
@@ -758,7 +717,7 @@ const SupervisorInvestigation = () => {
             <Col xs={12} md={4}>
               <Form.Group controlId="searchBar">
                 <Form.Label style={{ fontWeight: "600" }}>Search Incident Reports</Form.Label>
-                <Form.Control
+                <TextField
                   type="text"
                   placeholder="Search by Inc No, location, name..."
                   value={searchTerm}
@@ -769,7 +728,7 @@ const SupervisorInvestigation = () => {
             <Col xs={12} md={4}>
               <Form.Group controlId="fromDate">
                 <Form.Label style={{ fontWeight: "600" }} className="d-block">From Date</Form.Label>
-                <Form.Control
+                <TextField
                   type="date"
                   value={fromDate}
                   onChange={(e) => setFromDate(e.target.value)}
@@ -780,7 +739,7 @@ const SupervisorInvestigation = () => {
             <Col xs={12} md={4}>
               <Form.Group controlId="toDate">
                 <Form.Label style={{ fontWeight: "600" }} className="d-block">To Date</Form.Label>
-                <Form.Control
+                <TextField
                   type="date"
                   value={toDate}
                   onChange={(e) => setToDate(e.target.value)}
@@ -1014,7 +973,7 @@ const SupervisorInvestigation = () => {
               );
             })()
           ) : (
-            <Alert variant="info">No Supervisor Investigation or RCA has been submitted yet for this incident report.</Alert>
+            <FormAlert variant="info">No Supervisor Investigation or RCA has been submitted yet for this incident report.</FormAlert>
           )}
 
           <div className="text-center">
@@ -1062,8 +1021,7 @@ const SupervisorInvestigation = () => {
                 </SectionTitle>
                 <Form.Group className="mb-4" controlId="why1">
                   <FormFieldLabel>Identify the root cause of the incident:</FormFieldLabel>
-                  <StyledFormControl
-                    as="textarea"
+                  <TextAreaField
                     rows={4}
                     name="why1"
                     value={formData.why1}
@@ -1078,7 +1036,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="investigationName">
                       <FormFieldLabel>Investigator Name:</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="investigationName"
                         value={formData.investigationName}
@@ -1091,7 +1049,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="investigationSignatureEmpId">
                       <FormFieldLabel>Investigator Emp ID:</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="investigationSignatureEmpId"
                         value={formData.investigationSignatureEmpId}
@@ -1104,7 +1062,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="investigationDeptDesignation">
                       <FormFieldLabel>Investigator Dept/Designation:</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="investigationDeptDesignation"
                         value={formData.investigationDeptDesignation}
@@ -1116,7 +1074,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="investigationDate">
                       <FormFieldLabel className="d-block">Date & Time Received:</FormFieldLabel>
-                      <DatePicker
+                      <DateField
                         selected={investigationDate}
                         onChange={(date) => setInvestigationDate(date)}
                         className="form-control"
@@ -1138,8 +1096,7 @@ const SupervisorInvestigation = () => {
                 </SectionTitle>
                 <Form.Group controlId="correctiveAction">
                   <FormFieldLabel>Corrective Action taken:</FormFieldLabel>
-                  <StyledFormControl
-                    as="textarea"
+                  <TextAreaField
                     rows={3}
                     name="correctiveAction"
                     value={formData.correctiveAction}
@@ -1160,8 +1117,7 @@ const SupervisorInvestigation = () => {
                 </SectionTitle>
                 <Form.Group controlId="preventiveAction">
                   <FormFieldLabel>Preventive Action plan:</FormFieldLabel>
-                  <StyledFormControl
-                    as="textarea"
+                  <TextAreaField
                     rows={3}
                     name="preventiveAction"
                     value={formData.preventiveAction}
@@ -1196,7 +1152,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="qualityReceivedBy">
                       <FormFieldLabel>Received By (Name):</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="qualityReceivedBy"
                         value={formData.qualityReceivedBy}
@@ -1208,7 +1164,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="qualityReceivedSignatureEmpId">
                       <FormFieldLabel>Employee ID:</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="qualityReceivedSignatureEmpId"
                         value={formData.qualityReceivedSignatureEmpId}
@@ -1220,7 +1176,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="qualityReceivedDeptDesignation">
                       <FormFieldLabel>Dept & Designation:</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="qualityReceivedDeptDesignation"
                         value={formData.qualityReceivedDeptDesignation}
@@ -1232,7 +1188,7 @@ const SupervisorInvestigation = () => {
                   <Col md={3}>
                     <Form.Group controlId="receivedDate">
                       <FormFieldLabel className="d-block">Date & Time Received:</FormFieldLabel>
-                      <DatePicker
+                      <DateField
                         selected={receivedDate}
                         onChange={(date) => setReceivedDate(date)}
                         className="form-control"
@@ -1248,7 +1204,7 @@ const SupervisorInvestigation = () => {
                   <Col md={6}>
                     <Form.Group controlId="qualityClassification">
                       <FormFieldLabel>Classification of Incident:</FormFieldLabel>
-                      <StyledFormSelect
+                      <SelectField
                         name="qualityClassification"
                         value={formData.qualityClassification}
                         onChange={handleInputChange}
@@ -1258,13 +1214,13 @@ const SupervisorInvestigation = () => {
                         <option value="Near Miss">Near Miss</option>
                         <option value="Adverse Event">Adverse Event</option>
                         <option value="Sentinel Event">Sentinel Event</option>
-                      </StyledFormSelect>
+                      </SelectField>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group controlId="qualityVerifiedByHead">
                       <FormFieldLabel>Verified By Quality Head (Name):</FormFieldLabel>
-                      <StyledFormControl
+                      <TextField
                         type="text"
                         name="qualityVerifiedByHead"
                         value={formData.qualityVerifiedByHead}
@@ -1277,8 +1233,7 @@ const SupervisorInvestigation = () => {
 
                 <Form.Group className="mb-3" controlId="qualityRemarks">
                   <FormFieldLabel>Remarks (if any):</FormFieldLabel>
-                  <StyledFormControl
-                    as="textarea"
+                  <TextAreaField
                     rows={2}
                     name="qualityRemarks"
                     value={formData.qualityRemarks}
@@ -1292,7 +1247,7 @@ const SupervisorInvestigation = () => {
                   <Col md={4}>
                     <Form.Group controlId="verifiedDate">
                       <FormFieldLabel className="d-block">Verification Date & Time:</FormFieldLabel>
-                      <DatePicker
+                      <DateField
                         selected={verifiedDate}
                         onChange={(date) => setVerifiedDate(date)}
                         className="form-control"
@@ -1315,14 +1270,14 @@ const SupervisorInvestigation = () => {
               </StyledButton>
             </div>
 
-            <Alert variant="success" show={formSubmitted} className="mt-3">
+            <FormAlert variant="success" show={formSubmitted} className="mt-3">
               Supervisor root cause analysis saved successfully!
-            </Alert>
+            </FormAlert>
 
             {error && (
-              <Alert variant="danger" className="mt-3">
+              <FormAlert variant="danger" className="mt-3">
                 {error}
-              </Alert>
+              </FormAlert>
             )}
           </Form>
         </>

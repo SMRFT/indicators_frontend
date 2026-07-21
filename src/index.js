@@ -2,6 +2,7 @@ import React, { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom'; // <-- add this
 import App from './App';
+import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 
 function setForLocalDev() {
@@ -95,7 +96,9 @@ function RootRenderer() {
 
   return isValidToken ? (
  <BrowserRouter basename={process.env.PUBLIC_URL || "/"}>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </BrowserRouter>
   ) : null;
 }

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import * as XLSX from "xlsx";
 import { Row, Form, Col, Alert, Card, Tab, Nav, Table, Badge } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash, faEdit, faUserShield, faFileAlt, faArrowLeft, faSave, faUserCheck } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash, faEdit, faUserShield, faFileAlt, faArrowLeft, faSave, faUserCheck, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import { message } from "antd";
 import apiRequest from "../apiRequest";
+import { TextField, SelectField, FormAlert } from "../Common/fields";
 
 const StyledContainer = styled.div`
   margin: 0 auto;
@@ -326,7 +328,7 @@ const UnallocatedBadge = styled.span`
   border: 1px solid #fcd34d;
 `;
 
-const TableFormSelect = styled(Form.Select)`
+const TableFormSelect = styled(SelectField)`
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
   padding: 6px 12px !important;
@@ -550,7 +552,7 @@ const IncidentClassificationManager = () => {
   if (userRole !== "Admin") {
     return (
       <StyledContainer className="mt-5">
-        <Alert variant="danger">{error || "Access Denied."}</Alert>
+        <FormAlert variant="danger">{error || "Access Denied."}</FormAlert>
       </StyledContainer>
     );
   }
@@ -580,6 +582,25 @@ const IncidentClassificationManager = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleExportAllocationExcel = () => {
+    const exportData = flatAllocations.map(({ cls, item }) => {
+      const itemIncharges = cls.item_incharges || {};
+      const assignment = itemIncharges[item] || {};
+      const currentInchargeName = assignment.incharge_name || "";
+      
+      return {
+        "Category": cls.title,
+        "Classification Item": item,
+        "Currently Allocated In-charge": currentInchargeName || "Unallocated"
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Allocations");
+    XLSX.writeFile(workbook, "Allocation_Report.xlsx");
+  };
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -656,8 +677,8 @@ const IncidentClassificationManager = () => {
         <span>SP Medifort Hospital Quality Administration Panel</span>
       </FormHeader>
 
-      {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
-      {successMsg && <Alert variant="success" className="mb-3">{successMsg}</Alert>}
+      {error && <FormAlert variant="danger" className="mb-3">{error}</FormAlert>}
+      {successMsg && <FormAlert variant="success" className="mb-3">{successMsg}</FormAlert>}
 
       <TabContainer>
         <Tab.Container defaultActiveKey="classifications">
@@ -696,7 +717,7 @@ const IncidentClassificationManager = () => {
                       <Form onSubmit={handleSaveClassification}>
                         <Form.Group className="mb-3" controlId="classTitle">
                           <Form.Label><strong>Classification Title:</strong></Form.Label>
-                          <Form.Control
+                          <TextField
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -707,7 +728,7 @@ const IncidentClassificationManager = () => {
 
                         <Form.Label><strong>Classification Items:</strong></Form.Label>
                         <div className="d-flex gap-2 mb-3">
-                          <Form.Control
+                          <TextField
                             type="text"
                             value={newItemText}
                             onChange={(e) => setNewItemText(e.target.value)}
@@ -812,9 +833,14 @@ const IncidentClassificationManager = () => {
             <Tab.Pane eventKey="allocations">
               <Card className="shadow-sm border-0">
                 <Card.Body>
-                  <SectionTitle>
-                    <FontAwesomeIcon icon={faUserShield} /> Allocate In-charge per Classification Item
-                  </SectionTitle>
+                  <div className="d-flex justify-content-between align-items-center mb-2 mt-3">
+                    <SectionTitle style={{ marginTop: 0, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>
+                      <FontAwesomeIcon icon={faUserShield} /> Allocate In-charge per Classification Item
+                    </SectionTitle>
+                    <StyledButton onClick={handleExportAllocationExcel} style={{ height: "36px", fontSize: "14px", backgroundColor: "#109b76" }}>
+                      <FontAwesomeIcon icon={faFileExcel} /> Export XLS
+                    </StyledButton>
+                  </div>
                   <p className="text-muted mb-4">
                     Assign a responsible In-charge personnel to each individual classification item. Each item within a category can have its own designated In-charge.
                   </p>

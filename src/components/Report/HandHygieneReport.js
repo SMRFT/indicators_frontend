@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Row, Col } from "react-bootstrap";
-import { DatePicker } from "antd";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Calendar } from "lucide-react";
 import dayjs from "dayjs";
 import apiRequest from "../apiRequest";
+import { Printer, Download } from "lucide-react";
+import "./Report.css";
 
 const HandHygieneReport = () => {
   const [data, setData] = useState([]);
@@ -19,10 +23,7 @@ const HandHygieneReport = () => {
     // your export logic here
   };
   useEffect(() => {
-    // Set today's date initially
-    const today = dayjs().format("YYYY-MM-DD");
-    setFromDate(today);
-    setToDate(today);
+    // Do not set today's date initially so we can see all data
   }, []);
 
   useEffect(() => {
@@ -40,10 +41,22 @@ const HandHygieneReport = () => {
 
 
   useEffect(() => {
-    if (fromDate && toDate) {
+    if (fromDate || toDate) {
       const filtered = data.filter((item) => {
-        const date = new Date(item.selectedDate);
-        return new Date(fromDate) <= date && date <= new Date(toDate);
+        const itemDate = dayjs(item.selectedDate);
+        let isValid = true;
+        
+        if (fromDate) {
+          const from = dayjs(fromDate);
+          if (itemDate.isBefore(from, 'day')) isValid = false;
+        }
+        
+        if (toDate) {
+          const to = dayjs(toDate);
+          if (itemDate.isAfter(to, 'day')) isValid = false;
+        }
+        
+        return isValid;
       });
       setFilteredData(filtered);
     } else {
@@ -84,123 +97,116 @@ const HandHygieneReport = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4 text-center">
+    <div className="report-page">
+      <h1 className="report-title">
         Hand Hygiene Audit Report
-      </h2>
+      </h1>
 
       {/* Date Pickers */}
-      {/* FROM and TO Date Pickers */}
-      <Row
-        className="mb-3"
-        style={{ justifyContent: "flex-start", marginLeft: "10px" }}
-      >
-        <Col xs={12} md={3}>
-          <label>From Date</label>
-          <DatePicker
-            value={fromDate ? dayjs(fromDate) : null}
-            onChange={(date) =>
-              setFromDate(date ? date.format("YYYY-MM-DD") : "")
-            }
-            format="YYYY-MM-DD"
-            className="form-control"
-          />
-        </Col>
-        <Col xs={12} md={3}>
-          <label>To Date</label>
-          <DatePicker
-            value={toDate ? dayjs(toDate) : null}
-            onChange={(date) =>
-              setToDate(date ? date.format("YYYY-MM-DD") : "")
-            }
-            format="YYYY-MM-DD"
-            className="form-control"
-          />
-        </Col>
-
-        {/* Top-right Print & Download icons - only if data is available */}
-        {isViewClicked && exportData && exportData.length > 0 && (
-          <Col
-            xs={12}
-            md={6}
-            className="text-end d-flex justify-content-end align-items-end"
-          >
-            <i
-              className="fa fa-print"
-              title="Print"
+      <div className="report-actions">
+        {filteredData && filteredData.length > 0 && (
+          <>
+            <button
+              className="report-action-btn"
               onClick={handlePrint}
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-                marginRight: "20px",
-              }}
-            />
-
-            <i
-              className="fa fa-file-excel-o"
-              title="Download Excel"
+              title="Print"
+            >
+              <Printer size={16} />
+            </button>
+            <button
+              className="report-action-btn accent"
               onClick={handleDownloadButtonClick}
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-              }}
-            />
-          </Col>
+              title="Download Excel"
+            >
+              <Download size={16} />
+            </button>
+          </>
         )}
-      </Row>
+      </div>
+
+      {/* Date Pickers */}
+      <div className="report-toolbar">
+        <div className="report-field">
+          <label className="report-field-label">From Date</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              selected={fromDate ? dayjs(fromDate).toDate() : null}
+              onChange={(date) =>
+                setFromDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
+              }
+              dateFormat="yyyy-MM-dd"
+              className="form-control"
+              placeholderText="Select From Date"
+            />
+          </div>
+        </div>
+        <div className="report-field">
+          <label className="report-field-label">To Date</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              selected={toDate ? dayjs(toDate).toDate() : null}
+              onChange={(date) =>
+                setToDate(date ? dayjs(date).format("YYYY-MM-DD") : "")
+              }
+              dateFormat="yyyy-MM-dd"
+              className="form-control"
+              placeholderText="Select To Date"
+            />
+          </div>
+        </div>
+      </div>
 
       {error && <p className="text-red-500">{error}</p>}
 
       {/* Table */}
       {filteredData.length > 0 ? (
-        <div className="overflow-x-auto" ref={tableRef}>
-          <table className="w-full table-auto border border-gray-300">
+        <div className="report-table-wrap" ref={tableRef}>
+          <table className="report-table">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border px-2 py-1">Date</th>
-                <th className="border px-2 py-1">Audited By</th>
-                <th className="border px-2 py-1">Staff Name</th>
-                <th className="border px-2 py-1">Area</th>
-                <th className="border px-2 py-1">Category</th>
-                <th className="border px-2 py-1">Type</th>
-                <th className="border px-2 py-1">5 Moments</th>
-                <th className="border px-2 py-1">Ornaments</th>
-                <th className="border px-2 py-1">
-                  Total Number Of Actions Performed
-                </th>
-                <th className="border px-2 py-1">
-                  Total Number Of Hand Hygiene Opportunities
-                </th>
+              <tr>
+                <th>Date</th>
+                <th>Audited By</th>
+                <th>Staff Name</th>
+                <th>Area</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>5 Moments</th>
+                <th>Ornaments</th>
+                <th>Total Number Of Actions Performed</th>
+                <th>Total Number Of Hand Hygiene Opportunities</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.map((item, idx) => (
+              {filteredData.map((item, idx) => {
+                let parsedMoments = [];
+                try {
+                  if (typeof item.fiveMoments === 'string') {
+                    try { parsedMoments = JSON.parse(item.fiveMoments); }
+                    catch(e) { parsedMoments = JSON.parse(item.fiveMoments.replace(/'/g, '"')); }
+                  } else if (Array.isArray(item.fiveMoments)) {
+                    parsedMoments = item.fiveMoments;
+                  }
+                } catch(e) {
+                   parsedMoments = [item.fiveMoments]; // Fallback
+                }
+                return (
                 <tr key={idx}>
-                  <td className="border px-2 py-1">{item.selectedDate}</td>
-                  <td className="border px-2 py-1">{item.auditBy}</td>
-                  <td className="border px-2 py-1">{item.nameOfTheStaff}</td>
-                  <td className="border px-2 py-1">{item.area}</td>
-                  <td className="border px-2 py-1">{item.category}</td>
-                  <td className="border px-2 py-1">
-                    {item.typeOfHandHygiencePractice}
+                  <td>{item.selectedDate}</td>
+                  <td>{item.auditBy}</td>
+                  <td>{item.nameOfTheStaff}</td>
+                  <td>{item.area}</td>
+                  <td>{item.category}</td>
+                  <td>{item.typeOfHandHygiencePractice}</td>
+                  <td>
+                    {Array.isArray(parsedMoments) ? parsedMoments.map((m, i) => <div key={i}>• {m}</div>) : parsedMoments}
                   </td>
-                  <td className="border px-2 py-1">
-                    {item.fiveMoments &&
-                      JSON.parse(item.fiveMoments.replace(/'/g, '"')).map(
-                        (moment, i) => <div key={i}>• {moment}</div>
-                      )}
-                  </td>
-                  <td className="border px-2 py-1">{item.ornamentsIfAny}</td>
-                  <td className="border px-2 py-1">
-                    {item.totalNumberOfActionsPerformed}
-                  </td>
-                  <td className="border px-2 py-1">
-                    {item.totalNumberOfHandHygieneOpportunities}
-                  </td>
+                  <td>{item.ornamentsIfAny}</td>
+                  <td>{item.totalNumberOfActionsPerformed}</td>
+                  <td>{item.totalNumberOfHandHygieneOpportunities}</td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Row } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { TextField, SubmitButton, FormAlert } from '../Common/fields';
 import './Login.css';
 
 const Login = ({ title, endpoint, setUserRole }) => {
@@ -72,7 +73,7 @@ const Login = ({ title, endpoint, setUserRole }) => {
           <Row className="mb-3">
             <Form.Group controlId="formEmployeeId">
               <Form.Label>Employee ID</Form.Label>
-              <Form.Control
+              <TextField
                 type="text"
                 placeholder="Enter Employee ID"
                 value={employeeId}
@@ -88,7 +89,7 @@ const Login = ({ title, endpoint, setUserRole }) => {
           <Row className="mb-3">
             <Form.Group controlId="formPassword">
               <Form.Label>Password</Form.Label>
-              <Form.Control
+              <TextField
                 type="password"
                 placeholder="Enter Password"
                 value={password}
@@ -101,11 +102,11 @@ const Login = ({ title, endpoint, setUserRole }) => {
           </Row>
 
           {/* Error Message */}
-          {error && <div className="text-danger mb-3">{error}</div>}
+          {error && <FormAlert variant="danger" className="mb-3">{error}</FormAlert>}
 
           {/* Submit Button */}
           <center>
-            <button type="submit" className="mb-3">Login</button>
+            <SubmitButton type="submit" className="mb-3">Login</SubmitButton>
           </center>
         </Form>
       </StyledContainer>

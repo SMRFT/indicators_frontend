@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import styled from "styled-components";
+import { Row, Form, Col } from "react-bootstrap";
 import apiRequest from "./apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  SelectField,
+  DateField,
+  SubmitButton,
+  FormAlert,
+} from "./Common/fields";
 
 const HandHygenieAudit = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -124,7 +122,7 @@ const handleSubmit = async (e) => {
 };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">Hand Hygiene Audit</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -139,37 +137,19 @@ const handleSubmit = async (e) => {
       <br />
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div
-                className="position-absolute top-100 start-0 translate-middle-y"
-                style={{ marginLeft: "50px", marginTop: "-15px" }}
-              >
-                {selectedDate.toLocaleDateString("en-GB")}
-              </div>
-            )}
-          </div>
+          <DateField
+            id="datePicker"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            placeholderText="Select Date"
+          />
         </Form.Group>
         <br />
         <Row className="mb-3">
           <Form.Group controlId="nameOfTheStaff">
             <Form.Label>Name Of The Staff:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.nameOfTheStaff}
               onChange={handleChange}
             />
@@ -182,9 +162,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="area">
             <Form.Label>Area:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.area}
               onChange={handleChange}
             />
@@ -197,7 +176,7 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="category">
             <Form.Label>Category:</Form.Label>
-            <Form.Select
+            <SelectField
               required
               value={formData.category}
               onChange={(e) =>
@@ -211,14 +190,14 @@ const handleSubmit = async (e) => {
               <option value="Para medical">Para medical</option>
               <option value="Laboratory">Laboratory</option>
               <option value="Physiotherapy">Physiotherapy</option>
-            </Form.Select>
+            </SelectField>
           </Form.Group>
         </Row>
 
         <Row className="mb-3">
           <Form.Group controlId="typeOfHandHygiencePractice">
             <Form.Label>Type of Hand Hygiene Practice:</Form.Label>
-            <Form.Select
+            <SelectField
               required
               value={formData.typeOfHandHygiencePractice}
               onChange={(e) =>
@@ -231,7 +210,7 @@ const handleSubmit = async (e) => {
               <option value="">-- Select Practice Type --</option>
               <option value="Hand Wash">Hand Wash</option>
               <option value="Hand rub">Hand rub</option>
-            </Form.Select>
+            </SelectField>
           </Form.Group>
         </Row>
 
@@ -270,9 +249,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="ornamentsIfAny">
             <Form.Label>Ornaments If Any:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.ornamentsIfAny}
               onChange={handleChange}
             />
@@ -285,9 +263,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfActionsPerformed">
             <Form.Label>Total Number Of Actions Performed:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfActionsPerformed}
               onChange={handleChange}
             />
@@ -299,9 +276,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfHandHygieneOpportunities">
             <Form.Label>Total Number Of Hand Hygiene Opportunities:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfHandHygieneOpportunities}
               onChange={handleChange}
             />
@@ -311,25 +287,24 @@ const handleSubmit = async (e) => {
           </Form.Group>
         </Row>
 
-<button
-  variant="primary"
+<SubmitButton
   type="submit"
   className="mb-3"
   onClick={handleSubmit}
   disabled={isSubmitting}  // disables button after one submit
 >
   {isSubmitting ? "Saving..." : "Save"}
-</button>
+</SubmitButton>
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""}>
+        <FormAlert variant="danger" show={error !== ""}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

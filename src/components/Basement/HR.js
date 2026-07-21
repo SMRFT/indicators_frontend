@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Form, Button, Alert } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import styled from 'styled-components';
+import { Row, Form } from 'react-bootstrap';
 import apiRequest from "../apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import { FormCard, TextField, DateField, SubmitButton, FormAlert } from "../Common/fields";
 
 const HR = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -117,7 +108,7 @@ const HR = () => {
   };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">HR</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div><b>ID: </b>{formData.id}</div>
@@ -127,35 +118,20 @@ const HR = () => {
 
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
         <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: 'pointer', color: '#EBB099', fontSize: '25px' }}
-              onClick={() => document.getElementById('datePicker').click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div className="position-absolute top-100 start-0 translate-middle-y" style={{ marginLeft: '50px', marginTop: '-15px' }}>
-                {selectedDate.toLocaleDateString('en-GB')}
-              </div>
-            )}
-          </div>
+          <DateField
+            id="datePicker"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            placeholderText="Select Date"
+          />
         </Form.Group>
         <br />
 
         <Row className="mb-3">
           <Form.Group controlId="numberOfAbsenteeism">
             <Form.Label>No of Absenteeism</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.numberOfAbsenteeism}
               onChange={handleChange}
             />
@@ -168,9 +144,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfNewJoinees">
             <Form.Label>No of New Joinees</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.numberOfNewJoinees}
               onChange={handleChange}
             />
@@ -183,9 +158,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfStaffNursing">
             <Form.Label>Total No Of Nursing Staff</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfStaffNursing}
               onChange={handleChange}
             />
@@ -198,9 +172,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfPharamedicalStaff">
             <Form.Label>Total Number Of Paramedical Staff</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfPharamedicalStaff}
               onChange={handleChange}
             />
@@ -213,9 +186,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfDoctors">
             <Form.Label>Total Number Of Doctors</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfDoctors}
               onChange={handleChange}
             />
@@ -228,9 +200,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfAdminStaff">
             <Form.Label>Total Number Of Admin Staff</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfAdminStaff}
               onChange={handleChange}
             />
@@ -243,9 +214,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfHouseKeepingStaff">
             <Form.Label>Total Number Of HouseKeeping Staff</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfHouseKeepingStaff}
               onChange={handleChange}
             />
@@ -258,9 +228,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="numberOfStaffLeftTheOrganization">
             <Form.Label>No. of Staff left the Organization</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.numberOfStaffLeftTheOrganization}
               onChange={handleChange}
             />
@@ -273,9 +242,8 @@ const HR = () => {
         <Row className="mb-3">
           <Form.Group controlId="totalNumberOfStaff">
             <Form.Label>Total No of Staff</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.totalNumberOfStaff}
               onChange={handleChange}
             />
@@ -285,24 +253,23 @@ const HR = () => {
           </Form.Group>
         </Row>
 
-        <button
-          variant="primary"
+        <SubmitButton
           type="submit"
           className="mb-3"
           disabled={isSubmitting} // ✅ disable after submit
         >
           {isSubmitting ? 'Saving...' : 'Save'}
-        </button>
+        </SubmitButton>
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ''}>
+        <FormAlert variant="danger" show={error !== ''}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

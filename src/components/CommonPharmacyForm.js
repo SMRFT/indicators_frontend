@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import styled from "styled-components";
+import { Row, Form, Col } from "react-bootstrap";
 import apiRequest from "./apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  SubmitButton,
+  FormAlert,
+  DateField,
+} from "./Common/fields";
 
 const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -80,7 +77,7 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
   };
 
   return (
-    <StyledContainer>
+    <FormCard>
       <h2 className="text-center">{title}</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -94,36 +91,20 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
       </div>
       <br />
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div
-                className="position-absolute top-100 start-0 translate-middle-y"
-                style={{ marginLeft: "50px", marginTop: "-15px" }}
-              >
-                {selectedDate.toLocaleDateString("en-GB")}
-              </div>
-            )}
-          </div>
+        <Form.Group className="mb-3" controlId="selectedDate">
+          <DateField
+            id="datePicker"
+            selected={selectedDate}
+            onChange={handleDateChange}
+            placeholderText="Select Date"
+          />
         </Form.Group>
 
         {fields.map(({ id, label, type }) => (
           <Row className="mb-3" key={id}>
             <Form.Group controlId={id}>
               <Form.Label>{label}</Form.Label>
-              <Form.Control
+              <TextField
                 required
                 type={type}
                 value={formData[id] || ""}
@@ -136,19 +117,19 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
           </Row>
         ))}
 
-        <button type="submit" className="mb-3">
+        <SubmitButton type="submit" className="mb-3">
           Save
-        </button>
+        </SubmitButton>
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""}>
+        <FormAlert variant="danger" show={error !== ""}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

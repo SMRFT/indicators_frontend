@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { wardOptions } from "../constant";
-import * as XLSX from "xlsx";
 import Alert from "react-bootstrap/Alert";
 import apiRequest from "../apiRequest"; // Import the API helper
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
+import { Calendar, Pencil, Save, Trash2, Download } from "lucide-react";
 import { getTransposedData, exportToExcel } from "./reportUtils";
-
-
-
+import "./Report.css";
 
 function Report() {
   const [selectedWard, setSelectedWard] = useState("First Floor"); // Default value set to "First Floor"
@@ -37,7 +32,7 @@ function Report() {
     if (exportData.length > 0) {
       const mapping = {};
       const excludedFields = ["created_by", "created_date", "lastmodified_by", "lastmodified_date", "selectedDate", "ward"];
-    
+
     Object.keys(exportData[0]).forEach((key) => {
       if (excludedFields.includes(key)) return; // Strictly skip metadata
       let displayKey = key;
@@ -85,12 +80,12 @@ const fetchExportData = async () => {
       const sortedData = [...data].sort(
         (a, b) => new Date(a.selectedDate) - new Date(b.selectedDate)
       );
-      
+
       setExportData(sortedData);
       setEditedValues({});
     } else {
       setExportData([]);
-      
+
       console.error("No valid data array found:", response);
     }
   } catch (error) {
@@ -210,7 +205,7 @@ const getDisplayValue = (displayField, colIndex) => {
 
   // 1. Get the raw value from data
   const rawValue = exportData[colIndex][dbField];
-  
+
   // 2. Handle Edited Values (Ensure we return a string for inputs)
   if (isEditing && editedValues[colIndex] && dbField in editedValues[colIndex]) {
     const val = editedValues[colIndex][dbField];
@@ -227,9 +222,9 @@ const getDisplayValue = (displayField, colIndex) => {
     try {
       // If it's already an object, use it; if string, parse it
       const parsedRemarks = typeof rawValue === 'object' ? rawValue : JSON.parse(rawValue.replace(/'/g, '"'));
-      
+
       const transfusedKeys = Object.keys(parsedRemarks).filter(k => k.startsWith('transfused-') && !k.includes('remarks'));
-      
+
       if (transfusedKeys.length > 0) {
         return (
           <div>
@@ -275,41 +270,48 @@ const getDisplayValue = (displayField, colIndex) => {
     }));
   };
 
+  const isAdmin = localStorage.getItem("userRole") === "Admin";
+
   return (
-    <Container style={{ marginLeft: "230px" }}>
-      <h1 className="text-center mt-4">{selectedWard} Report</h1>
-      <br />
-      <Row className="mb-4" style={{ marginLeft: "10px" }}>
-        <Col xs={12} md={4}>
-          <Dropdown
-            id="wardSelect"
-            onSelect={handleSelect}
-            className="custom-dropdown"
+    <div className="report-page">
+      <h1 className="report-title">{selectedWard} Report</h1>
+
+      <div className="report-actions">
+        {isAdmin && (
+          <button
+            className="report-action-btn"
+            onClick={isEditing ? handleSaveClick : handleEditClick}
+            title={isEditing ? "Save" : "Edit"}
           >
-            <Dropdown.Toggle
-              id="dropdown-basic"
-              style={{
-                minWidth: "200px",
-                backgroundColor: "white",
-                color: "black",
-                border: "1px solid #DEE2E6",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            {isEditing ? <Save size={16} /> : <Pencil size={16} />}
+          </button>
+        )}
+        {isAdmin && (
+          <button
+            className="report-action-btn danger"
+            onClick={() => setShowDeleteModal(true)}
+            title="Delete"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
+        <button
+          className="report-action-btn accent"
+          onClick={handleDownloadButtonClick}
+          title="Download"
+        >
+          <Download size={16} />
+        </button>
+      </div>
+
+      <div className="report-toolbar">
+        <div className="report-field">
+          <label className="report-field-label">Ward</label>
+          <Dropdown onSelect={handleSelect}>
+            <Dropdown.Toggle className="report-dropdown-toggle" id="dropdown-basic">
               <span>{selectedWard || "Select Ward"}</span>
-              <span className="caret"></span>
             </Dropdown.Toggle>
-            <Dropdown.Menu
-              style={{
-                minWidth: "200px",
-                textAlign: "center",
-                maxHeight: "250px",
-                overflowY: "auto",
-                scrollbarWidth: "thin",
-              }}
-            >
+            <Dropdown.Menu className="report-dropdown-menu">
               {wardOptions.map((ward, index) => (
                 <Dropdown.Item key={index} eventKey={ward}>
                   {ward}
@@ -317,130 +319,39 @@ const getDisplayValue = (displayField, colIndex) => {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-        </Col>
-        <Col xs={12} md={4}>
-          <div className="input-group">
-            <div
-              style={{ cursor: "pointer" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            >
-              <i
-                style={{
-                  fontSize: "130%",
-                  color: "rgb(149,188,176)",
-                  marginRight: "10px",
-                  marginTop: "5px",
-                }}
-                className="fa fa-calendar"
-              ></i>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                zIndex: showDeleteModal ? 1 : 9999,
-              }}
-            >
-              <DatePicker
-                id="datePicker"
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                dateFormat="yyyy-MM-dd"
-                placeholderText="Select a Date"
-                className="form-control"
-                style={{ display: "inline-block", width: "calc(100% - 40px)" }}
-              />
-            </div>
-          </div>
-        </Col>
-        <Col xs={12} md={4}>
-          <div className="input-group">
-            <div
-              style={{ cursor: "pointer" }}
-              onClick={() => document.getElementById("monthYearPicker").click()}
-            >
-              <i
-                style={{
-                  fontSize: "130%",
-                  color: "rgb(149,188,176)",
-                  marginRight: "10px",
-                  marginTop: "5px",
-                }}
-                className="fa fa-calendar"
-              ></i>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                zIndex: showDeleteModal ? 1 : 9999,
-              }}
-            >
-              <DatePicker
-                id="monthYearPicker"
-                selected={selectedMonth}
-                onChange={(date) => setSelectedMonth(date)}
-                dateFormat="MM/yyyy"
-                showMonthYearPicker
-                placeholderText="Select Month and Year"
-                className="form-control"
-                style={{ display: "inline-block", width: "calc(100% - 40px)" }}
-              />
-            </div>
-          </div>
-        </Col>
-      </Row>
-      <Row>
-        <Col
-          xs={12}
-          md={12}
-          className="text-right"
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          {/* Admin-only buttons */}
-          {localStorage.getItem("userRole") === "Admin" && (
-            <>
-              <i
-                className={`fa ${isEditing ? "fa-save" : "fa-edit"}`}
-                onClick={isEditing ? handleSaveClick : handleEditClick}
-                style={{
-                  fontSize: "150%",
-                  color: "rgb(149,188,176)",
-                  cursor: "pointer",
-                  marginRight: "15px",
-                }}
-                title={isEditing ? "Save" : "Edit"}
-              ></i>
-              <i
-                style={{
-                  fontSize: "150%",
-                  color: "rgb(149,188,176)",
-                  cursor: "pointer",
-                  marginRight: "20px",
-                }}
-                title="Delete"
-                className="fa fa-trash"
-                onClick={() => setShowDeleteModal(true)}
-              ></i>
-            </>
-          )}
+        </div>
 
-          {/* Download button visible to everyone */}
-          <i
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-              marginRight: "30px",
-            }}
-            title="Download"
-            className="fa fa-download"
-            onClick={handleDownloadButtonClick}
-          ></i>
-        </Col>
-      </Row>
+        <div className="report-field">
+          <label className="report-field-label">Date</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              id="datePicker"
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Select a Date"
+              className="form-control"
+            />
+          </div>
+        </div>
+
+        <div className="report-field">
+          <label className="report-field-label">Month &amp; Year</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              id="monthYearPicker"
+              selected={selectedMonth}
+              onChange={(date) => setSelectedMonth(date)}
+              dateFormat="MM/yyyy"
+              showMonthYearPicker
+              placeholderText="Select Month and Year"
+              className="form-control"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Keep the delete modal outside but it will only be triggered by admins */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
@@ -474,195 +385,98 @@ const getDisplayValue = (displayField, colIndex) => {
       </Modal>
 
       {showSuccessAlert && (
-        <Alert
-          variant="success"
-          className="text-center mt-3"
-          style={{ width: "50%", margin: "auto" }}
-        >
+        <Alert variant="success" className="text-center mt-3">
           Successfully updated.
         </Alert>
       )}
       {showErrorAlert && (
-        <Alert
-          variant="danger"
-          className="text-center mt-3"
-          style={{ width: "50%", margin: "auto" }}
-        >
+        <Alert variant="danger" className="text-center mt-3">
           Failed to update. Please try again.
         </Alert>
       )}
-      <Container className="mt-2">
-        {isViewClicked && exportData && exportData.length > 0 ? (
-          <div
-            className="table-responsive"
-            style={{
-              overflowX: "auto",
-              overflowY: "auto",
-              maxHeight: "400px",
-              maxWidth: "100%",
-              position: "relative",
-              border: "1px solid #ddd",
-            }}
-          >
-            <table
-              className="table table-bordered"
-              style={{
-                marginLeft: "auto",
-                marginRight: "auto",
-                borderCollapse: "collapse",
-                minWidth: "600px",
-              }}
-            >
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      border: "1px solid #ddd",
-                      padding: "8px",
-                      backgroundColor: "rgb(149,188,176)",
-                      color: "white",
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 2,
-                    }}
-                  >
-                    Indicators
-                  </th>
-                  {exportData.map((item, index) => (
-                    <th
-                      key={index}
-                      style={{
-                        border: "1px solid #ddd",
-                        padding: "8px",
-                        backgroundColor: "rgb(149,188,176)",
-                        color: "white",
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 2,
-                      }}
-                    >
-                      {formatDate(item.selectedDate)}
-                    </th>
-                  ))}
-                  <th
-                    style={{
-                      border: "1px solid #ddd",
-                      padding: "8px",
-                      backgroundColor: "rgb(149,188,176)",
-                      color: "white",
-                      position: "sticky",
-                      top: 0,
-                      right: 0,
-                      zIndex: 2,
-                    }}
-                  >
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(getTransposedData(exportData)).map(
-                  ([field, values], rowIndex, rowArray) => {
-                    const totalRows = rowArray.length;
 
-                    // Calculate row total for numeric fields
-                    const rowTotal =
-                      rowIndex >= 2 && rowIndex < totalRows - 1
-                        ? values.reduce(
-                            (sum, val) => sum + (parseFloat(val) || 0),
-                            0
-                          )
-                        : "";
+      {isViewClicked && exportData && exportData.length > 0 ? (
+        <div className="report-table-wrap">
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>Indicators</th>
+                {exportData.map((item, index) => (
+                  <th key={index}>{formatDate(item.selectedDate)}</th>
+                ))}
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(getTransposedData(exportData)).map(
+                ([field, values], rowIndex, rowArray) => {
+                  const totalRows = rowArray.length;
 
-                    return (
-                      <tr
-                        key={rowIndex}
-                        style={{
-                          backgroundColor:
-                            rowIndex % 2 === 0 ? "grey" : "whitesmoke",
-                        }}
-                      >
-                        <td
-                          style={{
-                            padding: "8px",
-                            textAlign: "left",
-                            position: "sticky",
-                            left: 0,
-                            color: "black",
-                            zIndex: 1,
-                          }}
-                        >
-                          {field}
-                        </td>
-                        {values.map((_, colIndex) => {
-                          const displayValue = getDisplayValue(field, colIndex);
+                  // Calculate row total for numeric fields
+                  const rowTotal =
+                    rowIndex >= 2 && rowIndex < totalRows - 1
+                      ? values.reduce(
+                          (sum, val) => sum + (parseFloat(val) || 0),
+                          0
+                        )
+                      : "";
 
-                          // Special handling for numberOfUnitsTransfusedRemarks
-                          const isTransfusedRemarks =
-                            field === "Number Of Units Transfused Remarks";
+                  return (
+                    <tr key={rowIndex}>
+                      <td>{field}</td>
+                      {values.map((_, colIndex) => {
+                        const displayValue = getDisplayValue(field, colIndex);
 
-                          return (
-                            <td key={colIndex} style={{ padding: "8px" }}>
-                              {isEditing ? (
-                                isTransfusedRemarks ? (
-                                  <textarea
-                                    value={displayValue}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        field,
-                                        colIndex,
-                                        e.target.value
-                                      )
-                                    }
-                                    style={{ width: "100%", minHeight: "60px" }}
-                                  />
-                                ) : (
-                                  <input
-                                    type="text"
-                                    value={displayValue}
-                                    onChange={(e) =>
-                                      handleInputChange(
-                                        field,
-                                        colIndex,
-                                        e.target.value
-                                      )
-                                    }
-                                    style={{ width: "100%" }}
-                                  />
-                                )
+                        // Special handling for numberOfUnitsTransfusedRemarks
+                        const isTransfusedRemarks =
+                          field === "Number Of Units Transfused Remarks";
+
+                        return (
+                          <td key={colIndex}>
+                            {isEditing ? (
+                              isTransfusedRemarks ? (
+                                <textarea
+                                  value={displayValue}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      field,
+                                      colIndex,
+                                      e.target.value
+                                    )
+                                  }
+                                  style={{ minHeight: "60px" }}
+                                />
                               ) : (
-                                displayValue
-                              )}
-                            </td>
-                          );
-                        })}
-                        <td
-                          style={{
-                            padding: "8px",
-                            fontWeight: "bold",
-                            backgroundColor: "lightblue",
-                            position: "sticky",
-                            right: 0,
-                          }}
-                        >
-                          {rowTotal !== "" ? Math.round(rowTotal) : ""}
-                        </td>
-                      </tr>
-                    );
-                  }
-                )}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <center>
-            <div style={{ marginTop: "100px" }}>
-              <b>No data available</b>
-            </div>
-          </center>
-        )}
-      </Container>
-    </Container>
+                                <input
+                                  type="text"
+                                  value={displayValue}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      field,
+                                      colIndex,
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              )
+                            ) : (
+                              displayValue
+                            )}
+                          </td>
+                        );
+                      })}
+                      <td>{rowTotal !== "" ? Math.round(rowTotal) : ""}</td>
+                    </tr>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="report-empty-state">No data available</div>
+      )}
+    </div>
   );
 }
 

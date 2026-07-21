@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Row, Col, Modal, Button, Badge, Container, Form, Spinner } from "react-bootstrap";
-import { DatePicker } from "antd";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -520,10 +521,11 @@ const SupervisorInvestigationReport = () => {
           <Form.Group controlId="fromDate">
             <Form.Label style={{ fontWeight: "600" }} className="d-block">From Date</Form.Label>
             <DatePicker
-              value={fromDate ? dayjs(fromDate) : null}
-              onChange={(date) => setFromDate(date ? date.format("YYYY-MM-DD") : "")}
-              format="YYYY-MM-DD"
+              selected={fromDate ? dayjs(fromDate).toDate() : null}
+              onChange={(date) => setFromDate(date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              dateFormat="yyyy-MM-dd"
               className="form-control w-100"
+              placeholderText="Select From Date"
             />
           </Form.Group>
         </Col>
@@ -531,10 +533,11 @@ const SupervisorInvestigationReport = () => {
           <Form.Group controlId="toDate">
             <Form.Label style={{ fontWeight: "600" }} className="d-block">To Date</Form.Label>
             <DatePicker
-              value={toDate ? dayjs(toDate) : null}
-              onChange={(date) => setToDate(date ? date.format("YYYY-MM-DD") : "")}
-              format="YYYY-MM-DD"
+              selected={toDate ? dayjs(toDate).toDate() : null}
+              onChange={(date) => setToDate(date ? dayjs(date).format("YYYY-MM-DD") : "")}
+              dateFormat="yyyy-MM-dd"
               className="form-control w-100"
+              placeholderText="Select To Date"
             />
           </Form.Group>
         </Col>

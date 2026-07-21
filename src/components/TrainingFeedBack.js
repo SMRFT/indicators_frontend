@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Row, Form, Col, Alert, Table } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { Row, Form, Col, Table } from "react-bootstrap";
 import styled from "styled-components";
 import apiRequest from "./apiRequest";
-
-const StyledContainer = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-`;
+import {
+  FormCard,
+  TextField,
+  DateField,
+  SubmitButton,
+  FormAlert,
+} from "./Common/fields";
 
 const ValidationMessage = styled.div`
   color: #dc3545;
@@ -170,7 +168,7 @@ const handleSubmit = async (e) => {
 };
 
   return (
-    <StyledContainer className="NumericalData">
+    <FormCard className="NumericalData">
       <h2 className="text-center">Training Feed Back Form</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -184,38 +182,15 @@ const handleSubmit = async (e) => {
       </div>
       <br />
       <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="position-relative mb-3" controlId="selectedDate">
-          <div className="position-relative">
-            <FontAwesomeIcon
-              icon={faCalendarAlt}
-              style={{ cursor: "pointer", color: "#EBB099", fontSize: "25px" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            />
-            <DatePicker
-              id="datePicker"
-              selected={selectedDate}
-              onChange={handleDateChange}
-              className="position-absolute top-100 start-0 d-none"
-              calendarClassName="position-absolute top-100 start-0"
-              placeholderText="Select Date"
-            />
-            {selectedDate && (
-              <div
-                className="position-absolute top-100 start-0 translate-middle-y"
-                style={{ marginLeft: "50px", marginTop: "-15px" }}
-              >
-                {selectedDate.toLocaleDateString("en-GB")}
-              </div>
-            )}
-          </div>
+        <Form.Group className="mb-3" controlId="selectedDate">
+          <DateField selected={selectedDate} onChange={handleDateChange} />
         </Form.Group>
         <br />
         <Row className="mb-3">
           <Form.Group controlId="department">
             <Form.Label>Department:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.department}
               onChange={handleChange}
             />
@@ -228,9 +203,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="trainingTopic">
             <Form.Label>Training Topic:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.trainingTopic}
               onChange={handleChange}
             />
@@ -417,9 +391,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="nameOfTheTrainer">
             <Form.Label>Name of the Trainer:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.nameOfTheTrainer}
               onChange={handleChange}
             />
@@ -482,9 +455,8 @@ const handleSubmit = async (e) => {
         <Row className="mb-3">
           <Form.Group controlId="suggestionToImprove">
             <Form.Label>Suggestion To Improve:</Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.suggestionToImprove}
               onChange={handleChange}
             />
@@ -498,9 +470,8 @@ const handleSubmit = async (e) => {
             <Form.Label>
               Do you need training in any other area? If So Please Specify:
             </Form.Label>
-            <Form.Control
+            <TextField
               required
-              type="text"
               value={formData.ifSoPleaseSpecify}
               onChange={handleChange}
             />
@@ -510,26 +481,25 @@ const handleSubmit = async (e) => {
           </Form.Group>
         </Row>
 
-<button
-  variant="primary"
+<SubmitButton
   type="submit"
   className="mb-3"
   onClick={handleSubmit}
   disabled={isSubmitting}  // disable button during submission
 >
   {isSubmitting ? "Saving..." : "Save"}
-</button>
+</SubmitButton>
 
 
-        <Alert variant="success" show={formSubmitted}>
+        <FormAlert variant="success" show={formSubmitted}>
           Form submitted successfully.
-        </Alert>
+        </FormAlert>
 
-        <Alert variant="danger" show={error !== ""}>
+        <FormAlert variant="danger" show={error !== ""}>
           {error}
-        </Alert>
+        </FormAlert>
       </Form>
-    </StyledContainer>
+    </FormCard>
   );
 };
 

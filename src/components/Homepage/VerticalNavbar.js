@@ -2,40 +2,80 @@ import React, { useState } from "react";
 import {
   CDBSidebar,
   CDBSidebarContent,
-  CDBSidebarHeader,
   CDBSidebarMenu,
   CDBSidebarMenuItem,
 } from "cdbreact";
 import { NavLink } from "react-router-dom";
 import {
-  FaFileAlt,
-  FaHome,
-  FaTable,
-  FaUserPlus,
-  FaWpforms,
-  FaChevronDown,
-  FaChevronUp,
-  FaSquareRootAlt,
-  FaRegClipboard,
-  FaHandsWash,
-} from "react-icons/fa";
-import Logo from "../images/smrft.png";
+  Home,
+  FileText,
+  Table,
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp,
+  Sigma,
+  ClipboardList,
+  Droplets,
+} from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
 import "./VerticalNavbar.css";
 
-const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
+const SidebarItem = ({ to, icon: Icon, label, sub = false, onClick, trailing }) => {
+  const inner = (
+    <CDBSidebarMenuItem
+      className={`sidebar-menu-item ${sub ? "sidebar-menu-item-sub" : ""}`}
+      onClick={onClick}
+    >
+      <span className="sidebar-menu-item-inner">
+        {Icon && <Icon size={18} className="sidebar-menu-item-icon" />}
+        <span className="sidebar-menu-item-label">{label}</span>
+        {trailing}
+      </span>
+    </CDBSidebarMenuItem>
+  );
+
+  if (!to) return inner;
+
+  return (
+    <NavLink to={to} className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+      {inner}
+    </NavLink>
+  );
+};
+
+const Sidebar = ({ userRole = "", loginMethod = "", location = "", isOpen, toggleSidebar }) => {
   const [reportDropdownOpen, setReportDropdownOpen] = useState(false);
+  const { theme } = useTheme();
 
   const toggleReportDropdown = () => {
     setReportDropdownOpen(!reportDropdownOpen);
   };
 
-  console.log("Rendering Sidebar with userRole:", userRole);
-
   // Render a placeholder or default content if userRole is not defined
   if (!userRole) {
-    console.log("User role is not defined"); // Debug log
     return <div className="sidebar-placeholder">Loading...</div>;
   }
+
+  const reportsDropdown = (
+    <div className="sidebar-dropdown">
+      <SidebarItem
+        icon={FileText}
+        label="Reports"
+        onClick={toggleReportDropdown}
+        trailing={reportDropdownOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      />
+      {reportDropdownOpen && (
+        <div className="sidebar-dropdown-content">
+          <SidebarItem to="/Report" label="General Report" sub />
+          <SidebarItem to="/MasterDataReport" label="Master Data Report" sub />
+          <SidebarItem to="/HandHygieneReport" label="Hand Hygiene Report" sub />
+          <SidebarItem to="/TrainingFeedbackReport" label="Training Feedback Report" sub />
+          <SidebarItem to="/IncidentReportReport" label="Incident Report" sub />
+          <SidebarItem to="/SupervisorInvestigationReport" label="Supervisor Investigation Report" sub />
+        </div>
+      )}
+    </div>
+  );
 
   let content;
 
@@ -43,182 +83,19 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
   if (userRole === "Admin") {
     content = (
       <>
-        <div className="sidebar-dropdown">
-          <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
-            <CDBSidebarMenuItem className="sidebar-menu-item">
-              <FaHandsWash />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
-            </CDBSidebarMenuItem>
-          </NavLink>
-          <CDBSidebarMenuItem
-            className="sidebar-menu-item"
-            onClick={toggleReportDropdown}
-          >
-            <FaFileAlt />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reports{" "}
-            {reportDropdownOpen ? (
-              <FaChevronUp size={10} />
-            ) : (
-              <FaChevronDown size={10} />
-            )}
-          </CDBSidebarMenuItem>
-          {reportDropdownOpen && (
-            <div className="sidebar-dropdown-content">
-              <NavLink exact to="/Report" activeClassName="activeClicked">
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/MasterDataReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/HandHygieneReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/TrainingFeedbackReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feedback Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/IncidentReportReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/SupervisorInvestigationReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supervisor Investigation Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-            </div>
-          )}
-        </div>
-        {/* <NavLink exact to="/Register" activeClassName="activeClicked">
-          <CDBSidebarMenuItem className="sidebar-menu-item">
-            <FaUserPlus />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Registration
-          </CDBSidebarMenuItem>
-        </NavLink> */}
-        <NavLink exact to="/Availability" activeClassName="activeClicked">
-          <CDBSidebarMenuItem className="sidebar-menu-item">
-            <FaTable />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Availability
-          </CDBSidebarMenuItem>
-        </NavLink>
-        <NavLink exact to="/Formula" activeClassName="activeClicked">
-          <CDBSidebarMenuItem className="sidebar-menu-item">
-            <FaSquareRootAlt /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Formula
-          </CDBSidebarMenuItem>
-        </NavLink>
+        <SidebarItem to="/HandHygieneAudit" icon={Droplets} label="Hand Hygiene Audit" />
+        {reportsDropdown}
+        <SidebarItem to="/Availability" icon={Table} label="Availability" />
+        <SidebarItem to="/Formula" icon={Sigma} label="Formula" />
       </>
     );
   }
   if (userRole === "In-Charge") {
     content = (
       <>
-        <div className="sidebar-dropdown">
-          <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
-            <CDBSidebarMenuItem className="sidebar-menu-item">
-              <FaHandsWash />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
-            </CDBSidebarMenuItem>
-          </NavLink>
-          <CDBSidebarMenuItem
-            className="sidebar-menu-item"
-            onClick={toggleReportDropdown}
-          >
-            <FaFileAlt />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reports{" "}
-            {reportDropdownOpen ? (
-              <FaChevronUp size={10} />
-            ) : (
-              <FaChevronDown size={10} />
-            )}
-          </CDBSidebarMenuItem>
-          {reportDropdownOpen && (
-            <div className="sidebar-dropdown-content">
-              <NavLink exact to="/Report" activeClassName="activeClicked">
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/MasterDataReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/HandHygieneReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/TrainingFeedbackReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feedback Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/IncidentReportReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/SupervisorInvestigationReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Supervisor Investigation Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-            </div>
-          )}
-        </div>
-        <NavLink exact to="/Formula" activeClassName="activeClicked">
-          <CDBSidebarMenuItem className="sidebar-menu-item">
-            <FaSquareRootAlt /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Formula
-          </CDBSidebarMenuItem>
-        </NavLink>
+        <SidebarItem to="/HandHygieneAudit" icon={Droplets} label="Hand Hygiene Audit" />
+        {reportsDropdown}
+        <SidebarItem to="/Formula" icon={Sigma} label="Formula" />
       </>
     );
   }
@@ -266,64 +143,26 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
     content = (
       <>
         {!excludedPaths.includes(location.pathname) && (
-          <NavLink
-            exact
+          <SidebarItem
             to={getMasterDataRoute(location.pathname)}
-            activeClassName="activeClicked"
-          >
-            <CDBSidebarMenuItem className="sidebar-menu-item">
-              <FaWpforms />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data
-            </CDBSidebarMenuItem>
-          </NavLink>
+            icon={FileSpreadsheet}
+            label="Master Data"
+          />
+        )}
+        <SidebarItem to="/HandHygieneAudit" icon={Droplets} label="Hand Hygiene Audit" />
 
-        )}        
-          <NavLink exact to="/HandHygieneAudit" activeClassName="activeClicked">
-            <CDBSidebarMenuItem className="sidebar-menu-item">
-              <FaHandsWash />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hand Hygiene Audit
-            </CDBSidebarMenuItem>
-          </NavLink>
-
-        {/* Add General Report and Master Data Report for Employees */}
         <div className="sidebar-dropdown">
-          <CDBSidebarMenuItem
-            className="sidebar-menu-item"
+          <SidebarItem
+            icon={FileText}
+            label="Reports"
             onClick={toggleReportDropdown}
-          >
-            <FaFileAlt />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reports{" "}
-            {reportDropdownOpen ? (
-              <FaChevronUp size={10} />
-            ) : (
-              <FaChevronDown size={10} />
-            )}
-          </CDBSidebarMenuItem>
+            trailing={reportDropdownOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          />
           {reportDropdownOpen && (
             <div className="sidebar-dropdown-content">
-              <NavLink exact to="/Report" activeClassName="activeClicked">
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;General Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/MasterDataReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Master Data Report
-                </CDBSidebarMenuItem>
-              </NavLink>
-              <NavLink
-                exact
-                to="/IncidentReportReport"
-                activeClassName="activeClicked"
-              >
-                <CDBSidebarMenuItem className="sidebar-menu-item">
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Incident Report
-                </CDBSidebarMenuItem>
-              </NavLink>
+              <SidebarItem to="/Report" label="General Report" sub />
+              <SidebarItem to="/MasterDataReport" label="Master Data Report" sub />
+              <SidebarItem to="/IncidentReportReport" label="Incident Report" sub />
             </div>
           )}
         </div>
@@ -333,48 +172,36 @@ const Sidebar = ({ userRole = "", loginMethod = "", location = "" }) => {
 
   const getHomeRoute = () => {
     const path = location?.pathname || "";
-    if (
-      path.includes("Incident") ||
-      path.includes("SupervisorInvestigation")
-    ) {
+    if (path.includes("Incident") || path.includes("SupervisorInvestigation")) {
       return "/IncidentDashboard";
     }
     return "/QualityIndicators";
   };
 
+  const isDark = theme === "dark";
+
   return (
-    <div className="sidebar-container">
-      <CDBSidebar textColor="Black" backgroundColor="#ECF8F9">
-        <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large"></i>}>
-          <img
-            src={Logo}
-            alt="Shanmuga Hospital Logo"
-            style={{ maxWidth: "80%" }}
-          />
-        </CDBSidebarHeader>
-        <CDBSidebarContent className="sidebar-content">
-          <CDBSidebarMenu>
-            <NavLink exact to={getHomeRoute()} activeClassName="activeClicked">
-              <CDBSidebarMenuItem className="sidebar-menu-item">
-                <FaHome />
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Home
-              </CDBSidebarMenuItem>
-            </NavLink>
-            <NavLink
-              exact
-              to="/TrainingFeedBack"
-              activeClassName="activeClicked"
-            >
-              <CDBSidebarMenuItem className="sidebar-menu-item">
-                <FaRegClipboard /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Training Feed
-                Back
-              </CDBSidebarMenuItem>
-            </NavLink>
-            {content}
-          </CDBSidebarMenu>
-        </CDBSidebarContent>
-      </CDBSidebar>
-    </div>
+    <>
+      <div 
+        className={`sidebar-backdrop ${isOpen ? "open" : ""}`} 
+        onClick={toggleSidebar} 
+      />
+      <div className={`sidebar-container ${isOpen ? "open" : ""}`}>
+        <CDBSidebar
+          textColor={isDark ? "#e6edf3" : "#0f172a"}
+          backgroundColor={isDark ? "#111c2b" : "#ffffff"}
+        >
+          <CDBSidebarContent className="sidebar-content">
+            <CDBSidebarMenu>
+              <SidebarItem to={getHomeRoute()} icon={Home} label="Home" onClick={toggleSidebar} />
+              <SidebarItem to="/TrainingFeedBack" icon={ClipboardList} label="Training Feed Back" onClick={toggleSidebar} />
+              {/* Note: In a full implementation, you might want to pass onClick={toggleSidebar} to the other dynamic items as well to auto-close on selection */}
+              {content}
+            </CDBSidebarMenu>
+          </CDBSidebarContent>
+        </CDBSidebar>
+      </div>
+    </>
   );
 };
 

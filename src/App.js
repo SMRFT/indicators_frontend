@@ -5,8 +5,8 @@ import LandingPage from "./components/Homepage/LandingPage";
 import QualityIndicatorsLanding from "./components/Homepage/QualityIndicatorsLanding";
 import IncidentDashboard from "./components/Homepage/IncidentDashboard";
 import { AdminLogin, EmployeeLogin } from "./components/Auth/Login";
-import Logo from "./components/images/shanmuga-hospital-logo.jpg";
 import Sidebar from "./components/Homepage/VerticalNavbar";
+import PageHeader from "./components/Homepage/PageHeader";
 import "./App.css";
 
 // Lazy-loaded components
@@ -64,6 +64,9 @@ const IncidentClassificationManager = lazy(() => import("./components/IncitendIn
 function App() {
   const location = useLocation();
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   useEffect(() => {
     setUserRole(localStorage.getItem("userRole"));
@@ -74,7 +77,20 @@ function App() {
     !["/", "/Login", "/AdminLogin", "/EmployeeLogin", "/QualityIndicators", "/IncidentDashboard"].includes(
       location.pathname
     );
-  const showLogo = !showSidebar && !["/", "/QualityIndicators", "/IncidentDashboard"].includes(location.pathname);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("userRole");
+    window.location.href = "/Login";
+  };
+
+  const isIncidentArea =
+    location.pathname.includes("Incident") || location.pathname.includes("SupervisorInvestigation");
+
+  let backTo = "/";
+  if (showSidebar) {
+    backTo = isIncidentArea ? "/IncidentDashboard" : "/QualityIndicators";
+  }
+
   const hideMainContent = [
     "/",
     "/Login",
@@ -82,7 +98,6 @@ function App() {
     "/EmployeeLogin",
     "/Register",
     "/Availability",
-    "/Report",
     "/MasterDataReport",
     "/FirstFloorRawData",
     "/FirstSuitRawData",
@@ -103,15 +118,23 @@ function App() {
 
   return (
     <div className="App">
-      {showLogo && (
-        <div className="logo-container">
-          <img src={Logo} alt="Shanmuga Hospital Logo" className="logo" />
-        </div>
-      )}
+      <PageHeader
+        showBack={location.pathname !== "/"}
+        backTo={backTo}
+        showAdmin={userRole === "Admin"}
+        showSignOut={!!userRole}
+        onSignOut={handleSignOut}
+        toggleSidebar={toggleSidebar}
+        showSidebarToggle={showSidebar}
+      />
+
       {showSidebar && (
-        <div className="top-container">
-          <Sidebar userRole={userRole} location={location} />
-        </div>
+        <Sidebar
+          userRole={userRole}
+          location={location}
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+        />
       )}
 
       <div className={hideMainContent ? "" : "main-content"}>

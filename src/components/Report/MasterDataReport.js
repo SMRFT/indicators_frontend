@@ -10,6 +10,8 @@ import Alert from "react-bootstrap/Alert";
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 import { getTransposedData, exportToExcel } from "./reportUtils";
 import apiRequest from "../apiRequest";
+import { Pencil, Save, Trash2, Download } from "lucide-react";
+import "./Report.css";
 
 function MasterDataReport() {
   const [selectedWard, setSelectedWard] = useState("First Floor Raw Data");
@@ -169,9 +171,68 @@ const fetchExportData = async () => {
   const handleSelect = (ward) => setSelectedWard(ward);
 
   return (
-    <Container style={{ marginLeft: "230px" }}>
-      <h1 className="text-center mt-4">{selectedWard} Report</h1>
-      <br />
+    <div className="report-page">
+      <h1 className="report-title">{selectedWard} Report</h1>
+
+      {/* Keep the delete modal outside but it will only be triggered by admins */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Date to Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <label>Select a date:</label>
+          <div style={{ position: "relative", zIndex: 9999 }}>
+            <select
+              className="form-control"
+              onChange={(e) => setSelectedDate(e.target.value)}
+            >
+              <option value="">Select Date</option>
+              {exportData.map((item, index) => (
+                <option key={index} value={item.selectedDate}>
+                  {item.selectedDate}
+                </option>
+              ))}
+            </select>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <div className="report-actions">
+        {userRole === "Admin" && (
+          <button
+            className="report-action-btn"
+            onClick={isEditing ? handleSaveClick : handleEditClick}
+            title={isEditing ? "Save" : "Edit"}
+          >
+            {isEditing ? <Save size={16} /> : <Pencil size={16} />}
+          </button>
+        )}
+        {userRole === "Admin" && (
+          <button
+            className="report-action-btn danger"
+            onClick={() => setShowDeleteModal(true)}
+            title="Delete"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
+        <button
+          className="report-action-btn accent"
+          onClick={handleDownloadButtonClick}
+          title="Download"
+        >
+          <Download size={16} />
+        </button>
+      </div>
+
       <Row className="mb-4" style={{ marginLeft: "10px" }}>
         <Col xs={12} md={4}>
           <Dropdown
@@ -279,100 +340,6 @@ const fetchExportData = async () => {
           </div>
         </Col>
       </Row>
-      <Row>
-        <Col
-          xs={12}
-          md={12}
-          className="text-right"
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          {/* Edit Button (Admin Only) */}
-          {userRole === "Admin" && (
-            <i
-              className={`fa ${isEditing ? "fa-save" : "fa-edit"}`}
-              onClick={isEditing ? handleSaveClick : handleEditClick}
-              style={{
-                fontSize: "150%",
-                color: "rgb(149,188,176)",
-                cursor: "pointer",
-                marginRight: "15px",
-              }}
-              title={isEditing ? "Save" : "Edit"}
-            ></i>
-          )}
-
-          {/* Delete Button (Admin Only) */}
-          {userRole === "Admin" && (
-            <>
-              <Modal
-                show={showDeleteModal}
-                onHide={() => setShowDeleteModal(false)}
-              >
-                <Modal.Header closeButton>
-                  <Modal.Title>Select Date to Delete</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <label>Select a date:</label>
-                  <div style={{ position: "relative", zIndex: 9999 }}>
-                    <select
-                      className="form-control"
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                    >
-                      <option value="">Select Date</option>
-                      {exportData.map((item, index) => (
-                        <option key={index} value={item.selectedDate}>
-                          {item.selectedDate}{" "}
-                          {/* Assuming formatDate is applied elsewhere */}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setShowDeleteModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button variant="danger" onClick={handleDelete}>
-                    Delete
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-
-              <i
-                style={{
-                  fontSize: "150%",
-                  color: "rgb(149,188,176)",
-                  cursor: "pointer",
-                  marginRight: "20px",
-                }}
-                title="Delete"
-                className="fa fa-trash"
-                onClick={() => setShowDeleteModal(true)}
-              ></i>
-            </>
-          )}
-
-          {/* Download Button (Visible to Everyone) */}
-          <i
-            style={{
-              fontSize: "150%",
-              color: "rgb(149,188,176)",
-              cursor: "pointer",
-              marginRight: "30px",
-            }}
-            title="Download"
-            className="fa fa-download"
-            onClick={handleDownloadButtonClick}
-          ></i>
-        </Col>
-      </Row>
       {showSuccessAlert && (
         <Alert
           variant="success"
@@ -394,54 +361,16 @@ const fetchExportData = async () => {
       <Row>`` 
         <Col xs={12} className="mt-2">
           {exportData.length > 0 ? (
-            <div
-              className="table-responsive"
-              style={{
-                overflowX: "auto",
-                overflowY: "auto",
-                maxHeight: "400px",
-                maxWidth: "100%",
-                position: "relative",
-                border: "1px solid #ddd",
-              }}
-            >
-              <table
-                className="table table-bordered"
-                style={{
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                  borderCollapse: "collapse",
-                }}
-              >
+            <div className="report-table-wrap">
+              <table className="report-table">
                 <thead>
                   <tr>
-                    <th
-                      style={{
-                        border: "1px solid #ddd",
-                        padding: "8px",
-                        backgroundColor: "rgb(149,188,176)",
-                        color: "white",
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 2,
-                      }}
-                    >
+                    <th>
                       Field
                     </th>
 
                     {exportData.map((item, index) => (
-                      <th
-                        key={index}
-                        style={{
-                          border: "1px solid #ddd",
-                          padding: "8px",
-                          backgroundColor: "rgb(149,188,176)",
-                          color: "white",
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 2,
-                        }}
-                      >
+                      <th key={index}>
                         {formatDate(item.selectedDate)}
                       </th>
                     ))}
@@ -809,7 +738,7 @@ const fetchExportData = async () => {
           )}
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 }
 
