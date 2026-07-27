@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Form, Col, Table } from "react-bootstrap";
 import styled from "styled-components";
+import { message } from "antd";
 import apiRequest from "./apiRequest";
 import {
   FormCard,
@@ -14,6 +15,46 @@ const ValidationMessage = styled.div`
   color: #dc3545;
   font-size: 0.875rem;
   margin-top: 0.25rem;
+`;
+
+const StyledFormCard = styled(FormCard)`
+  table {
+    background-color: var(--color-surface, #ffffff) !important;
+    color: var(--color-text-primary, #0f172a) !important;
+    border-color: var(--color-border, #e2e8f0) !important;
+  }
+
+  th {
+    background-color: var(--color-surface-raised, #f8fafc) !important;
+    color: var(--color-text-primary, #0f172a) !important;
+    border-color: var(--color-border, #e2e8f0) !important;
+  }
+
+  td {
+    background-color: var(--color-surface, #ffffff) !important;
+    color: var(--color-text-primary, #0f172a) !important;
+    border-color: var(--color-border, #e2e8f0) !important;
+  }
+
+  .form-check-label {
+    color: var(--color-text-primary, #0f172a) !important;
+    font-weight: 500;
+  }
+
+  .form-label,
+  label {
+    color: var(--color-text-primary, #0f172a) !important;
+    font-weight: 600;
+  }
+
+  h2 {
+    color: var(--color-text-primary, #0f172a) !important;
+    font-weight: 700;
+  }
+
+  b {
+    color: var(--color-text-primary, #0f172a) !important;
+  }
 `;
 
 const TrainingFeedBack = () => {
@@ -102,73 +143,76 @@ const TrainingFeedBack = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false); // new state
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (isSubmitting) return; // prevent multiple clicks
-  setIsSubmitting(true);    // disable submit immediately
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return; // prevent multiple clicks
 
-  const form = e.currentTarget;
+    const form = e.currentTarget;
 
-  // Check if the date is selected
-  if (!selectedDate) {
-    setError("Please select a date");
-    setIsSubmitting(false);
-    return;
-  }
-
-  if (form.checkValidity() === false) {
-    e.stopPropagation();
-    setIsSubmitting(false);
-  } else {
-    try {
-      const ID = localStorage.getItem("userId");
-      const name = localStorage.getItem("userName");
-
-      const formDataWithUser = {
-        ...formData,
-        ID,
-        name,
-        detailsOfTrainingTopic: JSON.stringify({
-          relevance: formData.detailsOfTrainingTopic.relevance,
-          content: formData.detailsOfTrainingTopic.content,
-          clarity: formData.detailsOfTrainingTopic.clarity,
-        }),
-        trainer: JSON.stringify({
-          communicationskill: formData.trainer.communicationskill,
-          knowledge: formData.trainer.knowledge,
-        }),
-      };
-
-      const response = await apiRequest(`${IndicatorBaseUrl}TrainingFeedBack/`, "POST", formDataWithUser);
-
-      if (!response.success) {
-        if (response.error === "Data already exists for this date.") {
-          setError("Data already exists for this date.");
-        } else {
-          throw new Error(response.error || "Failed to submit data");
-        }
-        setIsSubmitting(false);
-      } else {
-        setFormSubmitted(true);
-        setError("");
-
-        // Auto-refresh after 2 seconds
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Error:", error.message);
-      setError(error.message || "Failed to submit data");
+    // Check if the date is selected
+    if (!selectedDate) {
+      message.warning("Please select a date.");
+      setError("Please select a date");
       setIsSubmitting(false);
+      return;
     }
-  }
 
-  setValidated(true);
-};
+    if (form.checkValidity() === false) {
+      e.stopPropagation();
+      message.warning("Please fill in all required fields.");
+      setIsSubmitting(false);
+    } else {
+      setIsSubmitting(true);
+      try {
+        const ID = localStorage.getItem("userId");
+        const name = localStorage.getItem("userName");
+
+        const formDataWithUser = {
+          ...formData,
+          ID,
+          name,
+          detailsOfTrainingTopic: JSON.stringify({
+            relevance: formData.detailsOfTrainingTopic.relevance,
+            content: formData.detailsOfTrainingTopic.content,
+            clarity: formData.detailsOfTrainingTopic.clarity,
+          }),
+          trainer: JSON.stringify({
+            communicationskill: formData.trainer.communicationskill,
+            knowledge: formData.trainer.knowledge,
+          }),
+        };
+
+        const response = await apiRequest(`${IndicatorBaseUrl}TrainingFeedBack/`, "POST", formDataWithUser);
+
+        if (!response.success) {
+          const errMsg = response.error || "Failed to submit data";
+          message.error(errMsg);
+          setError(errMsg);
+          setIsSubmitting(false);
+        } else {
+          message.success("Training Feedback submitted successfully!");
+          setFormSubmitted(true);
+          setError("");
+
+          // Auto-refresh after 2 seconds
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
+      } catch (error) {
+        console.error("Error:", error.message);
+        const errMsg = error.message || "Failed to submit data";
+        message.error(errMsg);
+        setError(errMsg);
+        setIsSubmitting(false);
+      }
+    }
+
+    setValidated(true);
+  };
 
   return (
-    <FormCard className="NumericalData">
+    <StyledFormCard className="NumericalData">
       <h2 className="text-center">Training Feed Back Form</h2>
       <div style={{ float: "right" }} className="mt-3">
         <div>
@@ -499,7 +543,7 @@ const handleSubmit = async (e) => {
           {error}
         </FormAlert>
       </Form>
-    </FormCard>
+    </StyledFormCard>
   );
 };
 

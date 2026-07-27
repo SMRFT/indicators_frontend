@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Row, Form, Col } from "react-bootstrap";
+import { message } from "antd";
 import apiRequest from "../apiRequest";
 import {
   FormCard,
@@ -78,12 +79,14 @@ const Lab = () => {
     const form = e.currentTarget;
 
     if (!selectedDate) {
+      message.warning("Please select a date.");
       setError("Please select a date");
       return;
     }
 
     if (form.checkValidity() === false) {
       e.stopPropagation();
+      message.warning("Please fill out all required fields.");
     } else {
       if (isSubmitting) return; // ✅ prevent multiple clicks
       setIsSubmitting(true); // ✅ disable button
@@ -96,18 +99,19 @@ const Lab = () => {
         const response = await apiRequest(`${IndicatorBaseUrl}Lab/`, "POST", formDataWithUser);
 
         if (!response.success) {
-          if (response.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(response.error || "Failed to submit data");
-          }
+          const errMsg = response.error || "Failed to submit data";
+          message.error(errMsg);
+          setError(errMsg);
         } else {
+          message.success("Lab data submitted successfully!");
           setFormSubmitted(true);
           setError("");
         }
       } catch (error) {
         console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
+        const errMsg = error.message || "Failed to submit data";
+        message.error(errMsg);
+        setError(errMsg);
       } finally {
         // ✅ re-enable button after 3 seconds
         setTimeout(() => setIsSubmitting(false), 3000);

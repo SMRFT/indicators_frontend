@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { Row, Form, Col, Alert, Card, Tab, Nav, Table, Badge } from "react-bootstrap";
+import { Row, Form, Col, Alert, Card, Table, Badge } from "react-bootstrap";
+import Nav from "react-bootstrap/Nav";
+import NavItem from "react-bootstrap/NavItem";
+import NavLink from "react-bootstrap/NavLink";
+import TabContent from "react-bootstrap/TabContent";
+import TabPane from "react-bootstrap/TabPane";
+import BTabContainer from "react-bootstrap/TabContainer";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrash, faEdit, faUserShield, faFileAlt, faArrowLeft, faSave, faUserCheck, faFileExcel } from "@fortawesome/free-solid-svg-icons";
@@ -13,8 +19,10 @@ const StyledContainer = styled.div`
   margin: 0 auto;
   padding: 30px;
   max-width: 1300px;
-  background: #fdfdfd;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-primary, #0f172a);
+  box-shadow: var(--shadow-card, 0 10px 30px rgba(0, 0, 0, 0.08));
+  border: 1px solid var(--color-border, #e2e8f0);
   border-radius: 12px;
 `;
 
@@ -39,8 +47,8 @@ const FormHeader = styled.div`
 `;
 
 const SectionTitle = styled.h4`
-  color: #109b76;
-  border-bottom: 2px solid #eef2f5;
+  color: var(--color-accent-dark, #109b76);
+  border-bottom: 2px solid var(--color-border, #eef2f5);
   padding-bottom: 8px;
   margin-top: 15px;
   margin-bottom: 20px;
@@ -50,8 +58,19 @@ const SectionTitle = styled.h4`
   gap: 10px;
 `;
 
+const StyledCard = styled(Card)`
+  background-color: var(--color-surface, #ffffff) !important;
+  color: var(--color-text-primary, #0f172a) !important;
+  border: 1px solid var(--color-border, #e2e8f0) !important;
+
+  .card-body {
+    background-color: var(--color-surface, #ffffff) !important;
+    color: var(--color-text-primary, #0f172a) !important;
+  }
+`;
+
 const StyledButton = styled.button`
-  background: #109b76;
+  background: var(--color-accent-dark, #109b76);
   color: white;
   border: none;
   padding: 8px 18px;
@@ -139,7 +158,7 @@ const DangerButton = styled.button`
 `;
 
 const BackButton = styled.button`
-  background: #6c757d;
+  background: var(--color-text-muted, #6c757d);
   color: white;
   border: none;
   padding: 8px 18px;
@@ -167,11 +186,11 @@ const TabContainer = styled.div`
   margin-bottom: 30px;
   
   .nav-tabs {
-    border-bottom: 2px solid #eef2f5;
+    border-bottom: 2px solid var(--color-border, #eef2f5);
   }
   
   .nav-link {
-    color: #495057;
+    color: var(--color-text-secondary, #495057);
     font-weight: 600;
     border: none;
     padding: 12px 20px;
@@ -180,13 +199,13 @@ const TabContainer = styled.div`
     
     &:hover {
       border-color: transparent;
-      color: #109b76;
+      color: var(--color-accent-dark, #109b76);
     }
     
     &.active {
-      color: #109b76;
+      color: var(--color-accent-dark, #109b76);
       background-color: transparent;
-      border-bottom: 3px solid #109b76;
+      border-bottom: 3px solid var(--color-accent-dark, #109b76);
     }
   }
 `;
@@ -194,18 +213,18 @@ const TabContainer = styled.div`
 const ItemBadge = styled.div`
   display: inline-flex;
   align-items: center;
-  background: #eef2f5;
-  color: #334155;
+  background: var(--color-surface-raised, #eef2f5);
+  color: var(--color-text-primary, #334155);
   padding: 6px 12px;
   border-radius: 20px;
   margin: 4px;
   font-size: 13px;
   font-weight: 500;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border, #cbd5e1);
 
   svg {
     margin-left: 8px;
-    color: #94a3b8;
+    color: var(--color-text-muted, #94a3b8);
     cursor: pointer;
     &:hover {
       color: #ef4444;
@@ -215,10 +234,10 @@ const ItemBadge = styled.div`
 
 const TableContainer = styled.div`
   overflow-x: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border, #e2e8f0);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  background: white;
+  background: var(--color-surface, #ffffff);
   margin-bottom: 20px;
 
   table {
@@ -228,13 +247,13 @@ const TableContainer = styled.div`
   }
 
   th {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: var(--color-surface-raised, #f8fafc);
+    color: var(--color-text-secondary, #475569);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border, #e2e8f0);
     padding: 12px 16px;
     text-align: left;
     white-space: nowrap;
@@ -242,13 +261,13 @@ const TableContainer = styled.div`
 
   td {
     padding: 12px 16px;
-    border-bottom: 1px solid #edf2f7;
-    color: #2d3748;
+    border-bottom: 1px solid var(--color-border, #edf2f7);
+    color: var(--color-text-primary, #2d3748);
     white-space: nowrap;
   }
 
   tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--color-hover-overlay, #f8fafc);
   }
 `;
 
@@ -261,9 +280,9 @@ const PaginationContainer = styled.div`
 `;
 
 const PageButton = styled.button`
-  background: ${props => props.active ? "#109b76" : "white"};
-  color: ${props => props.active ? "white" : "#4a5568"};
-  border: 1px solid #cbd5e0;
+  background: ${props => props.active ? "var(--color-accent-dark, #109b76)" : "var(--color-surface, #ffffff)"};
+  color: ${props => props.active ? "#ffffff" : "var(--color-text-primary, #4a5568)"};
+  border: 1px solid var(--color-border, #cbd5e0);
   padding: 6px 12px;
   margin: 0 4px;
   border-radius: 4px;
@@ -275,7 +294,7 @@ const PageButton = styled.button`
   white-space: nowrap;
 
   &:hover {
-    background: ${props => props.active ? "#109b76" : "#edf2f7"};
+    background: ${props => props.active ? "var(--color-accent-dark, #109b76)" : "var(--color-hover-overlay, #edf2f7)"};
   }
 
   &:disabled {
@@ -298,7 +317,7 @@ const CategoryHeader = styled.tr`
 
 const ItemRow = styled.tr`
   &:hover {
-    background: #f0faf6 !important;
+    background: var(--color-hover-overlay, #f0faf6) !important;
   }
 `;
 
@@ -306,30 +325,30 @@ const AllocatedBadge = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-surface-raised, #d1fae5);
+  color: var(--color-accent-dark, #065f46);
   padding: 3px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid #6ee7b7;
+  border: 1px solid var(--color-border, #6ee7b7);
 `;
 
 const UnallocatedBadge = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warn-bg, #fef3c7);
+  color: var(--color-text-primary, #92400e);
   padding: 3px 10px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid #fcd34d;
+  border: 1px solid var(--color-warn-border, #fcd34d);
 `;
 
 const TableFormSelect = styled(SelectField)`
-  border: 1px solid #cbd5e1 !important;
+  border: 1px solid var(--color-border, #cbd5e1) !important;
   border-radius: 6px !important;
   padding: 6px 12px !important;
   font-size: 13.5px !important;
@@ -339,7 +358,7 @@ const TableFormSelect = styled(SelectField)`
   height: auto !important;
 
   &:focus {
-    border-color: #109b76 !important;
+    border-color: var(--color-accent-dark, #109b76) !important;
     box-shadow: 0 0 0 3px rgba(16, 155, 118, 0.15) !important;
   }
 `;
@@ -681,16 +700,16 @@ const IncidentClassificationManager = () => {
       {successMsg && <FormAlert variant="success" className="mb-3">{successMsg}</FormAlert>}
 
       <TabContainer>
-        <Tab.Container defaultActiveKey="classifications">
+        <BTabContainer defaultActiveKey="classifications">
           <Nav variant="tabs" className="mb-4">
-            <Nav.Item>
-              <Nav.Link eventKey="classifications">
+            <NavItem>
+              <NavLink eventKey="classifications">
                 <FontAwesomeIcon icon={faFileAlt} className="me-2" />
                 Classification of Incidents
-              </Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="allocations">
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink eventKey="allocations">
                 <FontAwesomeIcon icon={faUserShield} className="me-2" />
                 In-charge Allocation
                 {totalItems > 0 && (
@@ -698,16 +717,16 @@ const IncidentClassificationManager = () => {
                     {allocatedItems}/{totalItems}
                   </Badge>
                 )}
-              </Nav.Link>
-            </Nav.Item>
+              </NavLink>
+            </NavItem>
           </Nav>
 
-          <Tab.Content>
+          <TabContent>
             {/* Tab 1: Create & Edit Classifications */}
-            <Tab.Pane eventKey="classifications">
+            <TabPane eventKey="classifications">
               <Row>
                 <Col lg={5}>
-                  <Card className="mb-4 shadow-sm border-0 bg-light p-3">
+                  <StyledCard className="mb-4 shadow-sm border-0 p-3">
                     <Card.Body>
                       <SectionTitle>
                         {editingId ? <FontAwesomeIcon icon={faEdit} /> : <FontAwesomeIcon icon={faPlus} />}
@@ -739,9 +758,9 @@ const IncidentClassificationManager = () => {
                           </StyledButton>
                         </div>
 
-                        <div className="mb-4 p-2 bg-white border rounded min-vh-10" style={{ minHeight: "120px" }}>
+                        <div className="mb-4 p-2 border rounded min-vh-10" style={{ minHeight: "120px", background: "var(--color-surface-inset)", borderColor: "var(--color-border)" }}>
                           {items.length === 0 ? (
-                            <span className="text-muted d-block text-center py-4">No items added yet. Add items above.</span>
+                            <span className="d-block text-center py-4" style={{ color: "var(--color-text-muted)" }}>No items added yet. Add items above.</span>
                           ) : (
                             items.map((item, idx) => (
                               <ItemBadge key={idx}>
@@ -764,20 +783,20 @@ const IncidentClassificationManager = () => {
                         </div>
                       </Form>
                     </Card.Body>
-                  </Card>
+                  </StyledCard>
                 </Col>
 
                 <Col lg={7}>
-                  <Card className="shadow-sm border-0">
+                  <StyledCard className="shadow-sm border-0">
                     <Card.Body>
                       <SectionTitle>
                         <FontAwesomeIcon icon={faFileAlt} /> Existing Classifications
                       </SectionTitle>
 
-                      <div className="table-responsive">
-                        <Table hover striped bordered className="align-middle">
+                      <TableContainer>
+                        <table>
                           <thead>
-                            <tr style={{ backgroundColor: "#f8fafc" }}>
+                            <tr>
                               <th>Title</th>
                               <th>Items Count</th>
                               <th>Allocated</th>
@@ -815,23 +834,23 @@ const IncidentClassificationManager = () => {
                               })
                             ) : (
                               <tr>
-                                <td colSpan="4" className="text-center text-muted py-4">
+                                <td colSpan="4" className="text-center py-4" style={{ color: "var(--color-text-muted)" }}>
                                   No classifications found.
                                 </td>
                               </tr>
                             )}
                           </tbody>
-                        </Table>
-                      </div>
+                        </table>
+                      </TableContainer>
                     </Card.Body>
-                  </Card>
+                  </StyledCard>
                 </Col>
               </Row>
-            </Tab.Pane>
+            </TabPane>
 
             {/* Tab 2: Per-Item In-charge Allocation */}
-            <Tab.Pane eventKey="allocations">
-              <Card className="shadow-sm border-0">
+            <TabPane eventKey="allocations">
+              <StyledCard className="shadow-sm border-0">
                 <Card.Body>
                   <div className="d-flex justify-content-between align-items-center mb-2 mt-3">
                     <SectionTitle style={{ marginTop: 0, marginBottom: 0, borderBottom: "none", paddingBottom: 0 }}>
@@ -940,10 +959,10 @@ const IncidentClassificationManager = () => {
                     </>
                   )}
                 </Card.Body>
-              </Card>
-            </Tab.Pane>
-          </Tab.Content>
-        </Tab.Container>
+              </StyledCard>
+            </TabPane>
+          </TabContent>
+        </BTabContainer>
       </TabContainer>
     </StyledContainer>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form } from 'react-bootstrap';
 import Container from 'react-bootstrap/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { message } from 'antd';
 import apiRequest from '../apiRequest';
 import { FormCard, TextField, DateField, SubmitButton, FormAlert } from '../Common/fields';
 
@@ -94,6 +95,7 @@ function FrontOffice() {
 
     const form = e.currentTarget;
     if (!selectedDate) {
+      message.warning('Please select a date.');
       setError('Please select a date');
       setIsSubmitting(false);
       return;
@@ -101,6 +103,7 @@ function FrontOffice() {
 
     if (form.checkValidity() === false) {
       e.stopPropagation();
+      message.warning('Please fill out all required fields.');
       setIsSubmitting(false);
     } else {
       try {
@@ -111,17 +114,18 @@ function FrontOffice() {
         const response = await apiRequest(`${IndicatorBaseUrl}FrontOffice/`, 'POST', formDataWithUser);
 
         if (!response.success) {
-          if (response.status === 400 && response.data?.error === 'Data already exists for this date.') {
-            setError('Data already exists for this date.');
-          } else {
-            throw new Error(response.error || 'Failed to submit data');
-          }
+          const errMsg = response.error || response.data?.error || 'Failed to submit data';
+          message.error(errMsg);
+          setError(errMsg);
         } else {
+          message.success('Front Office data submitted successfully!');
           setFormSubmitted(true);
           setError('');
         }
       } catch (err) {
-        setError(err.message || 'Failed to submit data');
+        const errMsg = err.message || 'Failed to submit data';
+        message.error(errMsg);
+        setError(errMsg);
       }
     }
 

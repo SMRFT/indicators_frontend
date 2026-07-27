@@ -64,14 +64,91 @@ const BackButton = styled.button`
   }
 `;
 
+const StyledAccordion = styled(Accordion)`
+  .accordion-item {
+    background-color: var(--color-surface, #ffffff);
+    color: var(--color-text-primary, #0f172a);
+    border: 1px solid var(--color-border, #e2e8f0);
+    margin-bottom: 8px;
+    border-radius: 8px !important;
+    overflow: hidden;
+  }
+
+  .accordion-button {
+    background-color: var(--color-surface-raised, #f8fafc);
+    color: var(--color-text-primary, #0f172a);
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: none !important;
+
+    &:not(.collapsed) {
+      background-color: var(--color-surface-raised, #f1f5f9);
+      color: var(--color-accent, #109b76);
+    }
+
+    &::after {
+      filter: var(--color-icon-filter, none);
+    }
+  }
+
+  .accordion-body {
+    background-color: var(--color-surface, #ffffff);
+    color: var(--color-text-primary, #0f172a);
+    padding: 16px;
+  }
+`;
+
 const CheckboxGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-  padding: 10px;
-  background: #f8fafc;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-surface-raised, #f8fafc);
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+`;
+
+const CheckboxItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  background: ${props => props.checked ? "var(--color-surface-selected, rgba(16, 155, 118, 0.12))" : "var(--color-surface, #ffffff)"};
+  border: 1px solid ${props => props.checked ? "var(--color-accent, #109b76)" : "var(--color-border, #e2e8f0)"};
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-accent, #109b76);
+    background: var(--color-hover-overlay, rgba(16, 155, 118, 0.06));
+  }
+
+  .form-check {
+    margin-bottom: 0;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-check-input {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .form-check-label {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary, #0f172a);
+    width: 100%;
+    margin-bottom: 0;
+  }
 `;
 
 
@@ -487,9 +564,11 @@ const IncidentReport = () => {
         <SectionTitle>
           <FontAwesomeIcon icon={faFileAlt} /> Classification of Incidents
         </SectionTitle>
-        <p className="text-muted">Please tick the appropriate boxes below:</p>
+        <p style={{ color: "var(--color-text-secondary, #64748b)", fontSize: "14px" }}>
+          Please tick the appropriate boxes below (click anywhere on an item or text to select):
+        </p>
 
-        <Accordion defaultActiveKey="0" className="mb-4">
+        <StyledAccordion defaultActiveKey="0" className="mb-4">
           {classificationOptions.map((cls, index) => {
             const key = cls.title;
             return (
@@ -499,18 +578,31 @@ const IncidentReport = () => {
                 </Accordion.Header>
                 <Accordion.Body>
                   <CheckboxGrid>
-                    {(cls.items || []).map((item) => (
-                      <Form.Check
-                        key={item}
-                        type="checkbox"
-                        label={item}
-                        checked={classifications[key] ? classifications[key].includes(item) : false}
-                        onChange={(e) => handleCheckboxChange(key, item, e.target.checked)}
-                      />
-                    ))}
+                    {(cls.items || []).map((item, itemIdx) => {
+                      const isChecked = classifications[key] ? classifications[key].includes(item) : false;
+                      const checkId = `chk-${cls.id}-${itemIdx}`;
+                      return (
+                        <CheckboxItem
+                          key={item}
+                          checked={isChecked}
+                          onClick={() => handleCheckboxChange(key, item, !isChecked)}
+                        >
+                          <Form.Check
+                            type="checkbox"
+                            id={checkId}
+                            label={item}
+                            checked={isChecked}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleCheckboxChange(key, item, e.target.checked);
+                            }}
+                          />
+                        </CheckboxItem>
+                      );
+                    })}
                   </CheckboxGrid>
                   <Form.Group className="mt-3" controlId={`others-${cls.id}`}>
-                    <Form.Label>Others (Specify):</Form.Label>
+                    <Form.Label style={{ fontWeight: "600" }}>Others (Specify):</Form.Label>
                     <TextField
                       value={othersText[key] || ""}
                       onChange={(e) => handleOthersTextChange(key, e.target.value)}
@@ -521,7 +613,7 @@ const IncidentReport = () => {
               </Accordion.Item>
             );
           })}
-        </Accordion>
+        </StyledAccordion>
 
         {/* Description Section */}
         <SectionTitle>
@@ -530,7 +622,8 @@ const IncidentReport = () => {
         <Form.Group className="mb-3" controlId="descriptionOfIncident">
           <Form.Label>Provide detailed description of what occurred:</Form.Label>
           <TextAreaField
-            rows={4}
+            rows={6}
+            style={{ width: "100%", minHeight: "150px" }}
             name="descriptionOfIncident"
             value={formData.descriptionOfIncident}
             onChange={handleInputChange}
@@ -610,7 +703,8 @@ const IncidentReport = () => {
         <Form.Group className="mb-3" controlId="immediateCorrection">
           <Form.Label>Action taken immediately to correct or control the incident:</Form.Label>
           <TextAreaField
-            rows={3}
+            rows={5}
+            style={{ width: "100%", minHeight: "130px" }}
             name="immediateCorrection"
             value={formData.immediateCorrection}
             onChange={handleInputChange}
@@ -667,7 +761,7 @@ const IncidentReport = () => {
             Back
           </BackButton>
           <SubmitButton type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Submit Incident Form"}
+            {isSubmitting ? "Saving..." : "Submit Form"}
           </SubmitButton>
         </div>
 

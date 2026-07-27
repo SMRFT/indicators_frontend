@@ -10,7 +10,7 @@ const FormCard = styled.div`
   padding: var(--space-xl);
   color: var(--color-text-primary);
   font-family: var(--font-family-base);
-  max-width: 1000px;
+  max-width: 1300px;
   width: 100%;
   margin: var(--space-lg) auto;
 
