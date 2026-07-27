@@ -95,9 +95,12 @@ const Lab = () => {
 
         const response = await apiRequest(`${IndicatorBaseUrl}Lab/`, "POST", formDataWithUser);
 
-        // ✅ apiRequest already returns parsed JSON
-        if (response?.error === "Data already exists for this date.") {
-          setError("Data already exists for this date.");
+        if (!response.success) {
+          if (response.error === "Data already exists for this date.") {
+            setError("Data already exists for this date.");
+          } else {
+            throw new Error(response.error || "Failed to submit data");
+          }
         } else {
           setFormSubmitted(true);
           setError("");

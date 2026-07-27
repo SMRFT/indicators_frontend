@@ -86,12 +86,16 @@ const HR = () => {
           formDataWithUser
         );
 
-         if (response?.error === 'Data already exists for this date.') {
-    setError('Data already exists for this date.');
-  } else {
-    setFormSubmitted(true);
-    setError('');
-  }
+        if (!response.success) {
+          if (response.error === 'Data already exists for this date.') {
+            setError('Data already exists for this date.');
+          } else {
+            throw new Error(response.error || 'Failed to submit data');
+          }
+        } else {
+          setFormSubmitted(true);
+          setError('');
+        }
 
 } catch (error) {
   console.error('Error:', error.message);

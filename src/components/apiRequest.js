@@ -8,6 +8,22 @@ import axios from "axios";
  * @param {Object} config - Additional axios configuration (like params)
  * @returns {Promise<Object>} - Returns { success: boolean, data?: any, error?: string, status?: number }
  */
+const extractBackendError = (data, status) => {
+  if (!data) return `Error (${status})`;
+  if (typeof data === "string") return data;
+  if (data.error) return typeof data.error === "string" ? data.error : JSON.stringify(data.error);
+  if (data.message) return typeof data.message === "string" ? data.message : JSON.stringify(data.message);
+  if (typeof data === "object") {
+    const entries = Object.entries(data);
+    if (entries.length > 0) {
+      const [key, val] = entries[0];
+      const valStr = Array.isArray(val) ? val.join(", ") : (typeof val === "object" ? JSON.stringify(val) : String(val));
+      return `${key}: ${valStr}`;
+    }
+  }
+  return `Error (${status})`;
+};
+
 const apiRequest = async (url, method = "GET", data = null, headers = {}) => {
   try {
     const token = localStorage.getItem("access_token");
@@ -40,18 +56,17 @@ const apiRequest = async (url, method = "GET", data = null, headers = {}) => {
     }
     // Client errors (4xx range)
     else if (response.status >= 400 && response.status < 500) {
-      // Extract error message from backend response
-      const backendError = response.data?.error || response.data?.message;
+      const backendError = extractBackendError(response.data, response.status);
       return {
         success: false,
-        error: backendError || `Client error (${response.status})`,
+        error: backendError,
         status: response.status,
         data: response.data,
       };
     }
     // Server errors (5xx range)
     else if (response.status >= 500) {
-      const backendError = response.data?.error || response.data?.message;
+      const backendError = extractBackendError(response.data, response.status);
       return {
         success: false,
         error: backendError || "Server error occurred.",
@@ -72,7 +87,7 @@ const apiRequest = async (url, method = "GET", data = null, headers = {}) => {
     console.error("Network or unexpected error:", error);
     return {
       success: false,
-      error: "Network error or unexpected issue occurred.",
+      error: error?.message || "Network error or unexpected issue occurred.",
       networkError: true,
     };
   }

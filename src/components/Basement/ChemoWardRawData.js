@@ -130,23 +130,19 @@ const ChemoWardRawData = ({ showHeading = true }) => {
                     }),
                 };
     
-                    const response = await apiRequest(
+                const response = await apiRequest(
                     `${IndicatorBaseUrl}ChemowardRawData/`,
                     'POST',
                     formDataWithUser
-                    );
+                );
 
-    
-                if (response.status === 400) {
-                    const errorText = await response.json();
-                    console.error('errorText:', errorText);
-                    if (errorText.error === 'Data already exists for this date.') {
+                if (!response.success) {
+                    if (response.status === 400 && response.data?.error === 'Data already exists for this date.') {
                         setError('Data already exists for this date.');
                     } else {
-                        throw new Error(errorText.error || 'Failed to submit data');
+                        throw new Error(response.error || 'Failed to submit data');
                     }
                 } else {
-                    // Set success message after successful submission
                     setFormSubmitted(true);
                     setError('');
                 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Form } from "react-bootstrap";
+import { message } from "antd";
 import apiRequest from "../apiRequest";
 import {
   FormCard,
@@ -30,7 +31,8 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
     };
     fields.forEach((field) => {
       if (field.isDynamicTable) {
-        state[field.id] = "";
+        // Initialize count fields to 0 (not empty string) so number inputs are always valid
+        state[field.id] = 0;
         if (field.id === "numberOfUnitsTransfused") {
           state.numberOfUnitsTransfusedRemarks = {};
         } else if (field.id === "totalIVLineChanges") {
@@ -70,6 +72,11 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
         ...prev,
         selectedDate: adjustedDate.toISOString().split("T")[0],
       }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        selectedDate: "",
+      }));
     }
   }, [selectedDate]);
 
@@ -88,11 +95,13 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
   const handleChange = (e) => {
     const { id, value } = e.target;
     if (value.length > MAX_CHAR_LIMIT) {
-      setError(`Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`);
+      const msg = `Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`;
+      setError(msg);
+      message.error(msg);
       return;
     }
 
-    if (id.includes("transfused") || id.includes("remarks")) {
+    if (id && id.startsWith("transfused-")) {
       setFormData((prev) => ({
         ...prev,
         numberOfUnitsTransfusedRemarks: {
@@ -100,7 +109,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
           [id]: value,
         },
       }));
-    } else {
+    } else if (id) {
       setFormData((prev) => ({ ...prev, [id]: value }));
     }
   };
@@ -141,11 +150,13 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
   const handleivlineChange = (e) => {
     const { id, value } = e.target;
     if (value.length > MAX_CHAR_LIMIT) {
-      setError(`Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`);
+      const msg = `Ensure this value has at most ${MAX_CHAR_LIMIT} characters.`;
+      setError(msg);
+      message.error(msg);
       return;
     }
 
-    if (id.includes("ExtravasationVIPScore")) {
+    if (id && id.startsWith("ExtravasationVIPScore")) {
       setFormData((prev) => ({
         ...prev,
         ivLineChangeRemarks: {
@@ -153,7 +164,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
           [id]: value,
         },
       }));
-    } else {
+    } else if (id) {
       // Handles the main number input (totalIVLineChanges)
       setFormData((prev) => ({ ...prev, [id]: parseInt(value, 10) || 0 }));
     }
@@ -164,44 +175,55 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const form = e.currentTarget;
-
     if (!selectedDate) {
-      setError("Please select a date");
+      const msg = "Please select a date";
+      setError(msg);
+      message.error(msg);
       setIsSubmitting(false);
       return;
     }
 
-    if (form.checkValidity() === false) {
-      e.stopPropagation();
-      setIsSubmitting(false);
-    } else {
-      try {
-        const id = localStorage.getItem("userId");
-        const name = localStorage.getItem("userName");
-        const formDataWithUser = { ...formData, id, name };
+    try {
+      const id = localStorage.getItem("userId");
+      const name = localStorage.getItem("userName");
 
-        const response = await apiRequest(`${IndicatorBaseUrl}${endpoint}`, "POST", formDataWithUser);
+      // Stringify nested object fields — backend stores them as CharField JSON strings
+      const formDataWithUser = {
+        ...formData,
+        id,
+        name,
+        numberOfUnitsTransfusedRemarks: JSON.stringify(formData.numberOfUnitsTransfusedRemarks || {}),
+        ivLineChangeRemarks: JSON.stringify(formData.ivLineChangeRemarks || {}),
+        restrainedPatientsDetails: JSON.stringify(formData.restrainedPatientsDetails || {}),
+      };
 
-        if (!response.success) {
-          if (response.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(response.error || "Failed to submit data");
-          }
-          setIsSubmitting(false);
-        } else {
-          setFormSubmitted(true);
-          setError("");
-          setTimeout(() => setIsSubmitting(false), 3000);
-        }
-      } catch (err) {
-        console.error("Error:", err.message);
-        setError(err.message || "Failed to submit data");
+      const response = await apiRequest(`${IndicatorBaseUrl}${endpoint}`, "POST", formDataWithUser);
+
+      if (!response || !response.success) {
+        const rawErr = response?.error;
+        const errMsg = typeof rawErr === "string" ? rawErr : (rawErr ? JSON.stringify(rawErr) : "Failed to submit data");
+        setError(errMsg);
+        message.error(errMsg);
+        setIsSubmitting(false);
+      } else {
+        message.success("Submitted successfully!");
+        setFormSubmitted(true);
+        setError("");
+        setSelectedDate(null);
+        setFormData({
+          ...getInitialState(),
+          id,
+          name,
+        });
         setIsSubmitting(false);
       }
+    } catch (err) {
+      console.error("Error:", err?.message || err);
+      const errMsg = err?.message || "Failed to submit data";
+      setError(errMsg);
+      message.error(errMsg);
+      setIsSubmitting(false);
     }
-    setValidated(true);
   };
 
   return (
@@ -222,7 +244,6 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
           <DateField
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
-            required
           />
         </Form.Group>
 
@@ -239,10 +260,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
                       <NumberField
+                        id={field.id}
                         min="0"
                         value={formData[field.id]}
                         onChange={handleRestraintNumberChange}
-                        required
                       />
                     </Form.Group>
                   </Col>
@@ -255,9 +276,9 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`restrainedPatientType-${key}`}>
                         <Form.Label>Type of Restraint</Form.Label>
                         <SelectField
+                          id={`restrainedPatientType-${key}`}
                           value={detail.type || ""}
                           onChange={(e) => handleRestraintDetailChange(key, "type", e.target.value)}
-                          required
                         >
                           <option value="">Select Type</option>
                           <option value="chemical">Chemical</option>
@@ -269,10 +290,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`restrainedPatientRemark-${key}`}>
                         <Form.Label>Remark</Form.Label>
                         <TextAreaField
+                          id={`restrainedPatientRemark-${key}`}
                           rows={1}
                           value={detail.remark || ""}
                           onChange={(e) => handleRestraintDetailChange(key, "remark", e.target.value)}
-                          required
                           maxLength={MAX_CHAR_LIMIT}
                         />
                       </Form.Group>
@@ -292,10 +313,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
                       <TextField
+                        id={field.id}
                         type="text"
                         value={formData[field.id]}
                         onChange={handleChange}
-                        required
                       />
                     </Form.Group>
                   </Col>
@@ -307,7 +328,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`transfused-${index}`}>
                         <Form.Label>{`Units Transfused ${index + 1}`}</Form.Label>
                         <TextAreaField
-                          required
+                          id={`transfused-${index}`}
                           rows={1}
                           value={formData.numberOfUnitsTransfusedRemarks[`transfused-${index}`] || ""}
                           onChange={handleChange}
@@ -322,7 +343,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`transfused-remarks-${index}`}>
                         <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
                         <TextAreaField
-                          required
+                          id={`transfused-remarks-${index}`}
                           rows={1}
                           value={formData.numberOfUnitsTransfusedRemarks[`transfused-remarks-${index}`] || ""}
                           onChange={handleChange}
@@ -348,10 +369,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                     <Form.Group controlId={field.id}>
                       <Form.Label>{field.label}</Form.Label>
                       <NumberField
+                        id={field.id}
                         min="0"
                         value={formData[field.id]}
                         onChange={handleivlineChange}
-                        required
                       />
                     </Form.Group>
                   </Col>
@@ -363,7 +384,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`ExtravasationVIPScore-${index}`}>
                         <Form.Label>{`Extravasation VIP Score ${index + 1}`}</Form.Label>
                         <SelectField
-                          required
+                          id={`ExtravasationVIPScore-${index}`}
                           value={formData.ivLineChangeRemarks[`ExtravasationVIPScore-${index}`] || ""}
                           onChange={handleivlineChange}
                         >
@@ -380,8 +401,8 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                       <Form.Group controlId={`ExtravasationVIPScoreRemarks-${index}`}>
                         <Form.Label>{`Remarks ${index + 1}`}</Form.Label>
                         <TextAreaField
+                          id={`ExtravasationVIPScoreRemarks-${index}`}
                           rows={1}
-                          required
                           maxLength={MAX_CHAR_LIMIT}
                           value={formData.ivLineChangeRemarks[`ExtravasationVIPScoreRemarks-${index}`] || ""}
                           onChange={handleivlineChange}
@@ -405,10 +426,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                   <Form.Group controlId={field.id}>
                     <Form.Label>{field.label}</Form.Label>
                     <TextField
+                      id={field.id}
                       type="text"
                       value={formData[field.id]}
                       onChange={handleChange}
-                      required
                     />
                   </Form.Group>
                 </Col>
@@ -416,7 +437,7 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                   <Form.Group controlId={field.remarksId}>
                     <Form.Label>Remarks</Form.Label>
                     <TextAreaField
-                      required
+                      id={field.remarksId}
                       rows={1}
                       value={formData[field.remarksId]}
                       onChange={handleChange}
@@ -437,10 +458,10 @@ const GenericWardForm = ({ title, endpoint, fields }) => {
                 <Form.Group controlId={field.id}>
                   <Form.Label>{field.label}</Form.Label>
                   <TextField
+                    id={field.id}
                     type="text"
                     value={formData[field.id]}
                     onChange={handleChange}
-                    required
                   />
                 </Form.Group>
               </Col>
