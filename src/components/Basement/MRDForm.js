@@ -86,8 +86,12 @@ function MRDForm() {
         };
         const response = await apiRequest(`${IndicatorBaseUrl}MRD/`, "POST", formDataWithUser);
 
-        if (response?.error === "Data already exists for this date.") {
-          setError("Data already exists for this date.");
+        if (!response.success) {
+          if (response.error === "Data already exists for this date.") {
+            setError("Data already exists for this date.");
+          } else {
+            throw new Error(response.error || "Failed to submit data");
+          }
         } else {
           setFormSubmitted(true);
           setError("");

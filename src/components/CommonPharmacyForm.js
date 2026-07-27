@@ -60,7 +60,7 @@ const CommonPharmacyForm = ({ title, apiUrl, fields }) => {
       e.stopPropagation();
     } else {
       try {
-        const response = await apiRequest(apiUrl, "POST", formData);
+        const response = await apiRequest(`${IndicatorBaseUrl}${apiUrl}`, "POST", formData);
 
         if (response.success) {
           console.log("Data submitted successfully");
