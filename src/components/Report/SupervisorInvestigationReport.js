@@ -9,6 +9,7 @@ import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faPrint, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import apiRequest from "../apiRequest";
+import "./ReportArchive.css";
 
 const BackButton = styled.button`
   background: #6c757d;
@@ -62,10 +63,10 @@ const ActionButton = styled.button`
 
 const TableContainer = styled.div`
   overflow-x: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  background: white;
+  background: var(--color-surface);
   margin-bottom: 20px;
 
   table {
@@ -75,13 +76,13 @@ const TableContainer = styled.div`
   }
 
   th {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: var(--color-accent-dark);
+    color: #fff;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--color-border);
     padding: 12px 16px;
     text-align: left;
     white-space: nowrap;
@@ -89,13 +90,13 @@ const TableContainer = styled.div`
 
   td {
     padding: 12px 16px;
-    border-bottom: 1px solid #edf2f7;
-    color: #2d3748;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
     white-space: nowrap;
   }
 
   tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--color-hover-overlay);
   }
 
   /* Sticky columns styling for first five fields */
@@ -103,7 +104,7 @@ const TableContainer = styled.div`
     position: sticky;
     left: 0;
     z-index: 2;
-    background-color: white;
+    background-color: var(--color-surface);
     box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     width: 80px;
     min-width: 80px;
@@ -113,7 +114,7 @@ const TableContainer = styled.div`
     position: sticky;
     left: 80px;
     z-index: 2;
-    background-color: white;
+    background-color: var(--color-surface);
     box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     width: 120px;
     min-width: 120px;
@@ -123,7 +124,7 @@ const TableContainer = styled.div`
     position: sticky;
     left: 200px;
     z-index: 2;
-    background-color: white;
+    background-color: var(--color-surface);
     box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     width: 110px;
     min-width: 110px;
@@ -133,7 +134,7 @@ const TableContainer = styled.div`
     position: sticky;
     left: 310px;
     z-index: 2;
-    background-color: white;
+    background-color: var(--color-surface);
     box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.1);
     width: 100px;
     min-width: 100px;
@@ -143,17 +144,17 @@ const TableContainer = styled.div`
     position: sticky;
     left: 410px;
     z-index: 2;
-    background-color: white;
+    background-color: var(--color-surface);
     box-shadow: 4px 0 5px -2px rgba(0, 0, 0, 0.15);
     width: 150px;
     min-width: 150px;
     max-width: 150px;
-    border-right: 2px solid #cbd5e0;
+    border-right: 2px solid var(--color-border-strong);
   }
 
   th:nth-child(1), th:nth-child(2), th:nth-child(3), th:nth-child(4), th:nth-child(5) {
     z-index: 3;
-    background-color: #f8fafc !important;
+    background-color: var(--color-accent-dark) !important;
   }
 
   tr:hover td:nth-child(1),
@@ -161,7 +162,7 @@ const TableContainer = styled.div`
   tr:hover td:nth-child(3),
   tr:hover td:nth-child(4),
   tr:hover td:nth-child(5) {
-    background-color: #f8fafc;
+    background-color: var(--color-hover-overlay);
   }
 `;
 
@@ -174,9 +175,9 @@ const PaginationContainer = styled.div`
 `;
 
 const PageButton = styled.button`
-  background: ${props => props.active ? "#4e4376" : "white"};
-  color: ${props => props.active ? "white" : "#4a5568"};
-  border: 1px solid #cbd5e0;
+  background: ${props => props.active ? "#4e4376" : "var(--color-surface)"};
+  color: ${props => props.active ? "white" : "var(--color-text-primary)"};
+  border: 1px solid var(--color-border-strong);
   padding: 6px 12px;
   margin: 0 4px;
   border-radius: 4px;
@@ -185,7 +186,7 @@ const PageButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => props.active ? "#4e4376" : "#edf2f7"};
+    background: ${props => props.active ? "#4e4376" : "var(--color-hover-overlay)"};
   }
 
   &:disabled {
@@ -493,7 +494,7 @@ const SupervisorInvestigationReport = () => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   return (
-    <div className="p-4">
+    <div className="p-4 archive-page">
       <div className="d-flex align-items-center mb-4">
         <BackButton onClick={() => navigate("/IncidentDashboard")}>
           <FontAwesomeIcon icon={faArrowLeft} /> Back
@@ -559,7 +560,7 @@ const SupervisorInvestigationReport = () => {
           <Spinner animation="border" role="status" style={{ width: "3rem", height: "3rem", color: "#4e4376" }}>
             <span className="visually-hidden">Loading...</span>
           </Spinner>
-          <div style={{ color: "#718096", fontSize: "16px", fontWeight: "500" }}>Fetching records...</div>
+          <div style={{ color: "var(--color-text-muted)", fontSize: "16px", fontWeight: "500" }}>Fetching records...</div>
         </SpinnerContainer>
       ) : filteredData.length > 0 ? (
         <>
@@ -667,7 +668,7 @@ const SupervisorInvestigationReport = () => {
 
           {filteredData.length > 0 && (
             <PaginationContainer>
-              <div style={{ color: "#718096", fontSize: "14px" }}>
+              <div style={{ color: "var(--color-text-muted)", fontSize: "14px" }}>
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} records
               </div>
               <div style={{ display: "flex", gap: "2px" }}>
@@ -695,7 +696,7 @@ const SupervisorInvestigationReport = () => {
                       </PageButton>
                     );
                   } else if (page === currentPage - 3 || page === currentPage + 3) {
-                    return <span key={page} style={{ padding: "6px 8px", color: "#a0aec0" }}>...</span>;
+                    return <span key={page} style={{ padding: "6px 8px", color: "var(--color-text-muted)" }}>...</span>;
                   }
                   return null;
                 })}
@@ -723,10 +724,10 @@ const SupervisorInvestigationReport = () => {
 
       {/* Detailed Investigation View Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
-        <Modal.Header closeButton style={{ backgroundColor: "#1e293b", color: "#fff" }}>
+        <Modal.Header closeButton style={{ backgroundColor: "var(--color-accent-dark)", color: "#fff" }}>
           <Modal.Title>Investigation & RCA Details - ID: {selectedInv?.id}</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ backgroundColor: "#f8fafc" }}>
+        <Modal.Body style={{ backgroundColor: "var(--color-bg-canvas)" }}>
           {selectedInv && (
             (() => {
               const matchedInc = incidents.find(inc => 
@@ -778,7 +779,7 @@ const SupervisorInvestigationReport = () => {
                       )}
 
                       <h5 className="border-bottom pb-2 mb-3 text-primary mt-4">Classifications</h5>
-                      <div className="bg-white p-3 border rounded mb-3">
+                      <div className="detail-box mb-3">
                         {matchedInc.classifications ? (
                           (() => {
                             let parsed = matchedInc.classifications;
@@ -799,10 +800,10 @@ const SupervisorInvestigationReport = () => {
                       </div>
 
                       <h5 className="border-bottom pb-2 mb-3 text-primary mt-4">Description of Incident</h5>
-                      <p className="bg-white p-3 border rounded text-muted">{matchedInc.descriptionOfIncident || "No description provided."}</p>
+                      <p className="detail-box">{matchedInc.descriptionOfIncident || "No description provided."}</p>
 
                       <h5 className="border-bottom pb-2 mb-3 text-primary mt-4">Immediate Correction Details</h5>
-                      <p className="bg-white p-3 border rounded text-muted">{matchedInc.immediateCorrection || "No immediate correction documented."}</p>
+                      <p className="detail-box">{matchedInc.immediateCorrection || "No immediate correction documented."}</p>
                       <Row className="mb-3">
                         <Col md={4}><strong>Actioned By:</strong><br />{matchedInc.correctionName || "-"}</Col>
                         <Col md={4}><strong>Designation (ID):</strong><br />{matchedInc.correctionDesignation || "-"} ({matchedInc.correctionEmpId || "-"})</Col>
@@ -817,7 +818,7 @@ const SupervisorInvestigationReport = () => {
                       </Row>
                     </>
                   ) : (
-                    <div className="bg-light p-3 border rounded text-muted mb-4">
+                    <div className="detail-box mb-4">
                       Associated Incident details not found in the database.
                     </div>
                   )}
@@ -835,13 +836,13 @@ const SupervisorInvestigationReport = () => {
 
                   <div className="mb-3">
                     <strong>Root Cause Analysis (RCA):</strong>
-                    <p className="bg-white p-3 border rounded text-muted mt-1">{selectedInv.why1 || "No RCA description provided."}</p>
+                    <p className="detail-box mt-1">{selectedInv.why1 || "No RCA description provided."}</p>
                   </div>
 
                   {selectedInv.rcaImage && (
                     <div className="mb-4">
                       <strong>RCA Diagram:</strong>
-                      <div className="mt-2 text-center" style={{ maxWidth: "100%", maxHeight: "400px", overflow: "hidden", border: "1px solid #ccc", borderRadius: "4px", backgroundColor: "#fff" }}>
+                      <div className="mt-2 text-center" style={{ maxWidth: "100%", maxHeight: "400px", overflow: "hidden", border: "1px solid var(--color-border-strong)", borderRadius: "4px", backgroundColor: "var(--color-surface)" }}>
                         <img src={selectedInv.rcaImage} alt="RCA Diagram" style={{ maxWidth: "100%", maxHeight: "398px", objectFit: "contain" }} />
                       </div>
                     </div>
@@ -851,12 +852,12 @@ const SupervisorInvestigationReport = () => {
                   <Row className="mb-3">
                     <Col md={6}>
                       <strong>Corrective Action Taken:</strong>
-                      <p className="bg-white p-2 border rounded text-muted mt-1" style={{ minHeight: "60px" }}>{selectedInv.correctiveAction || "-"}</p>
+                      <p className="detail-box sm mt-1" style={{ minHeight: "60px" }}>{selectedInv.correctiveAction || "-"}</p>
                       <span className="text-muted small">By: {selectedInv.correctiveName || "-"} ({selectedInv.correctiveSignatureEmpId || "-"})</span>
                     </Col>
                     <Col md={6}>
                       <strong>Preventive Action Plan:</strong>
-                      <p className="bg-white p-2 border rounded text-muted mt-1" style={{ minHeight: "60px" }}>{selectedInv.preventiveAction || "-"}</p>
+                      <p className="detail-box sm mt-1" style={{ minHeight: "60px" }}>{selectedInv.preventiveAction || "-"}</p>
                       <span className="text-muted small">By: {selectedInv.preventiveName || "-"} ({selectedInv.preventiveSignatureEmpId || "-"})</span>
                     </Col>
                   </Row>
@@ -875,7 +876,7 @@ const SupervisorInvestigationReport = () => {
                   </Row>
                   <div className="mb-3">
                     <strong>Quality Remarks:</strong>
-                    <p className="bg-white p-3 border rounded text-muted mt-1">{selectedInv.qualityRemarks || "-"}</p>
+                    <p className="detail-box mt-1">{selectedInv.qualityRemarks || "-"}</p>
                   </div>
                   <Row className="mb-3">
                     <Col md={12}><strong>Verification Date & Time:</strong><br />{selectedInv.qualityVerifiedDateTime ? dayjs(selectedInv.qualityVerifiedDateTime).format("DD/MM/YYYY hh:mm A") : "-"}</Col>

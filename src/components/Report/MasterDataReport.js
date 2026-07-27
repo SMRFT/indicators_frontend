@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
-import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import DatePicker from "react-datepicker";
@@ -10,7 +9,7 @@ import Alert from "react-bootstrap/Alert";
 import { Modal, Button } from "react-bootstrap"; // Import Bootstrap Modal
 import { getTransposedData, exportToExcel } from "./reportUtils";
 import apiRequest from "../apiRequest";
-import { Pencil, Save, Trash2, Download } from "lucide-react";
+import { Pencil, Save, Trash2, Download, Calendar } from "lucide-react";
 import "./Report.css";
 
 function MasterDataReport() {
@@ -233,37 +232,14 @@ const fetchExportData = async () => {
         </button>
       </div>
 
-      <Row className="mb-4" style={{ marginLeft: "10px" }}>
-        <Col xs={12} md={4}>
-          <Dropdown
-            id="wardSelect"
-            onSelect={handleSelect}
-            className="custom-dropdown"
-          >
-            <Dropdown.Toggle
-              id="dropdown-basic"
-              style={{
-                minWidth: "200px",
-                backgroundColor: "white",
-                color: "black",
-                border: "1px solid #DEE2E6",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+      <div className="report-toolbar">
+        <div className="report-field">
+          <label className="report-field-label">Ward</label>
+          <Dropdown id="wardSelect" onSelect={handleSelect}>
+            <Dropdown.Toggle className="report-dropdown-toggle" id="dropdown-basic">
               <span>{selectedWard || "Select Ward"}</span>
-              <span className="caret"></span>
             </Dropdown.Toggle>
-            <Dropdown.Menu
-              style={{
-                minWidth: "200px",
-                textAlign: "center",
-                maxHeight: "250px",
-                overflowY: "auto",
-                scrollbarWidth: "thin",
-              }}
-            >
+            <Dropdown.Menu className="report-dropdown-menu">
               {RawDataOptions.map((ward, index) => (
                 <Dropdown.Item key={index} eventKey={ward}>
                   {ward}
@@ -271,75 +247,39 @@ const fetchExportData = async () => {
               ))}
             </Dropdown.Menu>
           </Dropdown>
-        </Col>
-        <Col xs={12} md={4}>
-          <div className="input-group">
-            <div
-              style={{ cursor: "pointer" }}
-              onClick={() => document.getElementById("datePicker").click()}
-            >
-              <i
-                style={{
-                  fontSize: "130%",
-                  color: "rgb(149,188,176)",
-                  marginRight: "10px",
-                  marginTop: "5px",
-                }}
-                className="fa fa-calendar"
-              ></i>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                zIndex: showDeleteModal ? 1 : 9999,
-              }}
-            >
-              <DatePicker
-                id="datePicker"
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                dateFormat="dd/MM/yyyy"
-                className="form-control"
-                placeholderText="Select Date"
-              />
-            </div>
+        </div>
+
+        <div className="report-field">
+          <label className="report-field-label">Date</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              id="datePicker"
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="dd/MM/yyyy"
+              className="form-control"
+              placeholderText="Select Date"
+            />
           </div>
-        </Col>
-        <Col xs={12} md={4}>
-          <div className="input-group">
-            <div
-              style={{ cursor: "pointer" }}
-              onClick={() => document.getElementById("monthPicker").click()}
-            >
-              <i
-                style={{
-                  fontSize: "130%",
-                  color: "rgb(149,188,176)",
-                  marginRight: "10px",
-                  marginTop: "5px",
-                }}
-                className="fa fa-calendar"
-              ></i>
-            </div>
-            <div
-              style={{
-                position: "relative",
-                zIndex: showDeleteModal ? 1 : 9999,
-              }}
-            >
-              <DatePicker
-                id="monthPicker"
-                selected={selectedMonth}
-                onChange={(date) => setSelectedMonth(date)}
-                dateFormat="MM/yyyy"
-                showMonthYearPicker
-                className="form-control"
-                placeholderText="Select Month"
-              />
-            </div>
+        </div>
+
+        <div className="report-field">
+          <label className="report-field-label">Month</label>
+          <div className="report-date-input">
+            <Calendar size={16} />
+            <DatePicker
+              id="monthPicker"
+              selected={selectedMonth}
+              onChange={(date) => setSelectedMonth(date)}
+              dateFormat="MM/yyyy"
+              showMonthYearPicker
+              className="form-control"
+              placeholderText="Select Month"
+            />
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
       {showSuccessAlert && (
         <Alert
           variant="success"
@@ -358,7 +298,7 @@ const fetchExportData = async () => {
           Failed to update. Please try again.
         </Alert>
       )}
-      <Row>`` 
+      <Row>
         <Col xs={12} className="mt-2">
           {exportData.length > 0 ? (
             <div className="report-table-wrap">

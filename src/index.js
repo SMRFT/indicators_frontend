@@ -95,11 +95,11 @@ function RootRenderer() {
   }, []);
 
   return isValidToken ? (
- <BrowserRouter basename={process.env.PUBLIC_URL || "/"}>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-  </BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL || "/"}>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </BrowserRouter>
   ) : null;
 }
 
