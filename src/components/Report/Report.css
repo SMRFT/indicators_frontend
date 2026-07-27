@@ -146,33 +146,50 @@
 }
 
 .report-table-wrap {
+  position: relative;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 65vh;
+  max-height: 480px;
   max-width: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  background: var(--color-surface);
+  margin-bottom: 20px;
 }
 
 .report-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 600px;
   width: 100%;
+}
+
+.report-table thead,
+.report-table thead tr {
+  position: sticky;
+  top: 0;
+  z-index: 15;
 }
 
 .report-table th {
   border: 1px solid var(--color-border);
   padding: 10px;
-  background: var(--color-accent-dark);
-  color: #fff;
+  background: var(--color-accent-dark) !important;
+  color: #fff !important;
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 15;
   white-space: nowrap;
+  background-clip: padding-box;
 }
 
-.report-table th:last-child {
-  right: 0;
+.report-table th:first-child {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 25;
+  background: var(--color-accent-dark) !important;
+  background-clip: padding-box;
 }
 
 .report-table td {
@@ -186,24 +203,30 @@
 }
 
 .report-table tbody tr:nth-child(even) {
-  background: var(--color-hover-overlay);
+  background: var(--color-surface-raised, #f8fafc);
+}
+
+.report-table tbody tr:hover td {
+  background: var(--color-surface-raised, #f1f5f9) !important;
+  color: var(--color-text-primary) !important;
 }
 
 .report-table td:first-child {
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 5;
   font-weight: 600;
   text-align: left;
-  background: var(--color-accent-dark);
-  color: #fff;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
-.report-table td:last-child {
-  position: sticky;
-  right: 0;
-  font-weight: 700;
-  background: var(--color-active-overlay);
+.report-table tbody tr:nth-child(odd) td:first-child {
+  background: var(--color-surface);
+}
+
+.report-table tbody tr:nth-child(even) td:first-child {
+  background: var(--color-surface-raised, #f8fafc);
 }
 
 .report-table input,

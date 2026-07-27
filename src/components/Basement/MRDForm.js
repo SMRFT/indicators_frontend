@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { message } from "antd";
 import apiRequest from "../apiRequest";
 import { FormCard, TextField, TextAreaField, SubmitButton, FormAlert, DateField } from "../Common/fields";
 
@@ -67,6 +68,7 @@ function MRDForm() {
 
     // Check if the date is selected
     if (!selectedDate) {
+      message.warning("Please select a date.");
       setError("Please select a date");
       setIsSubmitting(false); // ✅ re-enable if validation fails
       return;
@@ -74,6 +76,7 @@ function MRDForm() {
 
     if (form.checkValidity() === false) {
       e.stopPropagation();
+      message.warning("Please fill out all required fields.");
       setIsSubmitting(false); // ✅ re-enable if invalid form
     } else {
       try {
@@ -87,18 +90,19 @@ function MRDForm() {
         const response = await apiRequest(`${IndicatorBaseUrl}MRD/`, "POST", formDataWithUser);
 
         if (!response.success) {
-          if (response.error === "Data already exists for this date.") {
-            setError("Data already exists for this date.");
-          } else {
-            throw new Error(response.error || "Failed to submit data");
-          }
+          const errMsg = response.error || "Failed to submit data";
+          message.error(errMsg);
+          setError(errMsg);
         } else {
+          message.success("MRD data submitted successfully!");
           setFormSubmitted(true);
           setError("");
         }
       } catch (error) {
         console.error("Error:", error.message);
-        setError(error.message || "Failed to submit data");
+        const errMsg = error.message || "Failed to submit data";
+        message.error(errMsg);
+        setError(errMsg);
       } finally {
         // ✅ Re-enable after 3 seconds
         setTimeout(() => setIsSubmitting(false), 3000);
@@ -145,6 +149,7 @@ function MRDForm() {
                 Consent{" "}
               </Form.Label>
               <TextField
+                id="numberOfMedicalRecords"
                 required
                 value={formData.numberOfMedicalRecords}
                 onChange={handleChange}
@@ -159,6 +164,7 @@ function MRDForm() {
             <Form.Group controlId="numberOfMedicalRecordsRemarks">
               <Form.Label>Remarks</Form.Label>
               <TextAreaField
+                id="numberOfMedicalRecordsRemarks"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfMedicalRecordsRemarks}
                 onChange={handleChange}
@@ -180,6 +186,7 @@ function MRDForm() {
             <Form.Group controlId="numberOfDischarge">
               <Form.Label>Number of discharge</Form.Label>
               <TextField
+                id="numberOfDischarge"
                 required
                 value={formData.numberOfDischarge}
                 onChange={handleChange}
@@ -196,6 +203,7 @@ function MRDForm() {
             <Form.Group controlId="numberOfDeath">
               <Form.Label>Number of death</Form.Label>
               <TextField
+                id="numberOfDeath"
                 required
                 value={formData.numberOfDeath}
                 onChange={handleChange}
@@ -210,6 +218,7 @@ function MRDForm() {
             <Form.Group controlId="numberOfDeathRemarks">
               <Form.Label>Remarks</Form.Label>
               <TextAreaField
+                id="numberOfDeathRemarks"
                 rows={1} // Adjust the number of visible rows
                 value={formData.numberOfDeathRemarks}
                 onChange={handleChange}

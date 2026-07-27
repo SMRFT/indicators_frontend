@@ -96,7 +96,12 @@ const TableContainer = styled.div`
   }
 
   tr:hover {
-    background-color: var(--color-hover-overlay);
+    background-color: var(--color-surface-raised, #f1f5f9);
+  }
+
+  tr:hover td {
+    background-color: var(--color-surface-raised, #f1f5f9) !important;
+    color: var(--color-text-primary) !important;
   }
 
   /* Sticky columns styling for first five fields */
@@ -162,7 +167,8 @@ const TableContainer = styled.div`
   tr:hover td:nth-child(3),
   tr:hover td:nth-child(4),
   tr:hover td:nth-child(5) {
-    background-color: var(--color-hover-overlay);
+    background-color: var(--color-surface-raised, #f1f5f9) !important;
+    color: var(--color-text-primary) !important;
   }
 `;
 

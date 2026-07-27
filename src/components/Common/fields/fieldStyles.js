@@ -21,7 +21,12 @@ export const inputStyles = css`
 
   &:disabled,
   &[readonly] {
-    opacity: 0.6;
+    background-color: var(--color-surface-raised, rgba(255, 255, 255, 0.06)) !important;
+    color: var(--color-text-primary, #0f172a) !important;
+    border-color: var(--color-border, #cbd5e0) !important;
+    opacity: 0.9 !important;
+    cursor: not-allowed;
+    -webkit-text-fill-color: var(--color-text-primary, #0f172a) !important;
   }
 
   &.is-invalid {
