@@ -98,7 +98,6 @@ function App() {
     "/EmployeeLogin",
     "/Register",
     "/Availability",
-    "/MasterDataReport",
     "/FirstFloorRawData",
     "/FirstSuitRawData",
     "/SecondFloorRawData",

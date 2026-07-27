@@ -229,6 +229,17 @@
   color: var(--color-text-primary);
 }
 
+.modal-content .form-control,
+.modal-content select.form-control {
+  background: var(--color-surface-inset);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+.modal-content label {
+  color: var(--color-text-secondary);
+}
+
 /* Ensure the datepicker popup appears above sticky table headers */
 .react-datepicker-popper {
   z-index: 1050 !important;
