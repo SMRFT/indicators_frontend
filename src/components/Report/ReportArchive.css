@@ -1,0 +1,42 @@
+.archive-page {
+  background: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+}
+
+.detail-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border) !important;
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  padding: 1rem;
+}
+
+.detail-box.sm {
+  padding: 0.5rem;
+}
+
+.archive-page h5.text-primary {
+  color: var(--color-accent-dark) !important;
+  border-color: var(--color-border) !important;
+}
+
+.archive-page .modal-content {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+.archive-page .form-control {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+.archive-page .form-control:focus {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+}
+
+.archive-page .form-control::placeholder {
+  color: var(--color-text-muted);
+}
