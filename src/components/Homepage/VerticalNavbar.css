@@ -35,6 +35,11 @@
 .sidebar-menu-item-icon {
   flex: none;
   margin-top: 1px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-content .sidebar-menu-item:hover .sidebar-menu-item-icon {
+  transform: scale(1.1);
 }
 
 .sidebar-menu-item-label {

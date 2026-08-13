@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { FaTimes } from 'react-icons/fa';
 import { TbHexagonNumber0, TbHexagonNumber1, TbHexagonNumber2, TbHexagonNumber3, TbHexagonPlus } from 'react-icons/tb';
 import { FiHexagon, FiArrowDown } from 'react-icons/fi';
+import { Droplets, FileText } from 'lucide-react';
 import BasementIcons from '../Basement/BasementIcons';
 import FirstFloorIcons from '../Firstfloor/FirstFloorIcons';
 import SecondFloorIcons from '../Secondfloor/SecondFloorIcons';
 import GroundFloorIcons from '../GroundFloor/GroundFloorIcons';
 import ThirdFloorIcons from '../Thirdfloor/ThirdFloorIcons';
 import OtherIcons from '../Others/OtherIcons';
+import ReportIcons from '../Report/ReportIcons';
 import './LandingPage.css';
 
 function QualityIndicatorsLanding() {
@@ -50,6 +52,8 @@ function QualityIndicatorsLanding() {
         return <ThirdFloorIcons handleIconClick={handleIconClick} />;
       case 'Others':
         return <OtherIcons handleIconClick={handleIconClick} />;
+      case 'Reports':
+        return <ReportIcons handleIconClick={handleIconClick} />;
       default:
         return null;
     }
@@ -86,6 +90,14 @@ function QualityIndicatorsLanding() {
           <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Others')}>
             <TbHexagonPlus className="floor-icon" />
             <p>Others</p>
+          </div>
+          <div className='col-6 col-md-3 floor' onClick={() => navigate('/HandHygieneAudit')}>
+            <Droplets size={52} className="floor-icon floor-icon-lucide" />
+            <p style={{ whiteSpace: "nowrap" }}>Hand Hygiene</p>
+          </div>
+          <div className='col-6 col-md-3 floor' onClick={() => handleFloorClick('Reports')}>
+            <FileText size={52} className="floor-icon floor-icon-lucide" />
+            <p>Reports</p>
           </div>
         </div>
 

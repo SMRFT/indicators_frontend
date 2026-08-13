@@ -246,9 +246,9 @@ const HandHygieneReport = () => {
                   <th>Date</th>
                   <th>Audited By</th>
                   <th>Staff Name</th>
+                  <th>Observer</th>
                   <th>Area</th>
                   <th>Category</th>
-                  <th>Type</th>
                   <th>5 Moments</th>
                   <th>Ornaments</th>
                   <th>Total Number Of Actions Performed</th>
@@ -273,11 +273,19 @@ const HandHygieneReport = () => {
                     <td>{item.selectedDate}</td>
                     <td>{item.auditBy}</td>
                     <td>{item.nameOfTheStaff}</td>
+                    <td>{item.observer || "-"}</td>
                     <td>{item.area}</td>
                     <td>{item.category}</td>
-                    <td>{item.typeOfHandHygiencePractice}</td>
                     <td>
-                      {Array.isArray(parsedMoments) ? parsedMoments.map((m, i) => <div key={i}>• {m}</div>) : parsedMoments}
+                      {Array.isArray(parsedMoments) ? parsedMoments.map((m, i) => {
+                        let displayStr = "";
+                        if (typeof m === 'object' && m !== null) {
+                          displayStr = m.moment + (m.practice ? ` (${m.practice})` : '');
+                        } else {
+                          displayStr = String(m);
+                        }
+                        return <div key={i}>• {displayStr}</div>;
+                      }) : (typeof parsedMoments === 'object' && parsedMoments !== null ? JSON.stringify(parsedMoments) : parsedMoments)}
                     </td>
                     <td>{item.ornamentsIfAny}</td>
                     <td>{item.totalNumberOfActionsPerformed}</td>

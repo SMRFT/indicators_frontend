@@ -153,6 +153,11 @@
   color: var(--color-accent);
 }
 
+svg.floor-icon-lucide {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
 .floor p {
   font-size: 1rem;
   font-weight: 600;
