@@ -207,12 +207,6 @@ const IncidentReport = () => {
     const name = localStorage.getItem("userName") || "";
     const userRole = localStorage.getItem("userRole") || "";
     
-    if (userRole === "In-Charge") {
-      alert("In-Charge users are not authorized to fill Incident Reports.");
-      navigate("/IncidentDashboard");
-      return;
-    }
-    
     setFormData((prev) => ({
       ...prev,
       reportedBy: name,

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import LandingPage from "./components/Homepage/LandingPage";
 import QualityIndicatorsLanding from "./components/Homepage/QualityIndicatorsLanding";
@@ -9,57 +9,56 @@ import Sidebar from "./components/Homepage/VerticalNavbar";
 import PageHeader from "./components/Homepage/PageHeader";
 import "./App.css";
 
-// Lazy-loaded components
-const Availability = lazy(() => import("./components/Report/Availability"));
-const Formula = lazy(() => import("./components/Report/Formula"));
-const Physiotherapy = lazy(() => import("./components/Others/Physiotherapy"));
-const FirstSuit = lazy(() => import("./components/Firstfloor/FirstSuit"));
-const FirstFloor = lazy(() => import("./components/Firstfloor/FirstFloor"));
-const FrontOffice = lazy(() => import("./components/GroundFloor/FrontOffice"));
-const SecondSuit = lazy(() => import("./components/Secondfloor/SecondSuit"));
-const ThirdFloor = lazy(() => import("./components/Thirdfloor/ThirdFloor"));
-const CT = lazy(() => import("./components/Others/CT"));
-const ChemoWard = lazy(() => import("./components/Basement/ChemoWard"));
-const EmergencyRoom = lazy(() => import("./components/GroundFloor/EmergencyRoom"));
-const Lab = lazy(() => import("./components/Basement/Lab"));
-const OTForm = lazy(() => import("./components/Firstfloor/OTForm"));
-const XRay = lazy(() => import("./components/Basement/X-Ray"));
-const MRDForm = lazy(() => import("./components/Basement/MRDForm"));
-const MICUForm = lazy(() => import("./components/Firstfloor/MICUForm"));
-const NICUForm = lazy(() => import("./components/Firstfloor/NICUForm"));
-const Dialysis = lazy(() => import("./components/Firstfloor/Dialysis"));
-const RecoveryWard = lazy(() => import("./components/Firstfloor/RecoveryWard"));
-const SecondFloor = lazy(() => import("./components/Secondfloor/SecondFloor"));
-const SICUForm = lazy(() => import("./components/Secondfloor/SICUForm"));
-const MRI = lazy(() => import("./components/Others/MRI"));
-const Report = lazy(() => import("./components/Report/Report"));
-const Register = lazy(() => import("./components/Auth/Register"));
-const FirstFloorRawData = lazy(() => import("./components/Firstfloor/FirstFloorRawData"));
-const SecondFloorRawData = lazy(() => import("./components/Secondfloor/SecondFloorRawData"));
-const SecondSuitRawData = lazy(() => import("./components/Secondfloor/SecondSuitRawData"));
-const FirstSuitRawData = lazy(() => import("./components/Firstfloor/FirstSuitRawData"));
-const MasterDataReport = lazy(() => import("./components/Report/MasterDataReport"));
-const OPD = lazy(() => import("./components/GroundFloor/OPD"));
-const HR = lazy(() => import("./components/Basement/HR"));
-const RecoveryWardRawData = lazy(() => import("./components/Firstfloor/RecoveryWardRawData"));
-const SICURawData = lazy(() => import("./components/Secondfloor/SICURawData"));
-const NICURawData = lazy(() => import("./components/Firstfloor/NICURawData"));
-const MICURawData = lazy(() => import("./components/Firstfloor/MICURawData"));
-const ThirdFloorRawData = lazy(() => import("./components/Thirdfloor/ThirdFloorRawData"));
-const EmergencyRoomRawData = lazy(() => import("./components/GroundFloor/EmergencyRoomRawData"));
-const ChemoWardRawData = lazy(() => import("./components/Basement/ChemoWardRawData"));
-const HandHygieneAudit = lazy(() => import("./components/HandHygenieAudit"));
-const HandHygieneReport = lazy(() => import("./components/Report/HandHygieneReport"));
-const TrainingFeedBack = lazy(() => import("./components/TrainingFeedBack"));
-const TrainingFeedbackReport = lazy(() => import("./components/Report/TrainingFeedBackReport"));
-const Pharmacy = lazy(() => import("./components/Basement/Pharmacy"));
-const Mockdrills = lazy(() => import("./components/Others/Mockdrills"));
-const OPDRawData = lazy(() => import("./components/GroundFloor/OPDRawData"));
-const IncidentReport = lazy(() => import("./components/IncitendInvestForms/IncidentReport"));
-const SupervisorInvestigation = lazy(() => import("./components/IncitendInvestForms/SupervisorInvestigation"));
-const IncidentReportReport = lazy(() => import("./components/Report/IncidentReportReport"));
-const SupervisorInvestigationReport = lazy(() => import("./components/Report/SupervisorInvestigationReport"));
-const IncidentClassificationManager = lazy(() => import("./components/IncitendInvestForms/IncidentClassificationManager"));
+import Availability from "./components/Report/Availability";
+import Formula from "./components/Report/Formula";
+import Physiotherapy from "./components/Others/Physiotherapy";
+import FirstSuit from "./components/Firstfloor/FirstSuit";
+import FirstFloor from "./components/Firstfloor/FirstFloor";
+import FrontOffice from "./components/GroundFloor/FrontOffice";
+import SecondSuit from "./components/Secondfloor/SecondSuit";
+import ThirdFloor from "./components/Thirdfloor/ThirdFloor";
+import CT from "./components/Others/CT";
+import ChemoWard from "./components/Basement/ChemoWard";
+import EmergencyRoom from "./components/GroundFloor/EmergencyRoom";
+import Lab from "./components/Basement/Lab";
+import OTForm from "./components/Firstfloor/OTForm";
+import XRay from "./components/Basement/X-Ray";
+import MRDForm from "./components/Basement/MRDForm";
+import MICUForm from "./components/Firstfloor/MICUForm";
+import NICUForm from "./components/Firstfloor/NICUForm";
+import Dialysis from "./components/Firstfloor/Dialysis";
+import RecoveryWard from "./components/Firstfloor/RecoveryWard";
+import SecondFloor from "./components/Secondfloor/SecondFloor";
+import SICUForm from "./components/Secondfloor/SICUForm";
+import MRI from "./components/Others/MRI";
+import Report from "./components/Report/Report";
+import Register from "./components/Auth/Register";
+import FirstFloorRawData from "./components/Firstfloor/FirstFloorRawData";
+import SecondFloorRawData from "./components/Secondfloor/SecondFloorRawData";
+import SecondSuitRawData from "./components/Secondfloor/SecondSuitRawData";
+import FirstSuitRawData from "./components/Firstfloor/FirstSuitRawData";
+import MasterDataReport from "./components/Report/MasterDataReport";
+import OPD from "./components/GroundFloor/OPD";
+import HR from "./components/Basement/HR";
+import RecoveryWardRawData from "./components/Firstfloor/RecoveryWardRawData";
+import SICURawData from "./components/Secondfloor/SICURawData";
+import NICURawData from "./components/Firstfloor/NICURawData";
+import MICURawData from "./components/Firstfloor/MICURawData";
+import ThirdFloorRawData from "./components/Thirdfloor/ThirdFloorRawData";
+import EmergencyRoomRawData from "./components/GroundFloor/EmergencyRoomRawData";
+import ChemoWardRawData from "./components/Basement/ChemoWardRawData";
+import HandHygieneAudit from "./components/HandHygenieAudit";
+import HandHygieneReport from "./components/Report/HandHygieneReport";
+import TrainingFeedBack from "./components/TrainingFeedBack";
+import TrainingFeedbackReport from "./components/Report/TrainingFeedBackReport";
+import Pharmacy from "./components/Basement/Pharmacy";
+import Mockdrills from "./components/Others/Mockdrills";
+import OPDRawData from "./components/GroundFloor/OPDRawData";
+import IncidentReport from "./components/IncitendInvestForms/IncidentReport";
+import SupervisorInvestigation from "./components/IncitendInvestForms/SupervisorInvestigation";
+import IncidentReportReport from "./components/Report/IncidentReportReport";
+import SupervisorInvestigationReport from "./components/Report/SupervisorInvestigationReport";
+import IncidentClassificationManager from "./components/IncitendInvestForms/IncidentClassificationManager";
 
 function App() {
   const location = useLocation();
@@ -114,7 +113,6 @@ function App() {
     "/IncidentDashboard",
   ].includes(location.pathname);
 
-
   return (
     <div className="App">
       <PageHeader
@@ -137,80 +135,78 @@ function App() {
       )}
 
       <div className={hideMainContent ? "" : "main-content"}>
-        <Suspense fallback={<div className="text-center p-5">Loading component...</div>}>
-          <Routes >
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/QualityIndicators" element={<QualityIndicatorsLanding />} />
-            <Route path="/IncidentDashboard" element={<IncidentDashboard />} />
-            <Route
-              path="/EmployeeLogin"
-              element={<EmployeeLogin setUserRole={setUserRole} />}
-            />
-            <Route
-              path="/AdminLogin"
-              element={<AdminLogin setUserRole={setUserRole} />}
-            />
-            <Route path="/Register" element={<Register />} />
-            <Route path="/Availability" element={<Availability />} />
-            <Route path="/Report" element={<Report />} />
-            <Route path="/MasterDataReport" element={<MasterDataReport />} />
-            <Route path="/Formula" element={<Formula />} />
-            <Route path="/FrontOffice" element={<FrontOffice />} />
-            <Route path="/FirstSuit" element={<FirstSuit />} />
-            <Route path="/FirstFloor" element={<FirstFloor />} />
-            <Route path="/SecondFloor" element={<SecondFloor />} />
-            <Route path="/SecondSuit" element={<SecondSuit />} />
-            <Route path="/ThirdFloor" element={<ThirdFloor />} />
-            <Route path="/CT" element={<CT />} />
-            <Route path="/Lab" element={<Lab />} />
-            <Route path="/MRI" element={<MRI />} />
-            <Route path="/XRay" element={<XRay />} />
-            <Route path="/OPD" element={<OPD />} />
-            <Route path="/OTForm" element={<OTForm />} />
-            <Route path="/HR" element={<HR />} />
-            <Route path="/Dialysis" element={<Dialysis />} />
-            <Route path="/Physiotherapy" element={<Physiotherapy />} />
-            <Route path="/Pharmacy" element={<Pharmacy />} />
-            <Route path="/EmergencyRoom" element={<EmergencyRoom />} />
-            <Route path="/MRDForm" element={<MRDForm />} />
-            <Route path="/ChemoWard" element={<ChemoWard />} />
-            <Route path="/RecoveryWard" element={<RecoveryWard />} />
-            <Route path="/SICUForm" element={<SICUForm />} />
-            <Route path="/MICUForm" element={<MICUForm />} />
-            <Route path="/NICUForm" element={<NICUForm />} />
-            <Route path="/FirstFloorRawData" element={<FirstFloorRawData />} />
-            <Route path="/FirstSuitRawData" element={<FirstSuitRawData />} />
-            <Route path="/SecondFloorRawData" element={<SecondFloorRawData />} />
-            <Route path="/SecondSuitRawData" element={<SecondSuitRawData />} />
-            <Route path="/ThirdFloorRawData" element={<ThirdFloorRawData />} />
-            <Route path="/Mockdrills" element={<Mockdrills />} />
-            <Route
-              path="/RecoveryWardRawData"
-              element={<RecoveryWardRawData />}
-            />
-            <Route path="/ChemoWardRawData" element={<ChemoWardRawData />} />
-            <Route
-              path="/EmergencyRoomRawData"
-              element={<EmergencyRoomRawData />}
-            />
-            <Route path="/SICURawData" element={<SICURawData />} />
-            <Route path="/NICURawData" element={<NICURawData />} />
-            <Route path="/MICURawData" element={<MICURawData />} />
-            <Route path="/HandHygieneAudit" element={<HandHygieneAudit />} />
-            <Route path="/HandHygieneReport" element={<HandHygieneReport />} />
-            <Route path="/TrainingFeedBack" element={<TrainingFeedBack />} />
-            <Route
-              path="/TrainingFeedbackReport"
-              element={<TrainingFeedbackReport />}
-            />
-            <Route path="/OPDRawData" element={<OPDRawData />} />
-            <Route path="/IncidentReport" element={<IncidentReport />} />
-            <Route path="/SupervisorInvestigation" element={<SupervisorInvestigation />} />
-            <Route path="/IncidentReportReport" element={<IncidentReportReport />} />
-            <Route path="/SupervisorInvestigationReport" element={<SupervisorInvestigationReport />} />
-            <Route path="/IncidentClassification" element={<IncidentClassificationManager />} />
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/QualityIndicators" element={<QualityIndicatorsLanding />} />
+          <Route path="/IncidentDashboard" element={<IncidentDashboard />} />
+          <Route
+            path="/EmployeeLogin"
+            element={<EmployeeLogin setUserRole={setUserRole} />}
+          />
+          <Route
+            path="/AdminLogin"
+            element={<AdminLogin setUserRole={setUserRole} />}
+          />
+          <Route path="/Register" element={<Register />} />
+          <Route path="/Availability" element={<Availability />} />
+          <Route path="/Report" element={<Report />} />
+          <Route path="/MasterDataReport" element={<MasterDataReport />} />
+          <Route path="/Formula" element={<Formula />} />
+          <Route path="/FrontOffice" element={<FrontOffice />} />
+          <Route path="/FirstSuit" element={<FirstSuit />} />
+          <Route path="/FirstFloor" element={<FirstFloor />} />
+          <Route path="/SecondFloor" element={<SecondFloor />} />
+          <Route path="/SecondSuit" element={<SecondSuit />} />
+          <Route path="/ThirdFloor" element={<ThirdFloor />} />
+          <Route path="/CT" element={<CT />} />
+          <Route path="/Lab" element={<Lab />} />
+          <Route path="/MRI" element={<MRI />} />
+          <Route path="/XRay" element={<XRay />} />
+          <Route path="/OPD" element={<OPD />} />
+          <Route path="/OTForm" element={<OTForm />} />
+          <Route path="/HR" element={<HR />} />
+          <Route path="/Dialysis" element={<Dialysis />} />
+          <Route path="/Physiotherapy" element={<Physiotherapy />} />
+          <Route path="/Pharmacy" element={<Pharmacy />} />
+          <Route path="/EmergencyRoom" element={<EmergencyRoom />} />
+          <Route path="/MRDForm" element={<MRDForm />} />
+          <Route path="/ChemoWard" element={<ChemoWard />} />
+          <Route path="/RecoveryWard" element={<RecoveryWard />} />
+          <Route path="/SICUForm" element={<SICUForm />} />
+          <Route path="/MICUForm" element={<MICUForm />} />
+          <Route path="/NICUForm" element={<NICUForm />} />
+          <Route path="/FirstFloorRawData" element={<FirstFloorRawData />} />
+          <Route path="/FirstSuitRawData" element={<FirstSuitRawData />} />
+          <Route path="/SecondFloorRawData" element={<SecondFloorRawData />} />
+          <Route path="/SecondSuitRawData" element={<SecondSuitRawData />} />
+          <Route path="/ThirdFloorRawData" element={<ThirdFloorRawData />} />
+          <Route path="/Mockdrills" element={<Mockdrills />} />
+          <Route
+            path="/RecoveryWardRawData"
+            element={<RecoveryWardRawData />}
+          />
+          <Route path="/ChemoWardRawData" element={<ChemoWardRawData />} />
+          <Route
+            path="/EmergencyRoomRawData"
+            element={<EmergencyRoomRawData />}
+          />
+          <Route path="/SICURawData" element={<SICURawData />} />
+          <Route path="/NICURawData" element={<NICURawData />} />
+          <Route path="/MICURawData" element={<MICURawData />} />
+          <Route path="/HandHygieneAudit" element={<HandHygieneAudit />} />
+          <Route path="/HandHygieneReport" element={<HandHygieneReport />} />
+          <Route path="/TrainingFeedBack" element={<TrainingFeedBack />} />
+          <Route
+            path="/TrainingFeedbackReport"
+            element={<TrainingFeedbackReport />}
+          />
+          <Route path="/OPDRawData" element={<OPDRawData />} />
+          <Route path="/IncidentReport" element={<IncidentReport />} />
+          <Route path="/SupervisorInvestigation" element={<SupervisorInvestigation />} />
+          <Route path="/IncidentReportReport" element={<IncidentReportReport />} />
+          <Route path="/SupervisorInvestigationReport" element={<SupervisorInvestigationReport />} />
+          <Route path="/IncidentClassification" element={<IncidentClassificationManager />} />
+        </Routes>
       </div>
     </div>
   );

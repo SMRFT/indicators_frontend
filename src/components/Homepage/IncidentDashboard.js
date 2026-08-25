@@ -16,7 +16,7 @@ function IncidentDashboard() {
       <main className="incident-wrap">
         <div className="incident-wrap-title">Incident Reporting</div>
         <div className="incident-grid">
-          {(userRole === "Employee" || userRole === "Admin") && (
+          {(userRole === "Employee" || userRole === "Admin" || userRole === "In-Charge") && (
             <div className="incident-card" style={{ borderLeftColor: ACCENTS.blue }}>
               <h3 className="incident-card-title">Incident Form</h3>
               <p className="incident-card-desc">

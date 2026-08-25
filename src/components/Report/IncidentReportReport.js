@@ -292,7 +292,7 @@ const IncidentReportReport = () => {
 
         let filteredInc = incData;
         if (userRole === "In-Charge") {
-          filteredInc = incData.filter(item => checkIsAssignedLocal(item));
+          filteredInc = incData.filter(item => checkIsAssignedLocal(item) || String(item.reportedByEmpId) === String(currentUserId));
         } else if (userRole === "Employee") {
           filteredInc = incData.filter(item => String(item.reportedByEmpId) === String(currentUserId));
         }

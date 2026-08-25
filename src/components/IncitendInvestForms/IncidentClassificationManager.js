@@ -693,7 +693,7 @@ const IncidentClassificationManager = () => {
 
       <FormHeader>
         <h2>INCIDENT CLASSIFICATIONS &amp; ALLOCATIONS</h2>
-        <span>SP Medifort Hospital Quality Administration Panel</span>
+        <span>Shanmuga Hospital Quality Administration Panel</span>
       </FormHeader>
 
       {error && <FormAlert variant="danger" className="mb-3">{error}</FormAlert>}

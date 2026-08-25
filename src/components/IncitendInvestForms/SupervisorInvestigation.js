@@ -1200,7 +1200,7 @@ const SupervisorInvestigation = () => {
 
           <FormHeader>
             <h2>ROOT CAUSE ANALYSIS (RCA) FORM</h2>
-            <span>CONFIDENTIAL • SP Medifort Hospital Quality Department</span>
+            <span>CONFIDENTIAL • Shanmuga Hospital Quality Department</span>
           </FormHeader>
 
           <IncidentHeaderBanner>
